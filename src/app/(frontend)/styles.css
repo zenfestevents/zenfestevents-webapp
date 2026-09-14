@@ -1,0 +1,347 @@
+/* ============================================================
+   Zenfest Events — design system
+   Concept: zen + fest. Kolam threshold line-art as the signature.
+   Fonts wired via next/font (see layout.tsx):
+     --font-display : Instrument Serif
+     --font-body    : Hanken Grotesk
+   ============================================================ */
+
+:root {
+  --ink: #0d0d0d; /* near-black (brand) */
+  --ink-800: #171310;
+  --ink-700: #241d16;
+  --marigold: #d9b24c; /* brand gold — primary accent */
+  --marigold-deep: #a9791f; /* deep gold / bronze */
+  --marigold-bright: #f3de8e; /* champagne highlight */
+  --emerald: #9c6b1a; /* bronze — rare secondary accent */
+  --blush: #f6f1e7; /* warm ivory surface */
+  --blush-200: #ece2d1;
+  --jasmine: #fbf7ee; /* lightest (text on dark) */
+  --clay: #6f6455; /* muted warm taupe text */
+  --clay-line: rgba(13, 13, 13, 0.14);
+
+  --bg: var(--blush);
+  --fg: var(--ink);
+
+  --container: 1200px;
+  --gutter: clamp(1.15rem, 4vw, 3rem);
+  --header-h: 73px; /* bar height; the hero cancels it to reclaim the full viewport */
+
+  --radius-s: 6px;
+  --radius-m: 14px;
+  --radius-l: 26px;
+
+  --shadow-soft: 0 18px 50px -24px rgba(0, 0, 0, 0.5);
+  --shadow-lift: 0 30px 70px -30px rgba(0, 0, 0, 0.65);
+
+  --step--1: clamp(0.8rem, 0.75rem + 0.2vw, 0.9rem);
+  --step-0: clamp(1rem, 0.96rem + 0.25vw, 1.13rem);
+  --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.5rem);
+  --step-2: clamp(1.5rem, 1.3rem + 1vw, 2.1rem);
+  --step-3: clamp(2rem, 1.6rem + 2vw, 3.2rem);
+  --step-4: clamp(2.6rem, 1.9rem + 3.6vw, 5rem);
+  --step-5: clamp(3.2rem, 2.1rem + 5.5vw, 6.8rem);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: var(--step-0);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display), 'Arial Narrow', sans-serif;
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* ---------- layout ---------- */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding-block: clamp(3.5rem, 2rem + 7vw, 7rem);
+}
+
+.section--tight {
+  padding-block: clamp(2.5rem, 1.5rem + 4vw, 4.5rem);
+}
+
+/* Feature bands: deep plum, photos & CTAs glow against them */
+.band-ink {
+  background: var(--ink);
+  color: var(--jasmine);
+}
+.band-ink h1,
+.band-ink h2,
+.band-ink h3 {
+  color: var(--jasmine);
+}
+
+/* ---------- type helpers ---------- */
+.eyebrow {
+  font-family: var(--font-body), sans-serif;
+  font-weight: 600;
+  font-size: var(--step--1);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--marigold-deep);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.band-ink .eyebrow {
+  color: var(--marigold);
+}
+.eyebrow::before {
+  content: '';
+  width: 1.6rem;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.7;
+}
+
+.display-xl {
+  font-size: var(--step-5);
+}
+.display-l {
+  font-size: var(--step-4);
+}
+.display-m {
+  font-size: var(--step-3);
+}
+/* Accent words are emphasised in brand gold (not italic — the display face is a
+   condensed sans with no elegant italic). Class name kept for existing markup. */
+.italic {
+  font-style: normal;
+  color: var(--marigold);
+}
+.accent {
+  color: var(--marigold);
+}
+
+.lede {
+  font-size: var(--step-1);
+  color: var(--clay);
+  line-height: 1.5;
+  max-width: 46ch;
+}
+.band-ink .lede {
+  color: rgba(255, 253, 249, 0.78);
+}
+
+.muted {
+  color: var(--clay);
+}
+.band-ink .muted {
+  color: rgba(255, 253, 249, 0.7);
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  --btn-bg: var(--ink);
+  --btn-fg: var(--jasmine);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.9rem 1.5rem;
+  border-radius: 999px;
+  font-family: var(--font-body), sans-serif;
+  font-weight: 600;
+  font-size: var(--step-0);
+  line-height: 1;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+.btn:focus-visible {
+  outline: 3px solid var(--marigold);
+  outline-offset: 3px;
+}
+.btn--primary {
+  --btn-bg: var(--marigold);
+  --btn-fg: var(--ink);
+}
+.btn--ghost {
+  --btn-bg: transparent;
+  --btn-fg: currentColor;
+  border-color: var(--clay-line);
+}
+.band-ink .btn--ghost {
+  border-color: rgba(255, 253, 249, 0.28);
+}
+.btn--whatsapp {
+  --btn-bg: #1eae5a;
+  --btn-fg: #fff;
+}
+/* Gold-outlined secondary: carries brand colour without competing with the
+   solid marigold primary sitting next to it. */
+.btn--gold {
+  --btn-bg: rgba(217, 178, 76, 0.14);
+  --btn-fg: var(--marigold);
+  border-color: var(--marigold);
+}
+.btn--gold:hover {
+  --btn-bg: var(--marigold);
+  --btn-fg: var(--ink);
+}
+/* Two-line button: label with a smaller line of context beneath it. */
+.btn--stack {
+  flex-direction: column;
+  gap: 0.1rem;
+  padding-block: 0.55rem;
+  line-height: 1.15;
+  text-align: center;
+}
+.btn__main {
+  font-weight: 600;
+}
+.btn__sub {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  opacity: 0.85;
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+
+/* ---------- cards ---------- */
+.card {
+  background: var(--jasmine);
+  border: 1px solid var(--clay-line);
+  border-radius: var(--radius-m);
+  overflow: hidden;
+}
+
+/* ---------- kolam signature ---------- */
+.kolam {
+  color: var(--marigold);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.kolam-divider {
+  display: flex;
+  justify-content: center;
+  color: var(--marigold);
+  opacity: 0.75;
+}
+.kolam path,
+.kolam-draw path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+.kolam circle {
+  fill: currentColor;
+}
+
+/* Self-drawing hero kolam */
+.kolam-draw path {
+  stroke-dasharray: var(--len, 1600);
+  stroke-dashoffset: var(--len, 1600);
+  animation: kolam-draw 2.6s ease forwards 0.3s;
+}
+@keyframes kolam-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---------- reveal ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .kolam-draw path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---------- utilities ---------- */
+.stack > * + * {
+  margin-top: var(--stack-gap, 1.1rem);
+}
+.grid {
+  display: grid;
+  gap: clamp(1rem, 2.5vw, 1.8rem);
+}
+.text-center {
+  text-align: center;
+}
+.mx-auto {
+  margin-inline: auto;
+}

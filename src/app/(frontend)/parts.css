@@ -1,0 +1,1424 @@
+/* ============================================================
+   Zenfest Events — component & section styles
+   (design tokens live in styles.css)
+   ============================================================ */
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--marigold);
+  color: var(--ink);
+  padding: 0.6rem 1rem;
+  border-radius: 0 0 var(--radius-s) 0;
+  z-index: 200;
+  font-weight: 600;
+}
+.skip-link:focus {
+  left: 0;
+}
+
+/* ---------- header ----------
+   Fixed, not sticky: a sticky bar occupies layout space, which pushed the hero's
+   100svh stage down and cropped the film. Fixed takes it out of flow, `#main`
+   pays back the offset, and the hero cancels that to fill the true viewport. */
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #000; /* solid black — the brand lockup is gold on black */
+  border-bottom: 1px solid transparent;
+  transition: transform 0.35s ease, opacity 0.35s ease, border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+#main {
+  padding-top: var(--header-h);
+}
+/* Over the scrub hero the bar gets out of the way entirely — full-bleed film.
+   It slides back the moment the hero scrolls past. See ScrubHero.tsx. */
+.hero-immersive .site-header {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header {
+    transition: none;
+  }
+}
+.site-header.is-scrolled {
+  border-bottom-color: rgba(217, 178, 76, 0.25);
+  box-shadow: 0 10px 30px -22px rgba(0, 0, 0, 0.6);
+}
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-height: var(--header-h);
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  line-height: 1;
+}
+.wordmark__mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: block;
+  flex: none;
+}
+/* The gold "ZENFEST EVENTS" lockup, extracted from the brand logo with a
+   transparent background so it sits cleanly on the black bar. */
+.wordmark__lockup {
+  display: block;
+  width: auto;
+  height: 30px;
+  flex: none;
+}
+@media (max-width: 420px) {
+  /* the emblem alone carries the brand once space is tight */
+  .wordmark__lockup {
+    display: none;
+  }
+}
+
+.site-nav {
+  display: none;
+  gap: 1.6rem;
+  margin-left: auto;
+}
+.site-nav__link {
+  font-weight: 500;
+  font-size: 0.98rem;
+  color: var(--jasmine);
+  padding-block: 0.3rem;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.site-nav__link:hover {
+  color: var(--marigold);
+}
+.site-nav__link.is-active {
+  border-bottom-color: var(--marigold);
+}
+.site-header__cta {
+  display: none;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.nav-toggle {
+  margin-left: auto;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.nav-toggle__bars,
+.nav-toggle__bars::before,
+.nav-toggle__bars::after {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--jasmine);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.nav-toggle__bars {
+  position: relative;
+}
+.nav-toggle__bars::before {
+  position: absolute;
+  top: -6px;
+}
+.nav-toggle__bars::after {
+  position: absolute;
+  top: 6px;
+}
+.nav-toggle__bars.is-open {
+  background: transparent;
+}
+.nav-toggle__bars.is-open::before {
+  transform: translateY(6px) rotate(45deg);
+}
+.nav-toggle__bars.is-open::after {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+.mobile-menu {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--ink);
+  padding: 1.2rem var(--gutter) 1.6rem;
+}
+.mobile-menu__nav {
+  display: flex;
+  flex-direction: column;
+}
+.mobile-menu__link {
+  padding: 0.85rem 0;
+  font-size: 1.15rem;
+  color: var(--jasmine);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.mobile-menu__link--sub {
+  color: var(--marigold);
+}
+.mobile-menu__cta {
+  margin-top: 1.2rem;
+}
+
+/* 1080, not 900: the bar now carries two CTAs (vendor + signup) alongside the
+   nav. Below this the menu collapses to the hamburger. */
+@media (min-width: 1080px) {
+  .site-nav {
+    display: flex;
+    gap: 1.25rem;
+  }
+  .site-header__cta {
+    display: flex;
+  }
+  .nav-toggle {
+    display: none;
+  }
+}
+
+/* ---------- section heads ---------- */
+.section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: clamp(1.8rem, 1rem + 3vw, 3rem);
+}
+.section-head h2 {
+  margin-top: 0.5rem;
+}
+.section-head__link {
+  font-weight: 600;
+  color: var(--marigold-deep);
+  white-space: nowrap;
+}
+.section-head__link:hover {
+  text-decoration: underline;
+}
+.band-soft {
+  background: var(--blush-200);
+}
+
+.page-head {
+  max-width: 60ch;
+  margin-bottom: clamp(2rem, 1rem + 4vw, 3.5rem);
+}
+.page-head h1 {
+  margin: 0.6rem 0 1rem;
+}
+
+.empty {
+  display: grid;
+  gap: 1.2rem;
+  justify-items: start;
+  padding: 2rem 0;
+}
+
+/* ---------- hero tag row (shared by the scrub hero) ---------- */
+.hero__tags,
+.scrubhero__tags {
+  list-style: none;
+  padding: 0;
+  margin: 2.4rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.4rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 253, 249, 0.6);
+}
+.hero__tags li,
+.scrubhero__tags li {
+  position: relative;
+  padding-left: 1.1rem;
+}
+.hero__tags li::before,
+.scrubhero__tags li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--marigold);
+  transform: translateY(-50%);
+}
+
+/* ---------- feature grid (home gallery preview) ---------- */
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+.feature-card {
+  position: relative;
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+}
+.feature-card a {
+  display: block;
+  height: 100%;
+}
+.feature-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.feature-card:hover img {
+  transform: scale(1.05);
+}
+.feature-card__meta {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  color: #fff;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.88), transparent);
+}
+.feature-card__cat {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--marigold);
+}
+.feature-card__title {
+  font-family: var(--font-display), serif;
+  font-size: 1.3rem;
+}
+@media (min-width: 720px) {
+  .feature-grid {
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+  }
+  .feature-card--lead {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+}
+
+/* ---------- services ---------- */
+.svc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.1rem;
+}
+.svc-card {
+  padding: 1.6rem;
+  border: 1px solid var(--clay-line);
+  border-radius: var(--radius-m);
+  background: var(--jasmine);
+}
+.svc-card__title {
+  font-size: 1.5rem;
+  margin-bottom: 0.4rem;
+}
+@media (min-width: 640px) {
+  .svc-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 960px) {
+  .svc-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.svc-list {
+  display: grid;
+  gap: 1.2rem;
+}
+.svc-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.2rem;
+  align-items: center;
+  padding: 1.6rem;
+  border: 1px solid var(--clay-line);
+  border-radius: var(--radius-l);
+  background: var(--jasmine);
+}
+.svc-row__img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: var(--radius-m);
+}
+.svc-row__num {
+  font-family: var(--font-display), serif;
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--marigold-deep);
+}
+.svc-row__body h2 {
+  margin: 0.2rem 0 0.5rem;
+}
+@media (min-width: 760px) {
+  .svc-row--has-img {
+    grid-template-columns: 260px 1fr;
+  }
+  .svc-row:has(.svc-row__img) {
+    grid-template-columns: 260px 1fr;
+  }
+}
+
+/* ---------- packages ---------- */
+.pkg-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.2rem;
+}
+.pkg-card {
+  position: relative;
+  padding: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.pkg-card__badge {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  background: var(--marigold);
+  color: var(--ink);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+}
+.pkg-card__title {
+  font-size: 1.7rem;
+}
+.pkg-card__includes {
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--emerald);
+}
+.pkg-card__list {
+  margin: 0.3rem 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+}
+.pkg-card__list li {
+  position: relative;
+  padding-left: 1.4rem;
+  color: var(--clay);
+}
+.pkg-card__list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 7px;
+  height: 7px;
+  background: var(--marigold);
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+.pkg-card__price {
+  font-family: var(--font-display), serif;
+  font-size: 1.3rem;
+  color: var(--ink);
+  margin-top: auto;
+}
+.pkg-card .btn {
+  margin-top: 0.6rem;
+}
+@media (min-width: 720px) {
+  .pkg-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (min-width: 720px) {
+  .pkg-grid--full {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+/* ---------- cta band ---------- */
+.cta-band {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+.cta-band__kolam {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.25;
+}
+.cta-band__inner {
+  position: relative;
+  max-width: 60ch;
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+}
+.cta-band__cta {
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+/* ---------- gallery ---------- */
+.gal-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 2rem;
+}
+.chip {
+  border: 1px solid var(--clay-line);
+  background: var(--jasmine);
+  color: var(--ink);
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.chip:hover {
+  border-color: var(--marigold);
+}
+.chip.is-active {
+  background: var(--ink);
+  color: var(--jasmine);
+  border-color: var(--ink);
+}
+.gal-grid {
+  columns: 1;
+  column-gap: 1rem;
+}
+.gal-card {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+  width: 100%;
+  border: none;
+  padding: 0;
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  display: block;
+  background: var(--ink);
+}
+.gal-card img {
+  width: 100%;
+  display: block;
+  transition: transform 0.5s ease, opacity 0.3s ease;
+}
+.gal-card:hover img {
+  transform: scale(1.04);
+  opacity: 0.9;
+}
+.gal-card__meta {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  color: #fff;
+  text-align: left;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.92), transparent);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.gal-card:hover .gal-card__meta,
+.gal-card:focus-visible .gal-card__meta {
+  opacity: 1;
+}
+.gal-card__cat {
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--marigold);
+}
+.gal-card__title {
+  font-family: var(--font-display), serif;
+  font-size: 1.25rem;
+}
+.gal-card__loc {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+@media (min-width: 620px) {
+  .gal-grid {
+    columns: 2;
+  }
+}
+@media (min-width: 1000px) {
+  .gal-grid {
+    columns: 3;
+  }
+}
+
+/* ---------- lightbox ---------- */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.95);
+  display: grid;
+  place-items: center;
+  padding: 1.2rem;
+}
+.lightbox__close {
+  position: absolute;
+  top: 1rem;
+  right: 1.2rem;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.lightbox__stage {
+  position: relative;
+  max-width: min(1100px, 96vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.lightbox__stage img {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: var(--radius-s);
+}
+.lightbox__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.lightbox__nav--prev {
+  left: -8px;
+}
+.lightbox__nav--next {
+  right: -8px;
+}
+.lightbox__caption {
+  margin-top: 0.9rem;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  text-align: center;
+}
+@media (min-width: 720px) {
+  .lightbox__nav--prev {
+    left: -60px;
+  }
+  .lightbox__nav--next {
+    right: -60px;
+  }
+}
+
+/* ---------- forms ---------- */
+.form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.2rem;
+}
+.form__row {
+  display: grid;
+  gap: 1rem;
+}
+.field {
+  display: grid;
+  gap: 0.4rem;
+}
+.field__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.field input,
+.field select,
+.field textarea {
+  font: inherit;
+  color: var(--ink);
+  background: var(--blush);
+  border: 1px solid var(--clay-line);
+  border-radius: 10px;
+  padding: 0.75rem 0.85rem;
+  width: 100%;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: 3px solid color-mix(in srgb, var(--marigold) 55%, transparent);
+  outline-offset: 1px;
+  border-color: var(--marigold);
+}
+.field textarea {
+  resize: vertical;
+}
+/* Radio/checkbox opt out of the full-width text-input styling above. */
+.field input[type='radio'],
+.field input[type='checkbox'] {
+  width: auto;
+  padding: 0;
+  flex: none;
+  accent-color: var(--marigold);
+}
+.field__hint {
+  font-size: 0.8rem;
+  color: var(--clay);
+}
+.choice {
+  border: 1px solid var(--clay-line);
+  border-radius: 10px;
+  padding: 0.85rem 1rem 1rem;
+  margin: 0;
+}
+.choice legend {
+  padding-inline: 0.3rem;
+}
+.choice__option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.signup-step {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--marigold-deep);
+}
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.form__error {
+  color: #b3261e;
+  font-size: 0.9rem;
+}
+.form__submit {
+  justify-self: start;
+  margin-top: 0.3rem;
+}
+.form-success {
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
+  padding: 1rem 0;
+}
+@media (min-width: 560px) {
+  .form__row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---------- contact / vendors ---------- */
+.contact-layout {
+  display: grid;
+  gap: 2.5rem;
+}
+.contact-intro h1 {
+  margin: 0.6rem 0 1rem;
+}
+.contact-methods {
+  display: grid;
+  gap: 0.8rem;
+  margin: 1.8rem 0;
+}
+.contact-method {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--clay-line);
+  border-radius: 12px;
+  background: var(--jasmine);
+}
+.contact-method:hover {
+  border-color: var(--marigold);
+}
+.contact-method__label {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--marigold-deep);
+  min-width: 5rem;
+}
+.contact-method__value {
+  font-weight: 600;
+}
+.contact-branches {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.contact-branch {
+  display: grid;
+  gap: 0.2rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--marigold);
+}
+.contact-hours {
+  margin-top: 1rem;
+}
+.contact-form-wrap {
+  padding: clamp(1.4rem, 1rem + 2vw, 2.2rem);
+}
+.contact-form-wrap h2 {
+  margin-bottom: 0.3rem;
+}
+.vendor-perks {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.8rem;
+}
+.vendor-perk {
+  display: grid;
+  gap: 0.2rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--emerald);
+}
+@media (min-width: 900px) {
+  .contact-layout {
+    grid-template-columns: 1fr 1.05fr;
+    align-items: start;
+  }
+}
+
+/* ---------- about ---------- */
+.about-hero {
+  max-width: 62ch;
+}
+.about-hero h1 {
+  margin: 0.6rem 0 1rem;
+}
+.why-grid {
+  display: grid;
+  gap: 1.1rem;
+}
+.why-card {
+  padding: 1.6rem;
+  background: var(--jasmine);
+  border: 1px solid var(--clay-line);
+  border-radius: var(--radius-m);
+}
+.why-card__title {
+  font-size: 1.4rem;
+  margin-bottom: 0.4rem;
+}
+.branch-grid {
+  display: grid;
+  gap: 1.2rem;
+}
+.branch-card {
+  padding: 1.8rem;
+  display: grid;
+  gap: 0.5rem;
+}
+.branch-card__title {
+  font-size: 1.6rem;
+}
+@media (min-width: 720px) {
+  .why-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .branch-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ---------- footer ---------- */
+.site-footer {
+  padding-block: clamp(3rem, 2rem + 4vw, 5rem) 6.5rem;
+}
+.site-footer__kolam {
+  margin-bottom: 2.5rem;
+}
+.site-footer__grid {
+  display: grid;
+  gap: 2.5rem;
+}
+.footer-logo {
+  width: 190px;
+  height: auto;
+  margin: -1rem 0 0.5rem -0.5rem;
+}
+.site-footer__brand .btn-row {
+  margin-top: 1.4rem;
+}
+.site-footer__col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.site-footer__col a:hover {
+  color: var(--marigold);
+}
+.site-footer__heading {
+  font-family: var(--font-body), sans-serif;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--marigold);
+  margin-bottom: 0.4rem;
+}
+.site-footer__branch {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin-bottom: 0.4rem;
+}
+.site-footer__email {
+  margin-top: 0.6rem;
+  color: var(--marigold);
+}
+.site-footer__bar {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 253, 249, 0.14);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+}
+.site-footer__social {
+  display: flex;
+  gap: 1.2rem;
+}
+.site-footer__social a:hover {
+  color: var(--marigold);
+}
+@media (min-width: 760px) {
+  .site-footer__grid {
+    grid-template-columns: 1.6fr 1fr 1.2fr;
+    gap: 3rem;
+  }
+}
+
+/* ---------- mobile CTA bar ---------- */
+.mobilebar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  display: flex;
+  gap: 1px;
+  background: var(--clay-line);
+  border-top: 1px solid var(--clay-line);
+  box-shadow: 0 -10px 30px -18px rgba(0, 0, 0, 0.5);
+}
+.mobilebar__btn {
+  flex: 1;
+  text-align: center;
+  padding: 0.95rem 0.5rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+  background: var(--jasmine);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+.mobilebar__btn--wa {
+  background: #1eae5a;
+  color: #fff;
+}
+.mobilebar__btn--enq {
+  background: var(--marigold);
+  color: var(--ink);
+}
+@media (min-width: 900px) {
+  .mobilebar {
+    display: none;
+  }
+  .site-footer {
+    padding-bottom: clamp(3rem, 2rem + 4vw, 5rem);
+  }
+}
+
+/* ---------- full-bleed scroll-scrubbed hero ----------
+   The reception film fills the viewport and is scrubbed by scroll position. JS sets
+   `--p` (0→1) on the outermost .scrubhero so every layer below inherits it; each rule
+   maps that to opacity/transform with clamp(). See components/ScrubHero.tsx.        */
+.scrubhero {
+  --p: 0;
+  position: relative;
+  height: 340vh; /* scroll distance for the scrub (the pinned stage is one viewport) */
+  /* cancel #main's header offset so the film starts at the very top of the page */
+  margin-top: calc(-1 * var(--header-h));
+  background: var(--ink);
+}
+.scrubhero.is-reduced {
+  height: auto;
+}
+.scrubhero__pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh; /* so mobile browser chrome doesn't clip the stage */
+  overflow: hidden;
+  background: #000;
+}
+/* Reduced motion / no-scrub: the stage stops being a pinned scene and becomes an
+   ordinary stacked hero — poster behind, content and outro in normal flow. */
+.scrubhero.is-reduced .scrubhero__pin {
+  position: relative;
+  height: auto;
+  min-height: 78svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(1.6rem, 4vw, 2.6rem);
+  padding-block: clamp(7rem, 6rem + 6vw, 10rem) clamp(4rem, 3rem + 5vw, 7rem);
+}
+.scrubhero.is-reduced .scrubhero__content,
+.scrubhero.is-reduced .scrubhero__outro,
+.scrubhero.is-reduced .scrubhero__heart {
+  position: static;
+  translate: none;
+  inset: auto;
+  padding-bottom: 0;
+}
+.scrubhero.is-reduced .scrubhero__heart {
+  align-self: center;
+  width: clamp(160px, 34vw, 260px);
+}
+.scrubhero.is-reduced .scrubhero__outro {
+  align-self: center;
+  pointer-events: auto;
+}
+
+/* ---- film ---- */
+.scrubhero__media {
+  position: absolute;
+  inset: 0;
+}
+.scrubhero__poster,
+.scrubhero__video,
+.scrubhero__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+  background: #000;
+}
+/* The poster paints instantly and holds until the film can actually be scrubbed. */
+.scrubhero__video,
+.scrubhero__canvas {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.scrubhero.is-ready .scrubhero__video,
+.scrubhero.is-ready .scrubhero__canvas {
+  opacity: 1;
+}
+.scrubhero.is-poster-only .scrubhero__video,
+.scrubhero.is-poster-only .scrubhero__canvas {
+  display: none;
+}
+
+/* ---- legibility + atmosphere ---- */
+.scrubhero__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(13, 13, 13, 0.82) 0%, rgba(13, 13, 13, 0.12) 34%, rgba(13, 13, 13, 0.2) 62%, rgba(13, 13, 13, 0.88) 100%),
+    linear-gradient(90deg, rgba(13, 13, 13, 0.78) 0%, rgba(13, 13, 13, 0.18) 52%, transparent 78%),
+    radial-gradient(130% 105% at 50% 45%, transparent 52%, rgba(0, 0, 0, 0.6) 100%);
+  /* lifts as the content clears, so the film reads cleanly mid-scroll */
+  opacity: clamp(0.58, calc(1 - var(--p) * 0.62), 1);
+}
+.scrubhero__grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.scrubhero__glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 78vmin;
+  height: 78vmin;
+  margin: -39vmin 0 0 -39vmin;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(217, 178, 76, 0.5), transparent 62%);
+  filter: blur(28px);
+  opacity: clamp(0, calc((var(--p) - 0.8) * 6), 0.85);
+  transform: scale(calc(0.55 + var(--p) * 0.55));
+}
+.scrubhero__kolam {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  pointer-events: none;
+  opacity: 0.14;
+  rotate: calc(var(--p) * 26deg);
+}
+
+/* ---- hearts ---- */
+.scrubhero__heart {
+  position: absolute;
+  left: 50%;
+  /* Sized and lifted so the outline frames the couple rather than cutting across
+     them: the cleft between the lobes clears their heads, and the lobes sit wide
+     of their faces. Verified against real frames of the film. */
+  top: calc(50% - 9vh);
+  translate: -50% -50%;
+  z-index: 3;
+  width: clamp(280px, 96vmin, 1000px);
+  aspect-ratio: 100 / 90;
+  pointer-events: none;
+  transition: transform 0.3s ease;
+  /* holds back while the opening content is still being read */
+  opacity: clamp(0, calc(var(--p) * 3.4), 1);
+}
+.scrubhero.is-joined .scrubhero__heart {
+  animation: heartbeat 0.62s ease;
+}
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.09);
+  }
+  60% {
+    transform: scale(0.98);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.scrubhero__half {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+.scrubhero__half svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 6px 22px rgba(0, 0, 0, 0.7));
+}
+.scrubhero__half svg path {
+  fill: none;
+  stroke: var(--marigold);
+  /* thinner than before: the stroke scales with the viewBox, so the bigger heart
+     needs a smaller number to keep the same on-screen line weight */
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.scrubhero__half--left {
+  clip-path: inset(0 49.6% 0 0);
+  transform: translateX(calc((var(--p) - 1) * 42vw));
+}
+.scrubhero__half--right {
+  clip-path: inset(0 0 0 49.6%);
+  transform: translateX(calc((1 - var(--p)) * 42vw));
+}
+
+/* ---- opening content: legible at rest, clears by ~35% ---- */
+/* Stretched left-to-right so the .container class it also carries keeps its own
+   max-width, gutters and centring; the text is constrained per-element below.
+   Top is bounded by the header rather than left to `auto`: the block is bottom
+   anchored, so an unbounded box grows up under the fixed bar (which outranks it
+   on z-index) and swallows the eyebrow. Content is bottom-aligned inside it. */
+.scrubhero__content {
+  position: absolute;
+  inset: var(--header-h) 0 0 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  z-index: 4;
+  padding-bottom: clamp(4rem, 10vh, 7rem);
+  color: var(--jasmine);
+  opacity: clamp(0, calc(1 - (var(--p) - 0.1) * 4), 1);
+  transform: translateY(calc(var(--p) * -70px));
+  pointer-events: auto;
+}
+.scrubhero.is-past-intro .scrubhero__content {
+  pointer-events: none;
+}
+.scrubhero .eyebrow {
+  color: var(--marigold-bright);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+/* Contained highlight: the dark band hugs the text itself and is cloned onto each
+   wrapped line, so the film still shows everywhere around the copy. Used where
+   type sits over the film's blown-out highlights, which no shadow can rescue. */
+.scrubhero__hl {
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  background: rgba(10, 10, 10, 0.58);
+  padding: 0.14em 0.42em;
+  border-radius: 5px;
+}
+/* Overrides .display-xl: the global step-5 (up to 6.8rem) is sized for a full
+   section, and at that size the hero copy overruns a laptop viewport. */
+.scrubhero__title {
+  font-size: clamp(2.3rem, 1.4rem + 3.4vw, 4.5rem);
+  line-height: 1.06;
+  margin: 0.7rem 0 1rem;
+  max-width: 18ch;
+  color: var(--jasmine);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7), 0 2px 26px rgba(0, 0, 0, 0.5);
+}
+.scrubhero__lede {
+  color: rgba(255, 253, 249, 0.92);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75), 0 1px 18px rgba(0, 0, 0, 0.55);
+}
+.scrubhero__cta {
+  margin-top: 1.8rem;
+}
+/* .hero__tags styling is shared — see the hero tags rule above. Over film the
+   shared 60% grey vanishes, so each tag sits on its own small dark chip. Kept
+   to the tags themselves so the film still shows between and around them. */
+.scrubhero__tags {
+  margin-top: 1.6rem;
+  gap: 0.5rem 0.6rem;
+  color: rgba(255, 253, 249, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+.scrubhero__tags li {
+  padding: 0.34rem 0.8rem 0.34rem 1.5rem;
+  border-radius: 999px;
+  background: rgba(10, 10, 10, 0.52);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 253, 249, 0.1);
+}
+.scrubhero__tags li::before {
+  left: 0.72rem;
+}
+
+/* ---- outro: the line + the CTA returning once the hearts meet ---- */
+.scrubhero__outro {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(2.5rem, 9vh, 6rem);
+  translate: -50% 0;
+  z-index: 4;
+  width: min(56ch, calc(100% - var(--gutter) * 2));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.6rem;
+  text-align: center;
+  opacity: clamp(0, calc((var(--p) - 0.75) * 4.5), 1);
+  transform: translateY(calc((1 - var(--p)) * 16px));
+  pointer-events: none;
+}
+.scrubhero.is-joined .scrubhero__outro {
+  pointer-events: auto;
+}
+.scrubhero__line {
+  font-family: var(--font-display), 'Arial Narrow', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: clamp(1.3rem, 1rem + 2.4vw, 2.4rem);
+  color: var(--jasmine);
+  margin: 0;
+  text-shadow: 0 2px 26px rgba(0, 0, 0, 0.7);
+}
+.scrubhero__line .accent {
+  color: var(--marigold);
+}
+.scrubhero__outro-cta {
+  justify-content: center;
+}
+
+/* ---- hint ---- */
+.scrubhero__hint {
+  position: absolute;
+  bottom: 1.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+  color: rgba(255, 253, 249, 0.72);
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.8);
+  opacity: clamp(0, calc(1 - var(--p) * 14), 1);
+}
+.scrubhero__hint::after {
+  content: '';
+  display: block;
+  width: 1px;
+  height: 22px;
+  margin: 0.5rem auto 0;
+  background: linear-gradient(var(--marigold), transparent);
+}
+
+/* ---- load progress: a hairline, never a blocking panel ---- */
+.scrubhero__loader {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  height: 2px;
+  background: rgba(255, 253, 249, 0.08);
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+.scrubhero.is-ready .scrubhero__loader,
+.scrubhero.is-poster-only .scrubhero__loader,
+.scrubhero.is-reduced .scrubhero__loader {
+  opacity: 0;
+}
+.scrubhero__bar {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--marigold);
+  transition: width 0.2s linear;
+}
+
+/* ---- phones: tighter stage, content given more room ---- */
+@media (max-width: 720px) {
+  .scrubhero {
+    height: 300vh;
+  }
+  .scrubhero__heart {
+    width: min(94vw, 460px);
+  }
+  .scrubhero__content {
+    padding-bottom: clamp(4rem, 14vh, 7rem);
+  }
+  .scrubhero__tags {
+    display: none; /* the headline and CTA earn the space on a small screen */
+  }
+}
+
+/* Short landscape viewports: the stage has almost no vertical room to give. */
+@media (max-height: 620px) and (orientation: landscape) {
+  .scrubhero__hint,
+  .scrubhero__tags {
+    display: none;
+  }
+  .scrubhero__content {
+    padding-bottom: clamp(2rem, 8vh, 3.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrubhero {
+    height: auto;
+  }
+  /* Same stacked layout as .is-reduced, so this holds even before hydration. */
+  .scrubhero__pin {
+    position: relative;
+    height: auto;
+    min-height: 78svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(1.6rem, 4vw, 2.6rem);
+    padding-block: clamp(7rem, 6rem + 6vw, 10rem) clamp(4rem, 3rem + 5vw, 7rem);
+  }
+  .scrubhero__content,
+  .scrubhero__outro,
+  .scrubhero__heart {
+    position: static;
+    translate: none;
+    inset: auto;
+    padding-bottom: 0;
+  }
+  .scrubhero__heart {
+    align-self: center;
+    width: clamp(160px, 34vw, 260px);
+  }
+  .scrubhero__outro {
+    align-self: center;
+    pointer-events: auto;
+  }
+  .scrubhero__video,
+  .scrubhero__canvas {
+    display: none;
+  }
+  .scrubhero__half--left,
+  .scrubhero__half--right {
+    transform: none;
+  }
+  .scrubhero__heart,
+  .scrubhero__content,
+  .scrubhero__outro {
+    opacity: 1;
+    transform: none;
+  }
+  .scrubhero__kolam {
+    rotate: none;
+  }
+  .scrubhero__glow {
+    opacity: 0.6;
+    transform: none;
+  }
+  .scrubhero__hint,
+  .scrubhero__loader {
+    display: none;
+  }
+}
