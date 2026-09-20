@@ -54,9 +54,11 @@ export default async function HomePage() {
                 Photos do the <span className="italic accent">talking</span>
               </h2>
             </div>
-            <Link href="/gallery" className="section-head__link">
-              View full gallery →
-            </Link>
+            {data.featured.length > 0 && (
+              <Link href="/gallery" className="section-head__link">
+                View full gallery →
+              </Link>
+            )}
           </div>
 
           {data.featured.length > 0 ? (
@@ -75,7 +77,28 @@ export default async function HomePage() {
               ))}
             </div>
           ) : (
-            <p className="muted">Our gallery is being prepared — beautiful events coming soon.</p>
+            /* No projects uploaded yet. Resolves itself once the first project
+               is added in /admin — nothing to switch off here. */
+            <div className="coming-soon">
+              <KolamRosette size={260} className="coming-soon__kolam" />
+              <p className="eyebrow">Coming soon</p>
+              <h3 className="display-m">Our gallery is being put together</h3>
+              <p className="lede">
+                We&apos;re choosing the best photographs from our recent weddings,
+                birthdays and corporate events. Until they&apos;re up, message us and
+                we&apos;ll send you work from events like yours right away.
+              </p>
+              <div className="btn-row">
+                <Link className="btn btn--primary" href="/contact">
+                  Request a callback
+                </Link>
+                {settings?.contact?.whatsapp && (
+                  <a className="btn btn--whatsapp" href={wa} target="_blank" rel="noopener">
+                    See recent work on WhatsApp
+                  </a>
+                )}
+              </div>
+            </div>
           )}
         </div>
       </section>

@@ -1,9 +1,13 @@
+import Link from 'next/link'
 import React from 'react'
 import type { Metadata } from 'next'
 
 import { getPayloadClient } from '../../../lib/payload'
+import { getSiteSettings } from '../../../lib/getSettings'
+import { whatsappLink, DEFAULT_WA_MESSAGE } from '../../../lib/site'
 import { mediaUrl, mediaAlt } from '../../../lib/media'
 import { GalleryGrid, type GalleryItem } from '../../../components/GalleryGrid'
+import { KolamRosette } from '../../../components/Kolam'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,7 +46,8 @@ async function getProjects(): Promise<GalleryItem[]> {
 }
 
 export default async function GalleryPage() {
-  const items = await getProjects()
+  const [items, settings] = await Promise.all([getProjects(), getSiteSettings()])
+  const wa = whatsappLink(settings?.contact?.whatsapp, DEFAULT_WA_MESSAGE)
 
   return (
     <section className="section">
@@ -61,14 +66,28 @@ export default async function GalleryPage() {
         {items.length > 0 ? (
           <GalleryGrid items={items} />
         ) : (
-          <div className="empty">
-            <p className="muted">
-              Our gallery is being prepared. Please check back soon, or contact us to see
-              recent work directly.
+          /* No projects uploaded yet. Resolves itself once the first project is
+             added in /admin — nothing to switch off here. */
+          <div className="coming-soon">
+            <KolamRosette size={300} className="coming-soon__kolam" />
+            <p className="eyebrow">Coming soon</p>
+            <h2 className="display-m">The gallery is being put together</h2>
+            <p className="lede">
+              We&apos;re selecting the best photographs from hundreds of weddings,
+              birthdays, housewarmings and corporate events across Chennai. They&apos;ll
+              be here shortly — in the meantime, tell us what you&apos;re planning and
+              we&apos;ll send you photos from events just like it.
             </p>
-            <a className="btn btn--primary" href="/contact">
-              Contact us
-            </a>
+            <div className="btn-row">
+              <Link className="btn btn--primary" href="/contact">
+                Request a callback
+              </Link>
+              {settings?.contact?.whatsapp && (
+                <a className="btn btn--whatsapp" href={wa} target="_blank" rel="noopener">
+                  See recent work on WhatsApp
+                </a>
+              )}
+            </div>
           </div>
         )}
       </div>

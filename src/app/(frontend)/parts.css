@@ -230,6 +230,43 @@
   padding: 2rem 0;
 }
 
+/* ---------- coming-soon panel ----------
+   Shown wherever a CMS-driven section has no content yet. An empty grid reads
+   as a broken page; this reads as a section that simply hasn't opened. It is
+   entirely data-driven — it disappears on its own once the first photos are
+   uploaded in /admin, so there is no flag to remember to flip. */
+.coming-soon {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  justify-items: center;
+  gap: 0.9rem;
+  text-align: center;
+  padding: clamp(2.6rem, 6vw, 4.4rem) var(--gutter);
+  border: 1px solid var(--clay-line);
+  border-radius: var(--radius-l);
+  background: linear-gradient(180deg, var(--jasmine), var(--blush-200));
+}
+.coming-soon > * {
+  position: relative;
+  margin: 0;
+}
+.coming-soon .coming-soon__kolam {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.1;
+  max-width: 100%;
+}
+.coming-soon .lede {
+  max-width: 48ch;
+}
+.coming-soon .btn-row {
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
 /* ---------- hero tag row (shared by the scrub hero) ---------- */
 .hero__tags,
 .scrubhero__tags {

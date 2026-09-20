@@ -149,7 +149,12 @@ src/
 - **Signature motif:** kolam line-art (`components/Kolam.tsx`) rendered in gold — keep
   it restrained.
 - **Editing content model:** after changing a collection/global, run
-  `npm run generate:types`. If you regenerate `(payload)` boilerplate, use the file
+  `npm run generate:types` **and** `npm run migrate:create` — production Postgres
+  never auto-pushes schema (Payload pushes only when `NODE_ENV !== 'production'`),
+  so an uncommitted migration means a green build whose every page 500s on missing
+  tables. `migrate:create` needs no database connection. Commit `src/migrations/`;
+  `vercel.json` runs `payload migrate` ahead of `next build` on every deploy.
+  If you regenerate `(payload)` boilerplate, use the file
   from the matching Payload version tag (e.g. `v3.88.0`), not `main`.
 
 ## Current state (things that are deliberate, not oversights)
@@ -168,8 +173,10 @@ src/
 - **Forms and page structures** are flexible: all pages can be edited via the admin
   (Services, About, Contact copy, etc.) or the CMS, but HTML/component structure changes
   require code edits.
-- The repo is **not a git repository**; deleted code is unrecoverable — prefer a flag
-  or a comment over deleting working code.
+- The repo **is** a git repository (`master`, remote `zenfestevents/zenfestevents-webapp`)
+  and deploys to Vercel from `master`. Still prefer a flag or a comment over deleting
+  working code. Note the video masters (`hero_master.mp4`, `scrub.mp4`, `0902.mp4`)
+  were committed despite the note above — ~150 MB of the repo is dead weight.
 
 ## Deploy
 Vercel (app) + Neon (Postgres) + Vercel Blob (media). Env vars and steps are in

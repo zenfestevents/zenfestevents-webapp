@@ -89,7 +89,7 @@ async function run() {
     { title: 'Housewarmings', slug: 'housewarmings', order: 4, color: '#1f6e5a' },
     { title: 'Sports Events', slug: 'sports', order: 5, color: '#6e401f' },
   ]
-  const cats: Record<string, number | string> = {}
+  const cats: Record<string, number> = {}
   for (const c of catData) {
     const doc = await payload.create({
       collection: 'categories',
@@ -106,7 +106,7 @@ async function run() {
     ['DJ & Sound', 'Music, lighting and live entertainment.', 'Professional DJ, sound, lighting and live entertainment to set the mood for any celebration.'],
     ['Complete Coordination', 'One team managing the whole day.', 'A single team managing vendors, timeline and the day itself, so you can enjoy your event.'],
   ]
-  const svcs: Record<string, number | string> = {}
+  const svcs: Record<string, number> = {}
   let si = 1
   for (const [title, summary, description] of svcData) {
     const doc = await payload.create({
@@ -161,7 +161,7 @@ async function run() {
     { title: 'TechCorp Annual Day', cat: 'corporate', color: '#1f5f6e', branch: 'guduvancheri', location: 'OMR, Chennai', featured: true },
     { title: 'New Home Blessing', cat: 'housewarmings', color: '#1f6e5a', branch: 'thiruverkadu', location: 'Thiruverkadu', featured: false },
     { title: 'Inter-School Sports Meet', cat: 'sports', color: '#6e401f', branch: 'guduvancheri', location: 'Guduvancheri', featured: false },
-  ]
+  ] as const
   for (const pr of projData) {
     const cover = await makeMedia(pr.title, pr.cat, pr.color)
     const photos = [
