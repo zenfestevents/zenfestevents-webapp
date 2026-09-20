@@ -162,6 +162,13 @@ src/
   the page shows "Coming soon" with a CTA to custom quote instead of displaying
   packages. Flip the flag once packages are entered in the admin. The working listing
   logic below is kept intact for when they're ready.
+- **`/admin/create-first-user` is broken** on Payload 3.88 + Next 16.3.3 — it renders
+  a blank page (the view is in the RSC stream but never reaches the DOM; reproduced
+  locally against an empty DB under both Turbopack and webpack). Use
+  `npm run create:admin` (`src/scripts/createAdmin.ts`, reads `ADMIN_EMAIL` /
+  `ADMIN_PASSWORD` from the environment) and sign in at `/admin/login`. The rest of
+  the admin renders fine — it is client-rendered, so a `curl` of any admin URL looks
+  empty even when the page works; check it in a browser, not with `curl`.
 - **Sign-ups** (`/signup`) capture name, phone, birthday and "planning an event?". Saying
   yes branches into a second step for event details; saying no submits immediately. Each
   record is stamped `offer: SIGNUP100` for the ₹100-off promise in the header CTA —

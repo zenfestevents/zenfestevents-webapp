@@ -69,7 +69,28 @@ WhatsApp actions, since that's how most clients get in touch.
    - `BLOB_READ_WRITE_TOKEN` — the Vercel Blob token
    - (optional) `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`,
      `LEAD_NOTIFICATION_EMAIL`
-4. Deploy, then open `/admin` to create the first admin user.
+4. Deploy, then create the first admin user (see below) and sign in at
+   `/admin/login`.
+
+### Creating the first admin user
+**Do not use `/admin/create-first-user`.** On Payload 3.88 + Next 16.3.3 that one
+screen renders blank: the view reaches the RSC stream but never the DOM. It
+reproduces locally against an empty database under both Turbopack and webpack, so
+it is not a deploy, bundler or database problem. Every other admin screen —
+login, dashboard, all collections and globals — renders correctly.
+
+Seed the first user from the command line instead, with `DATABASE_URI` pointed at
+the target database:
+```powershell
+$env:DATABASE_URI="postgres://...(your Neon pooled string)"
+$env:ADMIN_EMAIL="you@example.com"
+$env:ADMIN_PASSWORD="a long password"
+npm run create:admin
+```
+Then sign in at `/admin/login`. The script refuses to run if a user already
+exists, and reports whether it hit Postgres or SQLite so you can confirm you
+targeted the right database. Shell variables win over `.env`, which is left
+untouched — open a new terminal to go back to local SQLite.
 
 ### Database migrations (required in production)
 Locally, the SQLite adapter pushes schema changes automatically. **Postgres in
