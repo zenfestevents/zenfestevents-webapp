@@ -103,8 +103,20 @@ src/
   transforms/opacity with `clamp()`. Set `--p` on the top element so every child (glow,
   hearts, line, hint) inherits it. Both patterns respect `prefers-reduced-motion`.
 - **The hero (`ScrubHero`)** is full-bleed: the reception film fills the viewport and is
-  scrubbed by scroll, with the gold heart halves meeting as it ends. Things that are
-  easy to get wrong here:
+  scrubbed by scroll, with the gold heart halves meeting as it ends. **Phones
+  (≤720px, `MOBILE_QUERY`) get a still instead** — touch-scrubbing a film was laggy and
+  cost a 20 MB download — reusing the reduced-motion layout. The still is a ChatGPT team
+  image with its speech bubble baked in (`public/hero/poster-mobile-860.webp` / `-1290.webp`,
+  from the untracked master `hero-mobile-source.png.png`), shown **whole, full width, just
+  under the header** — cropping it to fill the screen cut people off and hid the bubble
+  under the header. Heart/kolam-rosette/glow/outro/scrim are hidden. Under the image, a
+  dark band holds (in order) the eyebrow, headline, lede and a `KolamDivider`
+  (`.scrubhero__divider`, phones only); the desktop buttons and tags are hidden there —
+  **phone actions live in `MobileCTABar`, never in the hero**. All of it is the last
+  `@media (max-width: 720px)` block in `parts.css`. Regenerate the image with
+  `ffmpeg -i hero-mobile-source.png.png -vf scale=1290:-2:flags=lanczos -c:v libwebp -quality 78 public/hero/poster-mobile-1290.webp`
+  (and 860). WebP, not JPEG: the busy petals/sparks made the JPEGs twice the size.
+  Things that are easy to get wrong here:
   - `--p` **reaches 1 while the stage is still pinned** and filling the screen. To act on
     "the film has actually left", test `section.getBoundingClientRect().bottom`, not `--p`.
   - The hero is pulled up under the fixed header with a negative margin, so **`--p` is
@@ -120,7 +132,25 @@ src/
 - **Header:** `position: fixed` (not sticky) — a sticky bar occupies layout space, which
   pushed the hero's `100svh` stage down and cropped the film. `#main` pays back the
   offset via `--header-h` and the hero cancels it. The bar hides over the hero
-  (`body.hero-immersive`) and returns as the film leaves.
+  (`body.hero-immersive`) and returns as the film leaves. Phones show the emblem **and**
+  the "ZENFEST EVENTS™" wordmark (it used to be hidden below 420px).
+- **Mobile bottom bar (`MobileCTABar`, <900px, every page):** WhatsApp · Enquire
+  (`/contact`, gold "zari" sheen — `zari-sheen` keyframes) · Enroll as a vendor
+  (`/vendors`). No Call button by the owner's choice. The sheen stops under
+  `prefers-reduced-motion`.
+- **`KolamDivider` needs `.kolam-divider path/circle` in `styles.css`** for its stroke;
+  before that rule existed, dividers on Home/About/Services rendered as filled black blobs.
+- **Media URLs are made root-relative** by `mediaUrl()` in `src/lib/media.ts`. Payload
+  prefixes local uploads with `serverURL` (`http://localhost:3000` in dev), which broke
+  every photo on any other host; Vercel Blob URLs pass through untouched.
+- **Testing on a phone over Wi-Fi:** open `http://<this PC's LAN IP>:3000`. That IP must
+  be in `allowedDevOrigins` in `next.config.ts` (currently `192.168.1.3`), or Next 16
+  blocks the dev JS chunks for it — the page renders but nothing hydrates (dead menu,
+  sections that never reveal). Dev-only; update it if the LAN IP changes.
+- **Local DB has seed demo projects** ("TechCorp Annual Day" etc., placeholder art with
+  titles baked in), so locally "Photos do the talking" shows those cards. Production's
+  Neon DB has none, so the live site shows the automatic "Coming soon" panel until real
+  projects are added in the live `/admin`.
 - **Hero video assets** live in `public/hero/` (`scrub.mp4`, `poster.jpg`,
   `frames/frame_001..090.webp`); masters stay untracked at the repo root. Regenerate from
   `hero_master.mp4` (1920×1080):
@@ -171,8 +201,12 @@ src/
   empty even when the page works; check it in a browser, not with `curl`.
 - **Sign-ups** (`/signup`) capture name, phone, birthday and "planning an event?". Saying
   yes branches into a second step for event details; saying no submits immediately. Each
-  record is stamped `offer: SIGNUP100` for the ₹100-off promise in the header CTA —
+  record is stamped `offer: SIGNUP100` for the ₹100-off promise —
   **nothing applies the discount automatically**; the team honours it when quoting.
+  The header's Sign Up CTA is **switched off** (`SIGNUP_ENABLED = false` in
+  `Header.tsx`, since the initial commit), so the offer isn't advertised anywhere yet.
+  A phone-hero "₹100 off" ribbon was proposed and parked until the owner confirms the
+  offer is live.
 - **Contact details are real** (phone/WhatsApp `9080089530`, both link to maps/calls) and
   live in three places that must stay in sync: the **SiteSettings** global (what's served),
   `src/seed/index.ts` (demo seed), and `SITE_FALLBACK` in `src/lib/site.ts` (client
@@ -187,7 +221,12 @@ src/
 
 ## Deploy
 Vercel (app) + Neon (Postgres) + Vercel Blob (media). Env vars and steps are in
-[README.md](README.md). Deployment is a later phase and needs the owner's accounts.
+[README.md](README.md). **Live at https://zenfestevents.in** (served from
+`www.zenfestevents.in`); pushing `master` deploys. The old
+`zenfestevents-webapp.vercel.app` domain was removed and now 404s — so
+`NEXT_PUBLIC_SERVER_URL` in Vercel must be `https://www.zenfestevents.in` (no trailing
+slash; it feeds Payload's `serverURL`/`cors`/`csrf` and `metadataBase`). The site's own
+forms POST to relative `/api/...` paths and don't depend on it.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

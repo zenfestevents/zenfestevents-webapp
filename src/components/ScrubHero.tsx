@@ -4,13 +4,17 @@ import Link from 'next/link'
 import React, { useEffect, useRef } from 'react'
 
 import { SITE_FALLBACK } from '../lib/site'
-import { KolamRosette } from './Kolam'
+import { KolamDivider, KolamRosette } from './Kolam'
 
 const HEART_PATH =
   'M50 82 C 20 58, 4 40, 4 24 C 4 11, 15 3, 27 3 C 37 3, 45 10, 50 19 C 55 10, 63 3, 73 3 C 85 3, 96 11, 96 24 C 96 40, 80 58, 50 82 Z'
 
 /** iOS fallback sequence — Safari will not seek a <video> reliably enough to scrub. */
 const FRAME_COUNT = 90
+/* Phones get a still hero, not the scrub: scrubbing a film by touch-scroll is laggy on
+   a phone decoder and costs a 20 MB download. Same breakpoint as parts.css. */
+const MOBILE_QUERY = '(max-width: 720px)'
+
 const framePath = (i: number) => `/hero/frames/frame_${String(i + 1).padStart(3, '0')}.webp`
 
 function HeartSvg() {
@@ -133,8 +137,11 @@ export function ScrubHero({
       }
     }
 
-    /* ---------- reduced motion: hearts already joined, no media fetched ---------- */
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    /* ---------- reduced motion / phones: hearts already joined, no media fetched ---------- */
+    if (
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      window.matchMedia(MOBILE_QUERY).matches
+    ) {
       section.classList.add('is-reduced', 'is-joined', 'is-ready')
       section.style.setProperty('--p', '1')
       return run
@@ -389,8 +396,15 @@ export function ScrubHero({
     <section className="scrubhero" ref={sectionRef} aria-label="Zenfest Events">
       <div className="scrubhero__pin">
         <div className="scrubhero__media" aria-hidden="true">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="scrubhero__poster" src="/hero/poster.jpg" alt="" />
+          <picture>
+            {/* phones: the whole team welcoming the visitor, shown uncropped */}
+            <source
+              media={MOBILE_QUERY}
+              srcSet="/hero/poster-mobile-860.webp 860w, /hero/poster-mobile-1290.webp 1290w"
+              sizes="100vw"
+            />
+            <img className="scrubhero__poster" src="/hero/poster.jpg" alt="" />
+          </picture>
           <video
             className="scrubhero__video"
             ref={videoRef}
@@ -439,6 +453,8 @@ export function ScrubHero({
               See our work
             </Link>
           </div>
+          {/* Phones only (see parts.css): closes the dark band under the image. */}
+          <KolamDivider className="scrubhero__divider" />
           <ul className="scrubhero__tags">
             <li>Weddings</li>
             <li>Birthdays</li>

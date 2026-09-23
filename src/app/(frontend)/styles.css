@@ -285,12 +285,14 @@ img {
   opacity: 0.75;
 }
 .kolam path,
-.kolam-draw path {
+.kolam-draw path,
+.kolam-divider path {
   fill: none;
   stroke: currentColor;
   stroke-width: 1.4;
 }
-.kolam circle {
+.kolam circle,
+.kolam-divider circle {
   fill: currentColor;
 }
 
