@@ -55,6 +55,81 @@ in `/admin`). When SMTP is configured (see `.env.example`), a notification email
 is also sent to `LEAD_NOTIFICATION_EMAIL`. Every page also offers Call and
 WhatsApp actions, since that's how most clients get in touch.
 
+### Vendor applications → Airtable
+Photography vendor applications are also copied, one row each, into an Airtable
+base (hook: `src/hooks/syncToAirtable.ts`). The row is added after the application
+is saved, so an Airtable problem never loses a submission — it just logs a warning.
+It uses one API call per application (the free plan allows ~1,000 a month; a base
+holds 1,000 records).
+
+One-time setup:
+1. In Airtable, create a workspace **Photo**. In it, create a base by
+   **importing** `docs/airtable/photo-vendors.csv` (it only has the column
+   headings). Name the base **Photo Vendors** and the table **Vendor Applications**.
+   Change the `Date` column to a **Date** field; the rest can stay as they are.
+2. Create a personal access token at <https://airtable.com/create/tokens> with the
+   scope `data.records:write`, and give it access to the **Photo Vendors** base only.
+3. Copy the base ID (the `app…` part of the base's URL) and set, in `.env` locally
+   and in Vercel for production: `AIRTABLE_TOKEN`, `AIRTABLE_PHOTO_BASE_ID`, and
+   `AIRTABLE_PHOTO_TABLE` if the table isn't named `Vendor Applications`.
+
+Column names must match the ones the hook sends; if you rename a column in
+Airtable, rename it in the hook too.
+
+**Cake applications** go to the existing **Cake Vendors** base (Bakers
+workspace), laid out like the team's hand-entered rows: one **Vendors** row with
+Status *To Call* and the FSSAI certificate attached, plus one **Flavour Prices**
+row per flavour (`src/hooks/syncCakeToAirtable.ts`). Answers without their own
+column (e.g. "tier charge is per kg", "menu card uploaded") go into *Risk Notes*.
+Set `AIRTABLE_CAKE_BASE_ID` (`appcZifMTnWKniVOR`) and make sure the token above
+also has access to that base.
+
+The cake questions are the base's **Intake Questions** marked *Approved 10*.
+FSSAI registration and delivery are hard filters: the form asks those two first
+and tells bakers without them to come back once they have them, and the server
+refuses cake applications without a 14-digit FSSAI number, a certificate upload,
+delivery rates and at least 3 flavours. Certificates and menu cards are stored
+in the private **Vendor Uploads** collection (admin-only; 4 MB max; images or PDF).
+
+### Phone verification (WhatsApp)
+The vendor form proves the phone number belongs to the applicant without paying
+for SMS. The vendor taps **Verify on WhatsApp**; WhatsApp opens with
+`ZENFEST VERIFY 482913` addressed to our number (laptops also get a QR code to
+scan with the phone). When they press Send, Meta calls our webhook, which marks
+the number verified only if WhatsApp reports **that same number** as the sender.
+Messages people send to a business are free, so there's no per-check cost.
+
+Code: `src/collections/PhoneVerifications.ts` (endpoints `/api/phone-verifications/start`,
+`/status`, `/webhook`, `/simulate`), `src/components/PhoneVerify.tsx` (the form
+widget), `src/hooks/requireVerifiedPhone.ts` (the server check on submit). Codes
+last 10 minutes, work once, and a number can request 5 per hour.
+
+Modes, picked automatically from env:
+- **live**: `WHATSAPP_BUSINESS_NUMBER` and `WHATSAPP_APP_SECRET` are set.
+- **test** (local dev, not set): a *Simulate WhatsApp send* button stands in for the message.
+- **off** (production, not set): no verification; the form works as before.
+
+One-time Meta setup (free):
+1. Go to <https://developers.facebook.com/apps> → **Create app** → type **Business**,
+   and add the **WhatsApp** product. This also creates a Meta Business account if you
+   don't have one.
+2. In **WhatsApp → API setup**, add the business phone number and verify it by SMS or
+   call. The number must be on the Cloud API: use 9080089530 if Meta offers to connect
+   it alongside the WhatsApp Business app, otherwise use a spare number that isn't on
+   WhatsApp.
+3. In **WhatsApp → Configuration → Webhook**, set the callback URL to
+   `https://www.zenfestevents.in/api/phone-verifications/webhook`, enter your
+   `WHATSAPP_VERIFY_TOKEN` (any long random string), click **Verify and save**, then
+   subscribe to the **messages** field. (The site must already be deployed with that
+   token set, or the handshake fails.)
+4. In Vercel, set `WHATSAPP_BUSINESS_NUMBER` (e.g. `919080089530`),
+   `WHATSAPP_APP_SECRET` (**App settings → Basic**) and `WHATSAPP_VERIFY_TOKEN`.
+   Optionally set `WHATSAPP_ACCESS_TOKEN` (a permanent system-user token) and
+   `WHATSAPP_PHONE_NUMBER_ID` (shown on API setup) to send a free "Verified ✓" reply.
+   Redeploy.
+5. Publish the app (switch it from Development to **Live**) so messages from any
+   number reach the webhook, then test from a phone.
+
 ## Production (Vercel + Neon + Vercel Blob)
 1. Create a **Neon** Postgres database; copy its **pooled** connection string
    (the one whose host contains `-pooler`) — serverless functions open many short
@@ -69,6 +144,9 @@ WhatsApp actions, since that's how most clients get in touch.
    - `BLOB_READ_WRITE_TOKEN` — the Vercel Blob token
    - (optional) `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`,
      `LEAD_NOTIFICATION_EMAIL`
+   - (optional) `AIRTABLE_TOKEN`, `AIRTABLE_PHOTO_BASE_ID`, `AIRTABLE_PHOTO_TABLE`
+     — see "Vendor applications → Airtable"
+   - (optional) `WHATSAPP_*` — see "Phone verification (WhatsApp)"
 4. Deploy, then create the first admin user (see below) and sign in at
    `/admin/login`.
 
@@ -106,6 +184,9 @@ After changing any collection or global:
 npm run migrate:create   # writes a new file into src/migrations (no DB needed)
 npm run generate:types   # refresh src/payload-types.ts
 ```
+`migrate:create` must see a `postgres…` `DATABASE_URI` (the local SQLite default makes it
+fail on the Postgres snapshots); it never connects, so a placeholder works — in PowerShell:
+`$env:DATABASE_URI='postgres://u:p@127.0.0.1:5432/none'; npm run migrate:create <name>`.
 Commit the generated migration — the deploy is what applies it. `npm run migrate`
 and `npm run migrate:status` run against whatever `DATABASE_URI` points at, so set
 it to the Neon string first if you want to apply or inspect migrations by hand.

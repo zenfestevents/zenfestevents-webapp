@@ -11,8 +11,28 @@ export const notifySubmission =
     if (operation !== 'create') return doc
 
     const to = process.env.LEAD_NOTIFICATION_EMAIL || 'zenfestevents@gmail.com'
+    // Dotted paths reach into groups (e.g. `photography.services`). Blank nested
+    // fields are skipped so one vendor type's email doesn't list another's fields.
     const lines = fields
-      .map((f) => `${f}: ${doc?.[f] ?? '-'}`)
+      .flatMap((f) => {
+        const value = f.split('.').reduce<unknown>((v, k) => (v as Record<string, unknown> | undefined)?.[k], doc)
+        // Array rows (e.g. price & camera per service) print as "a / b / c; …".
+        const text = Array.isArray(value)
+          ? value
+              .map((item) =>
+                item && typeof item === 'object'
+                  ? Object.entries(item)
+                      .filter(([k, v]) => k !== 'id' && v != null && v !== '')
+                      .map(([, v]) => v)
+                      .join(' / ')
+                  : item,
+              )
+              .join(typeof value[0] === 'object' ? '; ' : ', ')
+          : value
+        const blank = text === undefined || text === null || text === ''
+        if (blank && f.includes('.')) return []
+        return `${f}: ${blank ? '-' : text}`
+      })
       .join('\n')
     const summary = `New ${label} received via the website.\n\n${lines}`
 

@@ -76,6 +76,8 @@ export interface Config {
     leads: Lead;
     signups: Signup;
     'vendor-applications': VendorApplication;
+    'phone-verifications': PhoneVerification;
+    'vendor-uploads': VendorUpload;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -92,6 +94,8 @@ export interface Config {
     leads: LeadsSelect<false> | LeadsSelect<true>;
     signups: SignupsSelect<false> | SignupsSelect<true>;
     'vendor-applications': VendorApplicationsSelect<false> | VendorApplicationsSelect<true>;
+    'phone-verifications': PhoneVerificationsSelect<false> | PhoneVerificationsSelect<true>;
+    'vendor-uploads': VendorUploadsSelect<false> | VendorUploadsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -406,8 +410,65 @@ export interface VendorApplication {
   id: number;
   name: string;
   businessName?: string | null;
-  vendorType: 'decoration' | 'catering' | 'photography' | 'dj' | 'other';
+  vendorType: 'photography' | 'cake' | 'decoration' | 'catering' | 'dj' | 'other';
+  /**
+   * What the vendor offers, when they chose "Other".
+   */
+  otherService?: string | null;
+  photography?: {
+    coverage?: ('single' | 'all') | null;
+    specialty?: ('traditional-photo' | 'traditional-video' | 'candid-photo' | 'candid-video' | 'drone') | null;
+    rates?:
+      | {
+          service: 'traditional-photo' | 'traditional-video' | 'candid-photo' | 'candid-video' | 'drone';
+          /**
+           * 1 session ≈ 5 hours.
+           */
+          sessionPrice?: number | null;
+          camera?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    editing?: ('album-traditional' | 'album-candid' | 'video-traditional' | 'video-candid')[] | null;
+  };
+  cake?: {
+    flavours?:
+      | {
+          flavour: string;
+          ratePerKg?: number | null;
+          id?: string | null;
+        }[]
+      | null;
+    menu?: (number | null) | VendorUpload;
+    egglessCharge?: number | null;
+    egglessUnit?: ('per-kg' | 'flat' | 'nil' | 'none') | null;
+    wheatCharge?: number | null;
+    wheatUnit?: ('per-kg' | 'flat' | 'nil' | 'none') | null;
+    tier2kgCharge?: number | null;
+    tier3kgCharge?: number | null;
+    tierUnit?: ('flat' | 'per-kg' | 'none') | null;
+    customCharge?: number | null;
+    customUnit?: ('per-cake' | 'per-kg' | 'none') | null;
+    minOrder?: ('half-kg' | '1kg') | null;
+    leadNormalDays?: number | null;
+    leadCustomDays?: number | null;
+    fssaiNumber?: string | null;
+    fssaiCertificate?: (number | null) | VendorUpload;
+    deliveryRadiusKm?: number | null;
+    deliveryRates?: string | null;
+    venueServing?: ('yes' | 'no') | null;
+  };
   phone: string;
+  phoneVerified?: boolean | null;
+  phoneVerification?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   email?: string | null;
   city?: string | null;
   /**
@@ -416,6 +477,45 @@ export interface VendorApplication {
   portfolioUrl?: string | null;
   message?: string | null;
   status?: ('new' | 'reviewing' | 'approved' | 'rejected') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * FSSAI certificates and menu cards sent with vendor applications.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vendor-uploads".
+ */
+export interface VendorUpload {
+  id: number;
+  kind: 'fssai' | 'menu' | 'other';
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * WhatsApp phone checks from the website forms. Created automatically.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "phone-verifications".
+ */
+export interface PhoneVerification {
+  id: number;
+  phone: string;
+  code: string;
+  token: string;
+  status: 'pending' | 'verified' | 'used';
+  purpose?: string | null;
+  expiresAt: string;
+  verifiedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -478,6 +578,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'vendor-applications';
         value: number | VendorApplication;
+      } | null)
+    | ({
+        relationTo: 'phone-verifications';
+        value: number | PhoneVerification;
+      } | null)
+    | ({
+        relationTo: 'vendor-uploads';
+        value: number | VendorUpload;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -720,7 +828,54 @@ export interface VendorApplicationsSelect<T extends boolean = true> {
   name?: T;
   businessName?: T;
   vendorType?: T;
+  otherService?: T;
+  photography?:
+    | T
+    | {
+        coverage?: T;
+        specialty?: T;
+        rates?:
+          | T
+          | {
+              service?: T;
+              sessionPrice?: T;
+              camera?: T;
+              id?: T;
+            };
+        editing?: T;
+      };
+  cake?:
+    | T
+    | {
+        flavours?:
+          | T
+          | {
+              flavour?: T;
+              ratePerKg?: T;
+              id?: T;
+            };
+        menu?: T;
+        egglessCharge?: T;
+        egglessUnit?: T;
+        wheatCharge?: T;
+        wheatUnit?: T;
+        tier2kgCharge?: T;
+        tier3kgCharge?: T;
+        tierUnit?: T;
+        customCharge?: T;
+        customUnit?: T;
+        minOrder?: T;
+        leadNormalDays?: T;
+        leadCustomDays?: T;
+        fssaiNumber?: T;
+        fssaiCertificate?: T;
+        deliveryRadiusKm?: T;
+        deliveryRates?: T;
+        venueServing?: T;
+      };
   phone?: T;
+  phoneVerified?: T;
+  phoneVerification?: T;
   email?: T;
   city?: T;
   portfolioUrl?: T;
@@ -728,6 +883,39 @@ export interface VendorApplicationsSelect<T extends boolean = true> {
   status?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "phone-verifications_select".
+ */
+export interface PhoneVerificationsSelect<T extends boolean = true> {
+  phone?: T;
+  code?: T;
+  token?: T;
+  status?: T;
+  purpose?: T;
+  expiresAt?: T;
+  verifiedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vendor-uploads_select".
+ */
+export interface VendorUploadsSelect<T extends boolean = true> {
+  kind?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

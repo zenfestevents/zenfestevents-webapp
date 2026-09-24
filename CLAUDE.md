@@ -82,6 +82,29 @@ src/
   submissions; only admin can **read** them (see `src/access/index.ts`). New submissions
   trigger the `notifySubmission` hook (sends email to `LEAD_NOTIFICATION_EMAIL` when
   SMTP is configured; logs to console otherwise). All submissions auto-save to the DB.
+  **Photography** vendor applications are also copied to Airtable by
+  `hooks/syncToAirtable.ts` (one base, one row per application, `Date` column; skipped
+  when `AIRTABLE_TOKEN` / `AIRTABLE_PHOTO_BASE_ID` are unset). Its column names must
+  match the Airtable table — template in `docs/airtable/photo-vendors.csv`. Vendor
+  option lists shared by form, collection and hook live in `lib/vendorOptions.ts`.
+  **Cake** applications go to the existing Cake Vendors base (`AIRTABLE_CAKE_BASE_ID`)
+  via `hooks/syncCakeToAirtable.ts`, matching its Vendors / Flavour Prices columns
+  and dropdown choices; the FSSAI certificate is sent as bytes (uploadAttachment)
+  because `vendor-uploads` files are private. The cake questions
+  (`components/CakeFields.tsx`) are that base's "Approved 10" intake questions;
+  FSSAI + delivery are hard filters enforced in the form and by `requireCakeBasics`.
+  Keep `requireVerifiedPhone` **last** in `beforeChange` — it consumes the one-time
+  proof, so any validation after it would burn a vendor's verification on failure.
+- **Phone verification (vendor form)** is WhatsApp "reverse" verification: the
+  visitor sends `ZENFEST VERIFY <code>` to our number and Meta's webhook
+  (`collections/PhoneVerifications.ts`, `/api/phone-verifications/webhook`) marks it
+  verified only if the sender matches the typed number. `components/PhoneVerify.tsx`
+  is the reusable widget; `hooks/requireVerifiedPhone.ts` consumes the proof on create
+  and sets `phoneVerified`. Mode comes from `verifyMode()` in `lib/phoneVerification.ts`
+  (server-only): **live** when `WHATSAPP_BUSINESS_NUMBER` + `WHATSAPP_APP_SECRET` are
+  set, **test** in dev (a Simulate button), **off** in production otherwise (no
+  verification, so deploying without Meta set up doesn't break the form). Pages that
+  use it must be `force-dynamic` so the mode is read at request time.
 - **`getSiteSettings()`** merges `SITE_FALLBACK` into the CMS-stored global, filling
   blank fields with sensible defaults. Components read `settings.contact.whatsapp`
   directly; without this merge an empty admin field would silently hide every WhatsApp

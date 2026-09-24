@@ -18,6 +18,8 @@ import { Projects } from './collections/Projects'
 import { Leads } from './collections/Leads'
 import { Signups } from './collections/Signups'
 import { VendorApplications } from './collections/VendorApplications'
+import { PhoneVerifications } from './collections/PhoneVerifications'
+import { VendorUploads } from './collections/VendorUploads'
 import { SiteSettings } from './globals/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
@@ -46,6 +48,8 @@ export default buildConfig({
     Leads,
     Signups,
     VendorApplications,
+    PhoneVerifications,
+    VendorUploads,
   ],
   globals: [SiteSettings],
   editor: lexicalEditor(),
@@ -83,7 +87,9 @@ export default buildConfig({
       ? [
           vercelBlobStorage({
             enabled: true,
-            collections: { media: true },
+            // Vendor uploads (FSSAI certificates) stay behind Payload's access
+            // control: they're served via /api, not straight from the Blob URL.
+            collections: { media: true, 'vendor-uploads': true },
             token: process.env.BLOB_READ_WRITE_TOKEN,
           }),
         ]

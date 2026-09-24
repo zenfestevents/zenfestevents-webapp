@@ -762,6 +762,125 @@
   font-size: 0.95rem;
   cursor: pointer;
 }
+.choice--grid {
+  gap: 0.55rem 1rem;
+}
+.choice__hint {
+  grid-column: 1 / -1;
+}
+/* Service-specific block on the vendor form (photography / cake). */
+.form__section {
+  display: grid;
+  gap: 1rem;
+  margin: 0.4rem 0 0;
+  padding: 1.1rem 0 0;
+  border: 0;
+  border-top: 1px solid var(--clay-line);
+  min-width: 0;
+}
+.form__section-title {
+  float: left;
+  width: 100%;
+  margin-bottom: 0.2rem;
+  padding: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--marigold-deep);
+}
+/* Cake questions (components/CakeFields.tsx). */
+.cake-gate {
+  display: grid;
+  gap: 0.4rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--marigold);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--marigold) 10%, transparent);
+}
+.cake-gate p {
+  margin: 0;
+}
+.cake-gate__title {
+  font-weight: 600;
+  color: var(--ink);
+}
+.flavour-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 0.6rem;
+}
+.flavour-row__add {
+  justify-self: start;
+}
+.field input[type='file'] {
+  padding: 0.55rem;
+  font-size: 0.9rem;
+}
+
+/* Phone + WhatsApp verification (components/PhoneVerify.tsx). */
+.phone-verify__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.phone-verify__row input {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+.phone-verify__btn {
+  flex: none;
+}
+.phone-verify__status {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--clay);
+}
+.phone-verify__status--verified {
+  color: #1e7a3c;
+  font-weight: 600;
+}
+.phone-verify__status--expired {
+  color: #b3261e;
+}
+.phone-verify__steps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  padding: 0.85rem 1rem;
+  border: 1px dashed var(--clay-line);
+  border-radius: 10px;
+}
+.phone-verify__steps > div {
+  display: grid;
+  gap: 0.6rem;
+  justify-items: start;
+  flex: 1 1 14rem;
+}
+.phone-verify__steps > .phone-verify__qr {
+  flex: 0 0 auto;
+  justify-items: center;
+  text-align: center;
+}
+.phone-verify__qr-img {
+  width: 132px;
+  height: 132px;
+  background: #fff;
+  padding: 4px;
+  border-radius: 8px;
+}
+.phone-verify__qr-img svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* Phones open WhatsApp directly; the QR is for laptops and PCs. */
+@media (max-width: 720px) {
+  .phone-verify__steps > .phone-verify__qr {
+    display: none;
+  }
+}
 .signup-step {
   margin: 0;
   font-size: 0.78rem;
@@ -793,6 +912,12 @@
 }
 @media (min-width: 560px) {
   .form__row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .form__row--3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .choice--grid {
     grid-template-columns: 1fr 1fr;
   }
 }

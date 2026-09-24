@@ -2,11 +2,15 @@ import React from 'react'
 import type { Metadata } from 'next'
 
 import { VendorForm } from '../../../components/VendorForm'
+import { verifyMode } from '../../../lib/phoneVerification'
+
+// Read the WhatsApp verification env at request time, not at build time.
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Enroll as a Vendor',
   description:
-    'Decorators, caterers, photographers and DJs — partner with Zenfest Events and get matched to events across Chennai.',
+    'Photographers, videographers and cake makers — partner with Zenfest Events and get matched to events across Chennai.',
 }
 
 const PERKS = [
@@ -25,7 +29,7 @@ export default function VendorsPage() {
             Partner with <span className="italic accent">Zenfest</span>
           </h1>
           <p className="lede">
-            Are you a decorator, caterer, photographer, DJ or another event professional?
+            Are you a photographer, videographer, cake maker or another event professional?
             Enroll with us and we&apos;ll bring you into the right events.
           </p>
 
@@ -42,7 +46,7 @@ export default function VendorsPage() {
         <div className="contact-form-wrap card">
           <h2 className="display-m">Vendor application</h2>
           <p className="muted">Tell us about your work. Fields marked * are required.</p>
-          <VendorForm />
+          <VendorForm verifyMode={verifyMode()} />
         </div>
       </div>
     </section>
