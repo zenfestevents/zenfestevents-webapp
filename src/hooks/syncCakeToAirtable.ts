@@ -1,6 +1,4 @@
-import { readFile } from 'fs/promises'
-import path from 'path'
-import type { PayloadRequest } from 'payload'
+import { getFileByPath, type PayloadRequest } from 'payload'
 
 import type { VendorApplication, VendorUpload } from '../payload-types'
 import { TIER_UNITS, optionLabel } from '../lib/vendorOptions'
@@ -155,7 +153,13 @@ async function readUploadBytes(req: PayloadRequest, file: VendorUpload): Promise
     })
     if (res instanceof Response && res.ok) return Buffer.from(await res.arrayBuffer())
   }
-  return readFile(path.resolve(config.upload.staticDir || 'vendor-uploads', file.filename!))
+  // Local disk (dev). Go through Payload's helper rather than fs + path.resolve:
+  // a runtime-built path makes Next's file tracing bundle the whole project
+  // (hero videos included) into every function — that pushed each one past
+  // Vercel's 250 MB limit and failed the deploy.
+  const local = await getFileByPath(`${config.upload.staticDir || 'vendor-uploads'}/${file.filename}`)
+  if (!local) throw new Error(`Couldn't read ${file.filename}`)
+  return local.data
 }
 
 /** Airtable's "Eggless Unit" / "Wheat Unit" choice ("Don't offer" goes to Risk Notes). */
