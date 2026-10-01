@@ -48,12 +48,13 @@ src/
     contact/page.tsx      Contact form (inquiry)
     signup/page.tsx       Signup / offer form (branches on "planning an event?")
     vendors/page.tsx      Vendor enrollment form
+    earn/page.tsx         "Earn from events" — families apply to host foreign guests
     layout.tsx            Root layout, Header, Footer, MobileCTABar
     styles.css            Design tokens (colors, typography, spacing)
     parts.css             Component & section styles
   app/(payload)/        Payload admin (generated boilerplate — avoid hand-editing)
   collections/          Users, Media, Categories, Services, Packages, Projects,
-                        Leads, Signups, VendorApplications
+                        Leads, Signups, VendorApplications, HostApplications
   globals/              SiteSettings
   components/
     Header.tsx, Footer.tsx, MobileCTABar.tsx
@@ -230,6 +231,14 @@ src/
   `Header.tsx`, since the initial commit), so the offer isn't advertised anywhere yet.
   A phone-hero "₹100 off" ribbon was proposed and parked until the owner confirms the
   offer is live.
+- **"Earn from events" (`/earn`) is hosts-only.** Modelled on joinmywedding.com: families
+  in Tamil Nadu apply (`HostForm` → `/api/host-applications`) to let foreign travellers
+  attend their wedding or function for a fee. Guest browsing, booking and payment are
+  **deliberately not built** — the team verifies families and arranges guests and payouts
+  offline (`payoutNotes` in the admin). Earnings shown are constants (`EARNINGS`) in
+  `earn/page.tsx`. Option lists (incl. `HOST_CITIES`, Tamil Nadu only for now) live in
+  `lib/hostOptions.ts`; they are Postgres enums, so adding a city needs `migrate:create`.
+  Reached from the homepage band ("Earn from events" button), the header nav and footer.
 - **Contact details are real** (phone/WhatsApp `9080089530`, both link to maps/calls) and
   live in three places that must stay in sync: the **SiteSettings** global (what's served),
   `src/seed/index.ts` (demo seed), and `SITE_FALLBACK` in `src/lib/site.ts` (client

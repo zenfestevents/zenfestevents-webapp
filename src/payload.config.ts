@@ -20,6 +20,7 @@ import { Signups } from './collections/Signups'
 import { VendorApplications } from './collections/VendorApplications'
 import { PhoneVerifications } from './collections/PhoneVerifications'
 import { VendorUploads } from './collections/VendorUploads'
+import { HostApplications } from './collections/HostApplications'
 import { SiteSettings } from './globals/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
@@ -50,6 +51,7 @@ export default buildConfig({
     VendorApplications,
     PhoneVerifications,
     VendorUploads,
+    HostApplications,
   ],
   globals: [SiteSettings],
   editor: lexicalEditor(),

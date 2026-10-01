@@ -78,6 +78,7 @@ export interface Config {
     'vendor-applications': VendorApplication;
     'phone-verifications': PhoneVerification;
     'vendor-uploads': VendorUpload;
+    'host-applications': HostApplication;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -96,6 +97,7 @@ export interface Config {
     'vendor-applications': VendorApplicationsSelect<false> | VendorApplicationsSelect<true>;
     'phone-verifications': PhoneVerificationsSelect<false> | PhoneVerificationsSelect<true>;
     'vendor-uploads': VendorUploadsSelect<false> | VendorUploadsSelect<true>;
+    'host-applications': HostApplicationsSelect<false> | HostApplicationsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -520,6 +522,62 @@ export interface PhoneVerification {
   createdAt: string;
 }
 /**
+ * Families who want to host foreign guests at their event (/earn). Verify the family before listing.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "host-applications".
+ */
+export interface HostApplication {
+  id: number;
+  name: string;
+  phone: string;
+  email?: string | null;
+  relation?: ('couple' | 'parent' | 'sibling' | 'relative' | 'other') | null;
+  eventType:
+    | 'wedding'
+    | 'engagement'
+    | 'reception'
+    | 'valaikappu'
+    | 'puberty'
+    | 'naming'
+    | 'ear-piercing'
+    | 'housewarming'
+    | 'festival'
+    | 'other';
+  eventDate: string;
+  days: '1' | '2' | '3+';
+  city:
+    | 'chennai'
+    | 'coimbatore'
+    | 'madurai'
+    | 'tiruchirappalli'
+    | 'salem'
+    | 'tirunelveli'
+    | 'vellore'
+    | 'thanjavur'
+    | 'erode'
+    | 'tiruppur'
+    | 'kanchipuram'
+    | 'other-tn';
+  venueArea?: string | null;
+  language?: ('tamil' | 'telugu' | 'malayalam' | 'kannada' | 'hindi' | 'other') | null;
+  guestCount?: number | null;
+  touristSeats: '1-2' | '3-5' | '6+';
+  experiences?: ('meals' | 'dress-up' | 'mehendi' | 'buddy' | 'photos' | 'stay')[] | null;
+  englishSpeaker?: ('yes' | 'no') | null;
+  rituals?: string | null;
+  message?: string | null;
+  consent: boolean;
+  status?: ('new' | 'contacted' | 'verified' | 'listed' | 'declined' | 'closed') | null;
+  /**
+   * Internal — guests matched, amounts, paid date.
+   */
+  payoutNotes?: string | null;
+  source?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -586,6 +644,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'vendor-uploads';
         value: number | VendorUpload;
+      } | null)
+    | ({
+        relationTo: 'host-applications';
+        value: number | HostApplication;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -916,6 +978,34 @@ export interface VendorUploadsSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "host-applications_select".
+ */
+export interface HostApplicationsSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
+  email?: T;
+  relation?: T;
+  eventType?: T;
+  eventDate?: T;
+  days?: T;
+  city?: T;
+  venueArea?: T;
+  language?: T;
+  guestCount?: T;
+  touristSeats?: T;
+  experiences?: T;
+  englishSpeaker?: T;
+  rituals?: T;
+  message?: T;
+  consent?: T;
+  status?: T;
+  payoutNotes?: T;
+  source?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

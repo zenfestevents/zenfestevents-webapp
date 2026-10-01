@@ -87,6 +87,11 @@ the hero becomes an ordinary stacked section on a still poster, with no video fe
 - **About:** Company story and values (content managed via Payload CMS)
 - **Contact:** Inquiry form (POST to `/api/leads`); includes WhatsApp / Call CTAs
 - **Vendor signup:** Partner enrollment form (POST to `/api/vendor-applications`)
+- **Earn from events (`/earn`):** families in Tamil Nadu apply to host foreign guests at
+  their wedding or function. Intro + application form, "How it works" ink band with gold
+  numerals, earnings cards, "Why Zenfest", FAQ accordion, closing CTA. Reached from a
+  black homepage band (between featured work and services) with a gold "Earn from
+  events" button, plus the nav and footer.
 - **Signup / offer:** Event details capture (POST to `/api/signups`); branches on
   "planning an event?"
 

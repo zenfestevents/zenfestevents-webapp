@@ -1,5 +1,6 @@
 import * as migration_20260920_152319_initial from './20260920_152319_initial';
 import * as migration_20260924_081959_vendor_service_details from './20260924_081959_vendor_service_details';
+import * as migration_20261001_044341_host_applications from './20261001_044341_host_applications';
 
 export const migrations = [
   {
@@ -10,6 +11,11 @@ export const migrations = [
   {
     up: migration_20260924_081959_vendor_service_details.up,
     down: migration_20260924_081959_vendor_service_details.down,
-    name: '20260924_081959_vendor_service_details'
+    name: '20260924_081959_vendor_service_details',
+  },
+  {
+    up: migration_20261001_044341_host_applications.up,
+    down: migration_20261001_044341_host_applications.down,
+    name: '20261001_044341_host_applications'
   },
 ];

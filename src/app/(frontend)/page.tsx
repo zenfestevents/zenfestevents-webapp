@@ -105,6 +105,26 @@ export default async function HomePage() {
 
       <KolamDivider />
 
+      {/* ---------- EARN FROM EVENTS (hosts programme, /earn) ---------- */}
+      <section className="section band-ink home-earn">
+        <KolamRosette size={300} className="home-earn__kolam" />
+        <div className="container home-earn__inner">
+          <div>
+            <p className="eyebrow">For families</p>
+            <h2 className="display-l">
+              Earn from your <span className="italic accent">event</span>
+            </h2>
+            <p className="lede">
+              Welcome a few travellers from abroad to your wedding or family function in
+              Tamil Nadu, and earn from it. We verify every guest and look after them.
+            </p>
+          </div>
+          <Link className="btn btn--primary home-earn__btn" href="/earn">
+            Earn from events
+          </Link>
+        </div>
+      </section>
+
       {/* ---------- SERVICES ---------- */}
       <section className="section band-soft">
         <div className="container">
