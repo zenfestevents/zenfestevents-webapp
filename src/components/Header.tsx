@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
-import { whatsappLink, DEFAULT_WA_MESSAGE, type SiteSettings } from '../lib/site'
+import type { SiteSettings } from '../lib/site'
 
 const SIGNUP_ENABLED = false
 
@@ -12,16 +12,18 @@ const NAV = [
   { href: '/gallery', label: 'Our Work' },
   { href: '/services', label: 'Services' },
   { href: '/packages', label: 'Packages' },
-  { href: '/earn', label: 'Earn' },
+  { href: '/earn', label: 'Earn from events' },
+  { href: '/registry', label: 'Gift Registry' },
+  { href: '/polls', label: 'Polls' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ]
 
-export function Header({ settings }: { settings: SiteSettings }) {
+// `settings` is unused since WhatsApp left the menu; kept so layout.tsx needn't change.
+export function Header(_props: { settings: SiteSettings }) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const wa = whatsappLink(settings?.contact?.whatsapp, DEFAULT_WA_MESSAGE)
 
   useEffect(() => setOpen(false), [pathname])
   useEffect(() => {
@@ -112,9 +114,9 @@ export function Header({ settings }: { settings: SiteSettings }) {
             <a className="btn btn--primary" href="/contact">
               Get a callback
             </a>
-            <a className="btn btn--whatsapp" href={wa} target="_blank" rel="noopener">
-              WhatsApp us
-            </a>
+            <Link className="btn btn--gold" href="/earn">
+              Earn from events
+            </Link>
           </div>
         </div>
       )}

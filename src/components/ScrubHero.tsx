@@ -61,8 +61,6 @@ function shouldSkipHeavyMedia() {
 type Props = {
   headline?: string
   subheadline?: string
-  waHref: string
-  hasWhatsapp?: boolean
   line?: string
   hint?: string
 }
@@ -79,8 +77,6 @@ type Props = {
 export function ScrubHero({
   headline,
   subheadline,
-  waHref,
-  hasWhatsapp = false,
   line = 'Two hearts, one celebration',
   hint = 'Scroll to see the magic',
 }: Props) {
@@ -444,11 +440,9 @@ export function ScrubHero({
             <Link className="btn btn--primary" href="/contact">
               Get a callback
             </Link>
-            {hasWhatsapp && (
-              <a className="btn btn--whatsapp" href={waHref} target="_blank" rel="noopener">
-                WhatsApp us
-              </a>
-            )}
+            <Link className="btn btn--gold" href="/earn">
+              Earn from events
+            </Link>
             <Link className="btn btn--gold" href="/gallery">
               See our work
             </Link>
@@ -479,11 +473,9 @@ export function ScrubHero({
             <Link className="btn btn--primary" href="/contact">
               Get a callback
             </Link>
-            {hasWhatsapp && (
-              <a className="btn btn--whatsapp" href={waHref} target="_blank" rel="noopener">
-                WhatsApp us
-              </a>
-            )}
+            <Link className="btn btn--gold" href="/earn">
+              Earn from events
+            </Link>
           </div>
         </div>
 

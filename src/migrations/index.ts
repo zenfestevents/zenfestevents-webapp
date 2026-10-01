@@ -1,6 +1,8 @@
 import * as migration_20260920_152319_initial from './20260920_152319_initial';
 import * as migration_20260924_081959_vendor_service_details from './20260924_081959_vendor_service_details';
 import * as migration_20261001_044341_host_applications from './20261001_044341_host_applications';
+import * as migration_20261001_111304_gift_registry from './20261001_111304_gift_registry';
+import * as migration_20261001_114626_polls from './20261001_114626_polls';
 
 export const migrations = [
   {
@@ -16,6 +18,16 @@ export const migrations = [
   {
     up: migration_20261001_044341_host_applications.up,
     down: migration_20261001_044341_host_applications.down,
-    name: '20261001_044341_host_applications'
+    name: '20261001_044341_host_applications',
+  },
+  {
+    up: migration_20261001_111304_gift_registry.up,
+    down: migration_20261001_111304_gift_registry.down,
+    name: '20261001_111304_gift_registry',
+  },
+  {
+    up: migration_20261001_114626_polls.up,
+    down: migration_20261001_114626_polls.down,
+    name: '20261001_114626_polls'
   },
 ];

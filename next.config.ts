@@ -11,6 +11,19 @@ const nextConfig: NextConfig = {
   // Without it Next blocks the page's JavaScript there (menu dead, sections never
   // reveal). Update it if the computer's LAN address changes; production ignores it.
   allowedDevOrigins: ['192.168.1.3'],
+  // The old Firebase polls site (polls.zenfestevents.in) now lives at /polls.
+  // Works once that subdomain is added to this Vercel project.
+  async redirects() {
+    const fromPolls = [{ type: 'host' as const, value: 'polls.zenfestevents.in' }]
+    const to = 'https://www.zenfestevents.in'
+    return [
+      { source: '/closed-polls', has: fromPolls, destination: `${to}/polls/closed`, permanent: true },
+      { source: '/login', has: fromPolls, destination: `${to}/polls`, permanent: true },
+      { source: '/', has: fromPolls, destination: `${to}/polls`, permanent: true },
+      { source: '/polls/:path*', has: fromPolls, destination: `${to}/polls/:path*`, permanent: true },
+      { source: '/:path*', has: fromPolls, destination: `${to}/polls`, permanent: true },
+    ]
+  },
   images: {
     localPatterns: [
       {

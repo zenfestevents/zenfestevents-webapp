@@ -44,6 +44,8 @@ export function Footer({ settings }: { settings: SiteSettings }) {
             <Link href="/about">About</Link>
             <Link href="/contact">Contact</Link>
             <Link href="/earn">Earn from events</Link>
+            <Link href="/registry">Gift registry</Link>
+            <Link href="/polls">Polls</Link>
             <Link href="/vendors">Enroll as a vendor</Link>
           </div>
 

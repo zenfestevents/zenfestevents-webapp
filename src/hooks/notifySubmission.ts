@@ -39,7 +39,7 @@ export const notifySubmission =
     try {
       await req.payload.sendEmail({
         to,
-        subject: `New ${label}: ${doc?.name ?? 'Website enquiry'}`,
+        subject: `New ${label}: ${doc?.name ?? doc?.title ?? 'Website enquiry'}`,
         text: summary,
       })
     } catch (err) {

@@ -55,6 +55,45 @@ in `/admin`). When SMTP is configured (see `.env.example`), a notification email
 is also sent to `LEAD_NOTIFICATION_EMAIL`. Every page also offers Call and
 WhatsApp actions, since that's how most clients get in touch.
 
+### Gift registry
+Families make a free registry at `/registry/create` and share `/r/<slug>` with guests.
+There are no host accounts: each registry gets a secret **manage link**
+(`/dashboard/<slug>?key=…`), shown once on creation and emailed to the host if they
+give an email. Only its hash is stored, so **a lost link can't be recovered** — if a
+family loses it, create a new key from the server (or recreate the registry).
+
+- Every new registry and every "Plan with Zenfest" banner submission lands in `/admin`
+  under **Gift Registry** (Registries, Registry leads) and triggers the usual
+  notification email. Phone numbers there are one-tap WhatsApp links.
+- Guests claim gifts ("I'll gift this"); a claim reserves the gift for everyone. Admin
+  can free a gift by deleting its row in **Gift claims**.
+- Shagun goes straight to the host's own UPI ID (a QR + `upi://` link). Zenfest never
+  handles the money.
+- Store links get affiliate tags from `AMAZON_ASSOCIATE_TAG` /
+  `AFFILIATE_REDIRECT_TEMPLATE` (see `.env.example`); clicks are logged in
+  **Store clicks**.
+
+### Polls
+Public polls live at `/polls` (live), `/polls/closed` (results) and `/polls/<slug>`; the
+featured one also shows on the homepage. Create them in `/admin` → **Polls**: set the
+question, category, 2–8 options, **Status = Open**, and optionally **Closes at** (polls
+close by themselves). Each poll can carry a sponsor and its own call to action; otherwise
+a category default points to the matching Zenfest service.
+
+- **One person, one vote:** a voter is a phone number. While WhatsApp verification is
+  live (see "Phone verification"), voters prove their number once and a cookie keeps them
+  signed in; until then votes are phone-only and counted as *unverified* (results show
+  "N votes · M verified"). Another provider (SMS OTP) can be added in
+  `src/lib/voterVerification.ts`.
+- **Leads:** `/admin` → Polls → **Voters**. Only contact people with *Agreed to updates*
+  ticked — the box is unticked by default (DPDP Act).
+- **Election polls:** tick *Election-related* to hide results while the poll is open,
+  and close such polls during the Election Commission's silence period.
+- **Families** can also add polls to their gift registry (dashboard → Polls); guests vote
+  once per device with no phone check.
+- **Old site:** `polls.zenfestevents.in` redirects here (`next.config.ts`) once that domain
+  is added to this Vercel project and its DNS points at Vercel instead of Firebase.
+
 ### Vendor applications → Airtable
 Photography vendor applications are also copied, one row each, into an Airtable
 base (hook: `src/hooks/syncToAirtable.ts`). The row is added after the application
@@ -147,6 +186,8 @@ One-time Meta setup (free):
    - (optional) `AIRTABLE_TOKEN`, `AIRTABLE_PHOTO_BASE_ID`, `AIRTABLE_PHOTO_TABLE`
      — see "Vendor applications → Airtable"
    - (optional) `WHATSAPP_*` — see "Phone verification (WhatsApp)"
+   - (optional) `AMAZON_ASSOCIATE_TAG`, `AFFILIATE_REDIRECT_TEMPLATE` — gift-registry
+     affiliate links (see "Gift registry")
 4. Deploy, then create the first admin user (see below) and sign in at
    `/admin/login`.
 

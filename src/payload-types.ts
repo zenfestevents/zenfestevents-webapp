@@ -79,6 +79,15 @@ export interface Config {
     'phone-verifications': PhoneVerification;
     'vendor-uploads': VendorUpload;
     'host-applications': HostApplication;
+    'registry-events': RegistryEvent;
+    'registry-items': RegistryItem;
+    'registry-claims': RegistryClaim;
+    'registry-clicks': RegistryClick;
+    'registry-guests': RegistryGuest;
+    'registry-leads': RegistryLead;
+    polls: Poll;
+    'poll-votes': PollVote;
+    'poll-voters': PollVoter;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -98,6 +107,15 @@ export interface Config {
     'phone-verifications': PhoneVerificationsSelect<false> | PhoneVerificationsSelect<true>;
     'vendor-uploads': VendorUploadsSelect<false> | VendorUploadsSelect<true>;
     'host-applications': HostApplicationsSelect<false> | HostApplicationsSelect<true>;
+    'registry-events': RegistryEventsSelect<false> | RegistryEventsSelect<true>;
+    'registry-items': RegistryItemsSelect<false> | RegistryItemsSelect<true>;
+    'registry-claims': RegistryClaimsSelect<false> | RegistryClaimsSelect<true>;
+    'registry-clicks': RegistryClicksSelect<false> | RegistryClicksSelect<true>;
+    'registry-guests': RegistryGuestsSelect<false> | RegistryGuestsSelect<true>;
+    'registry-leads': RegistryLeadsSelect<false> | RegistryLeadsSelect<true>;
+    polls: PollsSelect<false> | PollsSelect<true>;
+    'poll-votes': PollVotesSelect<false> | PollVotesSelect<true>;
+    'poll-voters': PollVotersSelect<false> | PollVotersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -578,6 +596,231 @@ export interface HostApplication {
   createdAt: string;
 }
 /**
+ * Gift registries made by families at /registry. Every new one is also a warm lead.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registry-events".
+ */
+export interface RegistryEvent {
+  id: number;
+  slug: string;
+  title: string;
+  eventType:
+    | 'wedding'
+    | 'engagement'
+    | 'reception'
+    | 'housewarming'
+    | 'birthday'
+    | 'baby-shower'
+    | 'naming'
+    | 'pooja'
+    | 'anniversary'
+    | 'other';
+  hostNames?: string | null;
+  eventDate: string;
+  venueName?: string | null;
+  venueCity?: string | null;
+  venueMapUrl?: string | null;
+  welcomeNote?: string | null;
+  /**
+   * Guests pay the family directly — no money passes through Zenfest.
+   */
+  upiId?: string | null;
+  upiName?: string | null;
+  /**
+   * Off = surprise mode: the host sees counts only.
+   */
+  revealClaims?: boolean | null;
+  hostName: string;
+  hostPhone: string;
+  hostEmail?: string | null;
+  manageKeyHash: string;
+  /**
+   * Hidden registries show “not found” to guests.
+   */
+  status?: ('active' | 'hidden') | null;
+  leadStatus?: ('new' | 'contacted' | 'booked' | 'closed') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registry-items".
+ */
+export interface RegistryItem {
+  id: number;
+  event: number | RegistryEvent;
+  itemType: 'affiliate_link' | 'custom_offline' | 'cash_fund';
+  title: string;
+  price?: number | null;
+  imageUrl?: string | null;
+  originalUrl?: string | null;
+  merchant?: string | null;
+  note?: string | null;
+  targetAmount?: number | null;
+  /**
+   * Updated by the host as shagun arrives (guests pay the family directly).
+   */
+  raisedAmount?: number | null;
+  sortOrder?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Delete a claim to make the gift available again.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registry-claims".
+ */
+export interface RegistryClaim {
+  id: number;
+  item: number | RegistryItem;
+  event: number | RegistryEvent;
+  guestName: string;
+  message?: string | null;
+  mode?: ('online' | 'offline') | null;
+  undoTokenHash?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registry-clicks".
+ */
+export interface RegistryClick {
+  id: number;
+  item?: (number | null) | RegistryItem;
+  event?: (number | null) | RegistryEvent;
+  merchant?: string | null;
+  affiliated?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registry-guests".
+ */
+export interface RegistryGuest {
+  id: number;
+  event: number | RegistryEvent;
+  name: string;
+  phone?: string | null;
+  side?: ('family' | 'friends' | 'work' | 'other') | null;
+  count?: number | null;
+  rsvp?: ('pending' | 'yes' | 'maybe' | 'no') | null;
+  invitedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Guests who tapped “Plan with Zenfest” on someone’s registry. Call or WhatsApp them.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registry-leads".
+ */
+export interface RegistryLead {
+  id: number;
+  name: string;
+  phone: string;
+  eventType?: ('wedding' | 'birthday' | 'corporate' | 'housewarming' | 'other') | null;
+  tentativeDate?: string | null;
+  city?: string | null;
+  /**
+   * Slug of the registry the guest was viewing.
+   */
+  referringEvent?: string | null;
+  status?: ('new' | 'contacted' | 'quoted' | 'booked' | 'closed') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Open a poll by setting Status to Open. It closes by itself at “Closes at”. Event polls (with a registry) are managed by the family.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "polls".
+ */
+export interface Poll {
+  id: number;
+  question: string;
+  /**
+   * Filled in automatically from the question if left blank.
+   */
+  slug?: string | null;
+  category: 'sports' | 'entertainment' | 'food' | 'lifestyle' | 'politics' | 'civic' | 'event';
+  description?: string | null;
+  image?: (number | null) | Media;
+  options: {
+    label: string;
+    id?: string | null;
+  }[];
+  status: 'draft' | 'open' | 'closed';
+  /**
+   * Leave blank to keep it open until you close it.
+   */
+  closesAt?: string | null;
+  /**
+   * Shown at the top of /polls and on the homepage.
+   */
+  featured?: boolean | null;
+  resultsVisibility?: ('after-vote' | 'always' | 'after-close') | null;
+  /**
+   * Only applies once phone verification is live. Event polls never ask.
+   */
+  requireVerified?: boolean | null;
+  /**
+   * Hides results while open and shows an “opinion poll, not a prediction” note. Close it during the Election Commission’s silence period.
+   */
+  electionSensitive?: boolean | null;
+  registryEvent?: (number | null) | RegistryEvent;
+  sponsor?: {
+    name?: string | null;
+    logo?: (number | null) | Media;
+    url?: string | null;
+  };
+  /**
+   * Shown after voting. Blank = the default for the category.
+   */
+  cta?: {
+    text?: string | null;
+    label?: string | null;
+    href?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "poll-votes".
+ */
+export interface PollVote {
+  id: number;
+  poll: number | Poll;
+  optionId: string;
+  voterKey: string;
+  voter?: (number | null) | PollVoter;
+  verified?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Only contact people with “Agreed to updates” ticked.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "poll-voters".
+ */
+export interface PollVoter {
+  id: number;
+  phone: string;
+  phoneVerified?: boolean | null;
+  marketingConsent?: boolean | null;
+  consentAt?: string | null;
+  votes?: number | null;
+  lastVotedAt?: string | null;
+  source?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -648,6 +891,34 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'host-applications';
         value: number | HostApplication;
+      } | null)
+    | ({
+        relationTo: 'registry-events';
+        value: number | RegistryEvent;
+      } | null)
+    | ({
+        relationTo: 'registry-items';
+        value: number | RegistryItem;
+      } | null)
+    | ({
+        relationTo: 'registry-claims';
+        value: number | RegistryClaim;
+      } | null)
+    | ({
+        relationTo: 'registry-clicks';
+        value: number | RegistryClick;
+      } | null)
+    | ({
+        relationTo: 'registry-guests';
+        value: number | RegistryGuest;
+      } | null)
+    | ({
+        relationTo: 'registry-leads';
+        value: number | RegistryLead;
+      } | null)
+    | ({
+        relationTo: 'polls';
+        value: number | Poll;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1003,6 +1274,175 @@ export interface HostApplicationsSelect<T extends boolean = true> {
   consent?: T;
   status?: T;
   payoutNotes?: T;
+  source?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registry-events_select".
+ */
+export interface RegistryEventsSelect<T extends boolean = true> {
+  slug?: T;
+  title?: T;
+  eventType?: T;
+  hostNames?: T;
+  eventDate?: T;
+  venueName?: T;
+  venueCity?: T;
+  venueMapUrl?: T;
+  welcomeNote?: T;
+  upiId?: T;
+  upiName?: T;
+  revealClaims?: T;
+  hostName?: T;
+  hostPhone?: T;
+  hostEmail?: T;
+  manageKeyHash?: T;
+  status?: T;
+  leadStatus?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registry-items_select".
+ */
+export interface RegistryItemsSelect<T extends boolean = true> {
+  event?: T;
+  itemType?: T;
+  title?: T;
+  price?: T;
+  imageUrl?: T;
+  originalUrl?: T;
+  merchant?: T;
+  note?: T;
+  targetAmount?: T;
+  raisedAmount?: T;
+  sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registry-claims_select".
+ */
+export interface RegistryClaimsSelect<T extends boolean = true> {
+  item?: T;
+  event?: T;
+  guestName?: T;
+  message?: T;
+  mode?: T;
+  undoTokenHash?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registry-clicks_select".
+ */
+export interface RegistryClicksSelect<T extends boolean = true> {
+  item?: T;
+  event?: T;
+  merchant?: T;
+  affiliated?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registry-guests_select".
+ */
+export interface RegistryGuestsSelect<T extends boolean = true> {
+  event?: T;
+  name?: T;
+  phone?: T;
+  side?: T;
+  count?: T;
+  rsvp?: T;
+  invitedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registry-leads_select".
+ */
+export interface RegistryLeadsSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
+  eventType?: T;
+  tentativeDate?: T;
+  city?: T;
+  referringEvent?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "polls_select".
+ */
+export interface PollsSelect<T extends boolean = true> {
+  question?: T;
+  slug?: T;
+  category?: T;
+  description?: T;
+  image?: T;
+  options?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  status?: T;
+  closesAt?: T;
+  featured?: T;
+  resultsVisibility?: T;
+  requireVerified?: T;
+  electionSensitive?: T;
+  registryEvent?: T;
+  sponsor?:
+    | T
+    | {
+        name?: T;
+        logo?: T;
+        url?: T;
+      };
+  cta?:
+    | T
+    | {
+        text?: T;
+        label?: T;
+        href?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "poll-votes_select".
+ */
+export interface PollVotesSelect<T extends boolean = true> {
+  poll?: T;
+  optionId?: T;
+  voterKey?: T;
+  voter?: T;
+  verified?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "poll-voters_select".
+ */
+export interface PollVotersSelect<T extends boolean = true> {
+  phone?: T;
+  phoneVerified?: T;
+  marketingConsent?: T;
+  consentAt?: T;
+  votes?: T;
+  lastVotedAt?: T;
   source?: T;
   updatedAt?: T;
   createdAt?: T;

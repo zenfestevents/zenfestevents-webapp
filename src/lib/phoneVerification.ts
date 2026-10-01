@@ -2,6 +2,7 @@
 // sends a prefilled code to our WhatsApp number and Meta's webhook tells us
 // which number it came from. Don't import this from client components.
 import { randomBytes, randomInt } from 'crypto'
+import type { Payload, PayloadRequest } from 'payload'
 
 /**
  * - `live`: WhatsApp Cloud API is configured, the webhook verifies numbers.
@@ -40,4 +41,39 @@ export function newToken() {
 export function waLink(code: string) {
   const to = (process.env.WHATSAPP_BUSINESS_NUMBER || '').replace(/\D/g, '')
   return `https://wa.me/${to}?text=${encodeURIComponent(`${VERIFY_PREFIX} ${code}`)}`
+}
+
+/**
+ * Checks a `{ id, token }` proof from the PhoneVerify widget against a verified,
+ * unused PhoneVerifications record for `phone`, and marks it used. One proof
+ * verifies one submission. Shared by the vendor form hook and poll voters.
+ */
+export async function consumePhoneProof(
+  payload: Payload,
+  proof: { id?: unknown; token?: unknown } | null | undefined,
+  phone: string,
+  req?: PayloadRequest,
+): Promise<boolean> {
+  if (!proof?.id || typeof proof.token !== 'string') return false
+  let record
+  try {
+    record = await payload.findByID({
+      collection: 'phone-verifications',
+      id: proof.id as string,
+      overrideAccess: true,
+      showHiddenFields: true,
+      req,
+    })
+  } catch {
+    return false
+  }
+  if (record.token !== proof.token || record.status !== 'verified' || record.phone !== phone) return false
+  await payload.update({
+    collection: 'phone-verifications',
+    id: record.id,
+    data: { status: 'used' },
+    overrideAccess: true,
+    req,
+  })
+  return true
 }

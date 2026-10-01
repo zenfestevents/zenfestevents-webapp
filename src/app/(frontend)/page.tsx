@@ -8,8 +8,21 @@ import { mediaUrl } from '../../lib/media'
 import { KolamRosette, KolamDivider } from '../../components/Kolam'
 import { Reveal } from '../../components/Reveal'
 import { ScrubHero } from '../../components/ScrubHero'
+import { VoteCard } from '../../components/polls/VoteCard'
+import { getFeaturedPoll, getPollView } from '../../lib/polls'
+import { pollVerifyMode } from '../../lib/voterVerification'
 
 export const dynamic = 'force-dynamic'
+
+/** The featured live poll and this visitor's view of it; null when there's none (or the DB is down). */
+async function getHomePoll() {
+  try {
+    const poll = await getFeaturedPoll()
+    return poll ? { poll, view: await getPollView(poll) } : null
+  } catch {
+    return null
+  }
+}
 
 async function getHomeData() {
   try {
@@ -30,7 +43,7 @@ async function getHomeData() {
 }
 
 export default async function HomePage() {
-  const [data, settings] = await Promise.all([getHomeData(), getSiteSettings()])
+  const [data, settings, homePoll] = await Promise.all([getHomeData(), getSiteSettings(), getHomePoll()])
   const hero = { ...SITE_FALLBACK.hero, ...(settings?.hero || {}) }
   const wa = whatsappLink(settings?.contact?.whatsapp, DEFAULT_WA_MESSAGE)
 
@@ -40,8 +53,6 @@ export default async function HomePage() {
       <ScrubHero
         headline={hero.headline}
         subheadline={hero.subheadline}
-        waHref={wa}
-        hasWhatsapp={Boolean(settings?.contact?.whatsapp)}
       />
 
       {/* ---------- FEATURED WORK ---------- */}
@@ -124,6 +135,59 @@ export default async function HomePage() {
           </Link>
         </div>
       </section>
+
+      {/* ---------- GIFT REGISTRY (/registry) ---------- */}
+      <section className="section--tight home-registry">
+        <div className="container home-earn__inner">
+          <div>
+            <p className="eyebrow">Free for families</p>
+            <h2 className="display-m">
+              Make a <span className="italic accent">gift registry</span>
+            </h2>
+            <p className="lede">
+              One link with your invitation: guests pick from your wishlist, nobody buys the same gift twice,
+              and shagun goes straight to your UPI.
+            </p>
+          </div>
+          <Link className="btn btn--primary home-earn__btn" href="/registry">
+            Create a registry
+          </Link>
+        </div>
+      </section>
+
+      {/* ---------- LIVE POLL (/polls) ---------- */}
+      {homePoll && (
+        <section className="section--tight band-soft">
+          <div className="container home-poll__inner">
+            <div>
+              <p className="eyebrow">Zenfest Polls</p>
+              <h2 className="display-m">
+                Have your <span className="italic accent">say</span>
+              </h2>
+              <p className="lede">
+                Cricket, cinema, food and everything in between — one person, one vote. See what everyone
+                thinks, then share it on WhatsApp.
+              </p>
+              <Link className="btn btn--ghost home-earn__btn" href="/polls">
+                All live polls
+              </Link>
+            </div>
+            <div className="home-poll__card card">
+              <h3 className="poll-feature__q">
+                <Link href={`/polls/${homePoll.poll.slug}`}>{homePoll.poll.question}</Link>
+              </h3>
+              <VoteCard
+                poll={homePoll.poll}
+                results={homePoll.view.results}
+                myVote={homePoll.view.myVote}
+                voter={homePoll.view.voter}
+                verifyMode={pollVerifyMode()}
+                compact
+              />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ---------- SERVICES ---------- */}
       <section className="section band-soft">

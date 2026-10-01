@@ -21,6 +21,15 @@ import { VendorApplications } from './collections/VendorApplications'
 import { PhoneVerifications } from './collections/PhoneVerifications'
 import { VendorUploads } from './collections/VendorUploads'
 import { HostApplications } from './collections/HostApplications'
+import { RegistryEvents } from './collections/RegistryEvents'
+import { RegistryItems } from './collections/RegistryItems'
+import { RegistryClaims } from './collections/RegistryClaims'
+import { RegistryClicks } from './collections/RegistryClicks'
+import { RegistryGuests } from './collections/RegistryGuests'
+import { RegistryLeads } from './collections/RegistryLeads'
+import { Polls } from './collections/Polls'
+import { PollVotes } from './collections/PollVotes'
+import { PollVoters } from './collections/PollVoters'
 import { SiteSettings } from './globals/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
@@ -35,6 +44,10 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
+    components: {
+      // Gift-registry numbers on the admin home (events, gifts, clicks, leads).
+      beforeDashboard: ['/components/admin/RegistryStats#RegistryStats'],
+    },
     meta: {
       titleSuffix: ' — Zenfest Events',
     },
@@ -52,6 +65,15 @@ export default buildConfig({
     PhoneVerifications,
     VendorUploads,
     HostApplications,
+    RegistryEvents,
+    RegistryItems,
+    RegistryClaims,
+    RegistryClicks,
+    RegistryGuests,
+    RegistryLeads,
+    Polls,
+    PollVotes,
+    PollVoters,
   ],
   globals: [SiteSettings],
   editor: lexicalEditor(),

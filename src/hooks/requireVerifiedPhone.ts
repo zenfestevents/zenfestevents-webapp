@@ -1,6 +1,6 @@
 import { APIError, type CollectionBeforeChangeHook } from 'payload'
 
-import { normalizePhone, verifyMode } from '../lib/phoneVerification'
+import { consumePhoneProof, normalizePhone, verifyMode } from '../lib/phoneVerification'
 
 /**
  * On create, requires the submission to carry `phoneVerification: { id, token }`
@@ -24,37 +24,9 @@ export const requireVerifiedPhone: CollectionBeforeChangeHook = async ({
   const fail = () => {
     throw new APIError('Verify your phone number on WhatsApp first.', 400, null, true)
   }
-  if (!claim?.id || typeof claim.token !== 'string') return fail()
-
-  let record
-  try {
-    record = await req.payload.findByID({
-      collection: 'phone-verifications',
-      id: claim.id as string,
-      overrideAccess: true,
-      showHiddenFields: true,
-      req,
-    })
-  } catch {
-    return fail()
-  }
   const phone = normalizePhone(data.phone)
-  if (
-    record.token !== claim.token ||
-    record.status !== 'verified' ||
-    !phone ||
-    record.phone !== phone
-  ) {
-    return fail()
-  }
+  if (!phone || !(await consumePhoneProof(req.payload, claim, phone, req))) return fail()
 
-  await req.payload.update({
-    collection: 'phone-verifications',
-    id: record.id,
-    data: { status: 'used' },
-    overrideAccess: true,
-    req,
-  })
   data.phone = phone
   data.phoneVerified = true
   return data

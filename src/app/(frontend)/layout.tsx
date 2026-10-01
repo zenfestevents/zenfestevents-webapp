@@ -4,6 +4,8 @@ import { Oswald, Hanken_Grotesk } from 'next/font/google'
 
 import './styles.css'
 import './parts.css'
+import './registry.css'
+import './polls.css'
 import { Header } from '../../components/Header'
 import { Footer } from '../../components/Footer'
 import { MobileCTABar } from '../../components/MobileCTABar'

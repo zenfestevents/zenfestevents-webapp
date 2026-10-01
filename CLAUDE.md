@@ -5,8 +5,9 @@ Guidance for working in this repository.
 ## Project
 Zenfest Events — V1 marketing & lead-generation website for an event management
 company near Chennai. Public site + a self-service admin/back-end in one codebase.
-**Scope is intentionally limited:** no client login, payments, or client portal. The
-`/admin` login is for the business owner/team only. See [README.md](README.md) for
+**Scope is intentionally limited:** no client login or payments. The `/admin` login is
+for the business owner/team only. The one client-facing tool is the **gift registry**
+(below), and its hosts use a secret link, not an account. See [README.md](README.md) for
 setup and [DESIGN.md](DESIGN.md) for the visual direction.
 
 ## Stack
@@ -158,9 +159,11 @@ src/
   offset via `--header-h` and the hero cancels it. The bar hides over the hero
   (`body.hero-immersive`) and returns as the film leaves. Phones show the emblem **and**
   the "ZENFEST EVENTS™" wordmark (it used to be hidden below 420px).
-- **Mobile bottom bar (`MobileCTABar`, <900px, every page):** WhatsApp · Enquire
-  (`/contact`, gold "zari" sheen — `zari-sheen` keyframes) · Enroll as a vendor
-  (`/vendors`). No Call button by the owner's choice. The sheen stops under
+- **Mobile bottom bar (`MobileCTABar`, <900px, every page except the registry's `/r/*` and `/dashboard/*`):** Earn from events
+  (`/earn`, ivory) · Enquire (`/contact`, gold "zari" sheen — `zari-sheen` keyframes) ·
+  Enroll as a vendor (`/vendors`). No Call button by the owner's choice; WhatsApp was
+  swapped out for Earn from events (here and in the desktop hero's buttons) — it is
+  still on the homepage's other sections and `/contact`. The sheen stops under
   `prefers-reduced-motion`.
 - **`KolamDivider` needs `.kolam-divider path/circle` in `styles.css`** for its stroke;
   before that rule existed, dividers on Home/About/Services rendered as filled black blobs.
@@ -231,6 +234,62 @@ src/
   `Header.tsx`, since the initial commit), so the offer isn't advertised anywhere yet.
   A phone-hero "₹100 off" ribbon was proposed and parked until the owner confirms the
   offer is live.
+- **Gift registry (`/registry`, `/r/[slug]`, `/dashboard/[slug]`) — Phase 1 of 3.**
+  Families create a registry (`CreateRegistryForm`), add gifts (pasted store links are
+  scraped by `lib/scrapeMetadata.ts` — best effort, Amazon often blocks it, the host edits
+  the preview), custom "any shop" gifts and shagun funds, keep a guest list with WhatsApp
+  invites, and share `/r/<slug>`. All logic is in Server Actions
+  (`app/(frontend)/registry/actions.ts`) over the Local API; the six `registry-*`
+  collections are **admin-only over REST** (except `registry-leads`, public create, used by
+  the guest page's `PlanBanner`). Things that are easy to get wrong:
+  - **No host accounts.** Each registry has a manage key; only its scrypt hash is stored
+    (`manageKeyHash`). Every host action re-checks it (`findEventForHost`). The dashboard
+    sets `referrer: 'no-referrer'` because the key is in its URL.
+  - **Privacy shield:** `lib/registry.ts` is the boundary. Guests get `PublicItem`s with no
+    claimer fields; hosts see who claimed what only after turning on `revealClaims`.
+    Don't pass raw Payload docs to registry client components.
+  - **Claims are duplicate-proof by a unique index** on `registry-claims.item` (one row per
+    gift), not by an `isClaimed` flag — a read-then-write flag races. Verified: 10
+    concurrent claims → 1 row. Guests can undo from the same browser for 30 min (token
+    in localStorage).
+  - **Affiliate tags are added at redirect time** (`/r/[slug]/go/[itemId]`, `lib/affiliate.ts`,
+    env `AMAZON_ASSOCIATE_TAG` / `AFFILIATE_REDIRECT_TEMPLATE`), so adding IDs later covers
+    old registries. Each redirect logs a `registry-clicks` row.
+  - **Shagun is host-UPI only** (QR + `upi://pay`). Taking money through Zenfest needs
+    Razorpay **Route** (marketplace/KYC per host) — Phase 3, behind a flag, after Razorpay
+    approves. Phase 2 is the return-gifts store (Razorpay checkout for Zenfest's own
+    goods); the dashboard's "Return gifts" tab is a "coming soon" placeholder until then.
+  - Registry styles live in `registry.css` (imported in the layout after `parts.css`),
+    so `parts.css`'s last `@media` block stays the phone-hero one. `MobileCTABar` hides
+    itself on `/r/*` and `/dashboard/*` (the guest page has its own sticky banner).
+  - Local SQLite dev push creates new tables but does **not** add the new
+    `registry_*_id` columns to the existing `payload_locked_documents_rels` table, so
+    updates fail with a "Failed query … payload_locked_documents" error. Add them with
+    `ALTER TABLE … ADD COLUMN` (as was done for `host_applications_id`). Production is
+    fine: the migration adds them.
+- **Polls (`/polls`, `/polls/closed`, `/polls/[slug]`, homepage band, registry "Polls" tabs).**
+  Replaces the old Firebase app at polls.zenfestevents.in (redirected by host in
+  `next.config.ts`). Collections `polls`, `poll-votes`, `poll-voters` (admin-only REST);
+  pages read through `lib/polls.ts`, votes go through Server Actions in
+  `app/(frontend)/polls/actions.ts`. Easy to get wrong:
+  - **One vote per (poll, voterKey)** is a compound unique index on `poll-votes`
+    (`p:<voterId>` public, `d:<deviceId>` family event polls). Verified: 10 concurrent
+    votes → 1 row. Don't add a read-then-write check instead.
+  - **Voter session** = signed httpOnly cookie `zf_voter` (`lib/voterVerification.ts`),
+    `<id>.<v|u>.<hmac>`. The v/u flag is whether *this browser* proved the number, so
+    typing someone's verified phone never yields verified votes. The proof is the
+    WhatsApp reverse check (`consumePhoneProof` in `lib/phoneVerification.ts`, shared with
+    the vendor hook); the provider is meant to be swapped there later (owner undecided).
+  - `pollState()` closes a poll once `closesAt` passes — no cron. Event polls are polls
+    with `registryEvent` set; public queries filter `registryEvent: { exists: false }`.
+  - Results are withheld per `resultsVisibility` / `electionSensitive` (`canSeeResults`).
+    Family event polls send results to guests unless "after close" (votes live in the
+    guest's localStorage, so the server can't tell who voted).
+  - **No generated OG images** (`opengraph-image.tsx` / `next/og`): Next's ImageResponse
+    loads its own sharp (0.35.x) next to Payload's pinned sharp 0.34.2 and the native
+    module clash **crashed the dev server**. Polls use the poll image or the logo instead.
+  - Marketing consent is opt-in (unticked) and only ever switched on by the voter.
+  - Styles in `polls.css` (imported after `registry.css`).
 - **"Earn from events" (`/earn`) is hosts-only.** Modelled on joinmywedding.com: families
   in Tamil Nadu apply (`HostForm` → `/api/host-applications`) to let foreign travellers
   attend their wedding or function for a fee. Guest browsing, booking and payment are

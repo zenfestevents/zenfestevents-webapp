@@ -29,6 +29,7 @@
     "@payloadcms/richtext-lexical": "3.88.0",
     "@payloadcms/storage-vercel-blob": "3.88.0",
     "@payloadcms/ui": "3.88.0",
+    "cheerio": "1.2.0",
     "cross-env": "10.1.0",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
