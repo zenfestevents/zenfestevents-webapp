@@ -88,12 +88,17 @@ export interface Config {
     polls: Poll;
     'poll-votes': PollVote;
     'poll-voters': PollVoter;
+    'ai-conversations': AiConversation;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    leads: {
+      aiConversation: 'ai-conversations';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -116,6 +121,7 @@ export interface Config {
     polls: PollsSelect<false> | PollsSelect<true>;
     'poll-votes': PollVotesSelect<false> | PollVotesSelect<true>;
     'poll-voters': PollVotersSelect<false> | PollVotersSelect<true>;
+    'ai-conversations': AiConversationsSelect<false> | AiConversationsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -287,6 +293,49 @@ export interface Service {
   description?: string | null;
   image?: (number | null) | Media;
   /**
+   * Turn this on to give Zenfest AI a specialist for this service. It only knows what you enter below, so fill in options and price ranges.
+   */
+  ai?: {
+    enabled?: boolean | null;
+    /**
+     * Shown to customers, e.g. "Zenfest Décor".
+     */
+    agentName?: string | null;
+    /**
+     * e.g. 🎨
+     */
+    agentEmoji?: string | null;
+    /**
+     * How this specialist talks and what it is expert in (a few lines).
+     */
+    persona?: string | null;
+    /**
+     * What customers can choose. The AI may only recommend these.
+     */
+    options?:
+      | {
+          name: string;
+          unit: 'event' | 'plate' | 'hour' | 'person';
+          description?: string | null;
+          priceMin?: number | null;
+          priceMax?: number | null;
+          minQty?: number | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Facts and limits the AI must respect, e.g. "Minimum 100 plates", "No outdoor fireworks".
+     */
+    rules?: string | null;
+    faqs?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
    * Highlight on the home page.
    */
   featured?: boolean | null;
@@ -393,8 +442,89 @@ export interface Lead {
   eventDate?: string | null;
   branch?: ('guduvancheri' | 'thiruverkadu' | 'any') | null;
   message?: string | null;
+  /**
+   * Drafted with the customer by Zenfest AI. Estimates only — confirm before quoting.
+   */
+  aiPlan?: string | null;
+  aiConversation?: {
+    docs?: (number | AiConversation)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   status?: ('new' | 'contacted' | 'quoted' | 'booked' | 'closed') | null;
   source?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Every Zenfest AI conversation. Open one to read what the customer and the agents said.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ai-conversations".
+ */
+export interface AiConversation {
+  id: number;
+  /**
+   * The customer’s first message.
+   */
+  title?: string | null;
+  status?: ('active' | 'lead' | 'handed-off' | 'capped') | null;
+  lead?: (number | null) | Lead;
+  leadNotified?: boolean | null;
+  turns?: number | null;
+  /**
+   * Event basics gathered so far (type, date, area, guests, budget).
+   */
+  brief?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * The chat as the customer saw it.
+   */
+  transcript?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Latest card from each specialist.
+   */
+  specialistResults?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  messages?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  usage?: {
+    inputTokens?: number | null;
+    outputTokens?: number | null;
+    cacheReadTokens?: number | null;
+    costUsd?: number | null;
+  };
+  tokenHash: string;
+  ipHash?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -919,6 +1049,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'polls';
         value: number | Poll;
+      } | null)
+    | ({
+        relationTo: 'ai-conversations';
+        value: number | AiConversation;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1071,6 +1205,33 @@ export interface ServicesSelect<T extends boolean = true> {
   summary?: T;
   description?: T;
   image?: T;
+  ai?:
+    | T
+    | {
+        enabled?: T;
+        agentName?: T;
+        agentEmoji?: T;
+        persona?: T;
+        options?:
+          | T
+          | {
+              name?: T;
+              unit?: T;
+              description?: T;
+              priceMin?: T;
+              priceMax?: T;
+              minQty?: T;
+              id?: T;
+            };
+        rules?: T;
+        faqs?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+      };
   featured?: T;
   order?: T;
   updatedAt?: T;
@@ -1129,6 +1290,8 @@ export interface LeadsSelect<T extends boolean = true> {
   eventDate?: T;
   branch?: T;
   message?: T;
+  aiPlan?: T;
+  aiConversation?: T;
   status?: T;
   source?: T;
   updatedAt?: T;
@@ -1449,6 +1612,33 @@ export interface PollVotersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ai-conversations_select".
+ */
+export interface AiConversationsSelect<T extends boolean = true> {
+  title?: T;
+  status?: T;
+  lead?: T;
+  leadNotified?: T;
+  turns?: T;
+  brief?: T;
+  transcript?: T;
+  specialistResults?: T;
+  messages?: T;
+  usage?:
+    | T
+    | {
+        inputTokens?: T;
+        outputTokens?: T;
+        cacheReadTokens?: T;
+        costUsd?: T;
+      };
+  tokenHash?: T;
+  ipHash?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1521,6 +1711,20 @@ export interface SiteSetting {
         id?: string | null;
       }[]
     | null;
+  /**
+   * The AI event planner (chat bubble, homepage band, /plan). It also needs ANTHROPIC_API_KEY set on the server.
+   */
+  ai?: {
+    /**
+     * Untick to hide the AI everywhere; its buttons then go to the contact page.
+     */
+    enabled?: boolean | null;
+    /**
+     * First message customers see in the chat.
+     */
+    greeting?: string | null;
+    bandHeadline?: string | null;
+  };
   social?: {
     instagram?: string | null;
     facebook?: string | null;
@@ -1557,6 +1761,13 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         phone?: T;
         mapUrl?: T;
         id?: T;
+      };
+  ai?:
+    | T
+    | {
+        enabled?: T;
+        greeting?: T;
+        bandHeadline?: T;
       };
   social?:
     | T

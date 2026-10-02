@@ -30,6 +30,7 @@ import { RegistryLeads } from './collections/RegistryLeads'
 import { Polls } from './collections/Polls'
 import { PollVotes } from './collections/PollVotes'
 import { PollVoters } from './collections/PollVoters'
+import { AiConversations } from './collections/AiConversations'
 import { SiteSettings } from './globals/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
@@ -74,6 +75,7 @@ export default buildConfig({
     Polls,
     PollVotes,
     PollVoters,
+    AiConversations,
   ],
   globals: [SiteSettings],
   editor: lexicalEditor(),

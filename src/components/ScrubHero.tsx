@@ -4,6 +4,7 @@ import Link from 'next/link'
 import React, { useEffect, useRef } from 'react'
 
 import { SITE_FALLBACK } from '../lib/site'
+import { AiLink } from './ai/ChatLauncher'
 import { KolamDivider, KolamRosette } from './Kolam'
 
 const HEART_PATH =
@@ -437,9 +438,9 @@ export function ScrubHero({
             </span>
           </p>
           <div className="btn-row scrubhero__cta">
-            <Link className="btn btn--primary" href="/contact">
-              Get a callback
-            </Link>
+            <AiLink className="btn btn--primary" fallback="Get a callback">
+              ✦ Plan with Zenfest AI
+            </AiLink>
             <Link className="btn btn--gold" href="/earn">
               Earn from events
             </Link>
@@ -470,9 +471,9 @@ export function ScrubHero({
             )}
           </p>
           <div className="btn-row scrubhero__outro-cta">
-            <Link className="btn btn--primary" href="/contact">
-              Get a callback
-            </Link>
+            <AiLink className="btn btn--primary" fallback="Get a callback">
+              ✦ Plan with Zenfest AI
+            </AiLink>
             <Link className="btn btn--gold" href="/earn">
               Earn from events
             </Link>

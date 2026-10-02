@@ -2,6 +2,7 @@ import 'dotenv/config'
 import sharp from 'sharp'
 import { getPayload } from 'payload'
 import config from '../payload.config'
+import { AI_DEMO } from './aiDemo'
 
 /* ---------- placeholder image generator (brand-safe, offline) ---------- */
 const PLUM = '#2e1026'
@@ -111,7 +112,7 @@ async function run() {
   for (const [title, summary, description] of svcData) {
     const doc = await payload.create({
       collection: 'services',
-      data: { title, summary, description, order: si, featured: si <= 4 },
+      data: { title, summary, description, order: si, featured: si <= 4, ai: AI_DEMO[title] },
     })
     svcs[title] = doc.id
     si++

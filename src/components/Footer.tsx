@@ -38,6 +38,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
 
           <div className="site-footer__col">
             <h4 className="site-footer__heading">Explore</h4>
+            <Link href="/plan">Zenfest AI planner</Link>
             <Link href="/gallery">Our Work</Link>
             <Link href="/services">Services</Link>
             <Link href="/packages">Packages</Link>

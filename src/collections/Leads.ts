@@ -1,7 +1,10 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, FieldAccess } from 'payload'
 
 import { anyone, authenticated } from '../access'
 import { notifySubmission } from '../hooks/notifySubmission'
+
+/** Field-level: only signed-in admins (the Local API used by Zenfest AI bypasses access). */
+const adminOnly: FieldAccess = ({ req }) => Boolean(req.user)
 
 /** Inquiry-form submissions. Public can create; only admin can read/manage. */
 export const Leads: CollectionConfig = {
@@ -29,6 +32,7 @@ export const Leads: CollectionConfig = {
         'eventDate',
         'branch',
         'message',
+        'aiPlan',
       ]),
     ],
   },
@@ -59,6 +63,29 @@ export const Leads: CollectionConfig = {
       ],
     },
     { name: 'message', type: 'textarea' },
+    {
+      // Written server-side by Zenfest AI (plan/actions.ts); the public REST create
+      // can't set it, so a form POST can't pose as an AI plan.
+      name: 'aiPlan',
+      type: 'textarea',
+      label: 'Zenfest AI plan',
+      access: { create: adminOnly, update: adminOnly },
+      admin: {
+        readOnly: true,
+        condition: (data) => Boolean(data?.aiPlan),
+        description: 'Drafted with the customer by Zenfest AI. Estimates only — confirm before quoting.',
+      },
+    },
+    {
+      // Virtual (no column): the chat links to the lead, not both ways — a two-way
+      // relationship made the local SQLite schema push fail on every start.
+      name: 'aiConversation',
+      type: 'join',
+      collection: 'ai-conversations',
+      on: 'lead',
+      label: 'Zenfest AI chat',
+      admin: { condition: (data) => Boolean(data?.aiPlan) },
+    },
     {
       name: 'status',
       type: 'select',

@@ -63,6 +63,31 @@ export const SiteSettings: GlobalConfig = {
     },
     {
       type: 'group',
+      name: 'ai',
+      label: 'Zenfest AI',
+      admin: {
+        description:
+          'The AI event planner (chat bubble, homepage band, /plan). It also needs ANTHROPIC_API_KEY set on the server.',
+      },
+      fields: [
+        {
+          name: 'enabled',
+          type: 'checkbox',
+          defaultValue: true,
+          label: 'Zenfest AI switched on',
+          admin: { description: 'Untick to hide the AI everywhere; its buttons then go to the contact page.' },
+        },
+        {
+          name: 'greeting',
+          type: 'textarea',
+          maxLength: 400,
+          admin: { description: 'First message customers see in the chat.' },
+        },
+        { name: 'bandHeadline', type: 'text', maxLength: 90, label: 'Homepage band headline' },
+      ],
+    },
+    {
+      type: 'group',
       name: 'social',
       label: 'Social links',
       fields: [

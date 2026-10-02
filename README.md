@@ -130,6 +130,57 @@ refuses cake applications without a 14-digit FSSAI number, a certificate upload,
 delivery rates and at least 3 flavours. Certificates and menu cards are stored
 in the private **Vendor Uploads** collection (admin-only; 4 MB max; images or PDF).
 
+### Zenfest AI (the AI event planner)
+A multi-agent planner on **open-source models**: **Zenfest** (the coordinator) talks
+to the customer and hands each service to a **specialist agent** (Décor, Kitchen,
+Lens, Beats…) that knows only that service. Each specialist's answer is shown to the
+customer as its own card; estimates are added up **in code** from the price ranges
+in the admin, never by the AI.
+
+**Every chat starts with a short intake form** (4 steps, every field required): type
+of event; who is planning (bride / groom / family member + relation / friend, or host /
+organiser for other events); for weddings, which functions (Nichayathartham, Mehendi,
+Haldi, Sangeet, Muhurtham, Reception) with a **month for each** (exact date optional),
+otherwise one month/date; where; guests; at least one service or **Complete event
+planning**; name and phone; then a Confirm step that names the specialists and offers to
+add more services. Zenfest is given these answers on every reply, so it never asks for
+them again, and remembers new details (budget, theme, venue) as the chat goes on.
+Customers can reopen their earlier chats from **Chats** in the chat header. Sending it **saves a Lead at once** (`source = zenfest-ai`, the answers
+in the message, the AI plan attached and kept up to date) and triggers the usual
+notification — so the team has the basics even if the customer leaves. The server then
+consults the chosen specialists itself and Zenfest continues the chat from there.
+
+- **Models (hosted on Groq, chosen by testing real chats):** the coordinator runs
+  Alibaba's **Qwen 3.8 27B** (`qwen/qwen3.8-27b`) — fastest, most natural Tamil/Tanglish,
+  routes to specialists straight away. Every specialist runs OpenAI's **GPT-OSS-120B**
+  (`openai/gpt-oss-120b`) — the smaller 20B mixed up options and ignored budgets.
+  Qwen is a Groq *preview* model, so when it is unavailable or out of free quota Zenfest
+  automatically answers with GPT-OSS-120B (`AI_COORDINATOR_FALLBACK_MODEL`). Any
+  OpenAI-compatible host works — change `AI_BASE_URL` / `AI_*_MODEL`.
+- **Switching it on:** create a free key at console.groq.com (no credit card) and set
+  `AI_API_KEY`. Without it, or with the kill switch in **Site Settings → Zenfest AI**
+  unticked, every AI button falls back to the contact page and the site looks as before.
+- **Free-tier limits:** roughly 1,000 requests / ~200K tokens a day *per model* — the
+  coordinator and specialists use different models, so each has its own quota; about
+  5–10 full planning chats a day. When Groq says "too many requests", the chat shows
+  "our planners are busy, leave your number", so the lead is still captured. For more,
+  add a card on Groq (pay as you go, roughly ₹2–5 per full chat with Qwen as the
+  coordinator, ~₹1 if `AI_COORDINATOR_MODEL=openai/gpt-oss-120b`).
+- **Where it shows:** a "Meet Zenfest AI" band under the homepage hero, a gold bubble
+  on every desktop page, the gold middle button of the phone bottom bar, the header
+  and phone menu, the hero buttons, and the shareable full-screen page `/plan`.
+- **What the specialists know:** `/admin` → Services → open a service → **Zenfest AI
+  specialist**. Tick "AI specialist enabled", give it a name and emoji, and enter
+  **options with price ranges** (per event / plate / hour / person), rules and FAQs. A
+  service with no options says "our team will advise" instead of guessing. Adding a
+  service and ticking the box creates a new specialist — no code change.
+- **Limits:** per-IP rate limits, 30 messages per chat, and `ZENFEST_AI_DAILY_USD_CAP`
+  (default 5 USD/day, only relevant on a paid plan).
+- **Reviewing chats:** `/admin` → **Zenfest AI chats** shows every conversation as the
+  customer saw it.
+- **Local demo data:** `npm run seed:ai` adds sample options and prices to the seeded
+  services (local only — enter real prices in the live admin).
+
 ### Phone verification (WhatsApp)
 The vendor form proves the phone number belongs to the applicant without paying
 for SMS. The vendor taps **Verify on WhatsApp**; WhatsApp opens with
@@ -186,6 +237,8 @@ One-time Meta setup (free):
    - (optional) `AIRTABLE_TOKEN`, `AIRTABLE_PHOTO_BASE_ID`, `AIRTABLE_PHOTO_TABLE`
      — see "Vendor applications → Airtable"
    - (optional) `WHATSAPP_*` — see "Phone verification (WhatsApp)"
+   - (optional) `AI_API_KEY` (free Groq key) and the other `AI_*` settings — turns on
+     Zenfest AI (see "Zenfest AI")
    - (optional) `AMAZON_ASSOCIATE_TAG`, `AFFILIATE_REDIRECT_TEMPLATE` — gift-registry
      affiliate links (see "Gift registry")
 4. Deploy, then create the first admin user (see below) and sign in at

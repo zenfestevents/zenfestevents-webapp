@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
 import type { SiteSettings } from '../lib/site'
+import { AiLink } from './ai/ChatLauncher'
 
 const SIGNUP_ENABLED = false
 
@@ -68,7 +69,11 @@ export function Header(_props: { settings: SiteSettings }) {
         </nav>
 
         <div className="site-header__cta">
-          {/* Not a second "Get a callback" — the hero already owns that action. */}
+          {/* Zenfest AI is the headline feature. With the AI off it's hidden rather than a
+              second "Get a callback" — the hero already owns that action. */}
+          <AiLink className="btn btn--primary site-header__ai" fallback={false}>
+            ✦ Zenfest AI
+          </AiLink>
           <Link className="btn btn--gold" href="/vendors">
             Enroll as a Vendor
           </Link>
@@ -96,6 +101,9 @@ export function Header(_props: { settings: SiteSettings }) {
             <Link href="/" className="mobile-menu__link">
               Home
             </Link>
+            <AiLink className="mobile-menu__link mobile-menu__link--ai" fallback={false} onOpen={() => setOpen(false)}>
+              ✦ Plan with Zenfest AI
+            </AiLink>
             {NAV.map((item) => (
               <Link key={item.href} href={item.href} className="mobile-menu__link">
                 {item.label}
@@ -111,9 +119,9 @@ export function Header(_props: { settings: SiteSettings }) {
             )}
           </nav>
           <div className="mobile-menu__cta btn-row">
-            <a className="btn btn--primary" href="/contact">
-              Get a callback
-            </a>
+            <AiLink className="btn btn--primary" fallback="Get a callback" onOpen={() => setOpen(false)}>
+              ✦ Ask Zenfest AI
+            </AiLink>
             <Link className="btn btn--gold" href="/earn">
               Earn from events
             </Link>

@@ -22,6 +22,7 @@ export type SiteSettings = {
     mapUrl?: string
   }[]
   social?: { instagram?: string; facebook?: string; youtube?: string }
+  ai?: { enabled?: boolean | null; greeting?: string | null; bandHeadline?: string | null }
 }
 
 /** Sensible fallbacks so the site looks complete before settings are filled in. */
@@ -54,6 +55,12 @@ export const SITE_FALLBACK: Required<SiteSettings> = {
     },
   ],
   social: { instagram: '', facebook: '', youtube: '' },
+  ai: {
+    enabled: true,
+    greeting:
+      "Vanakkam! I'm Zenfest, your AI event planner. A few quick questions about your event first — then I'll bring in our décor, catering, photography and entertainment specialists to draft a plan with estimates.",
+    bandHeadline: 'Plan your whole event with Zenfest AI',
+  },
 }
 
 /** Build a wa.me deep link with a pre-filled message. */

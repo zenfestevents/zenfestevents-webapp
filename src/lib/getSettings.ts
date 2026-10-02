@@ -30,6 +30,12 @@ function withFallback(data: SiteSettings): SiteSettings {
     },
     branches: data.branches?.length ? data.branches : SITE_FALLBACK.branches,
     social: data.social ?? SITE_FALLBACK.social,
+    ai: {
+      // Unset (a database from before this field existed) counts as on.
+      enabled: data.ai?.enabled !== false,
+      greeting: pick(data.ai?.greeting, SITE_FALLBACK.ai.greeting),
+      bandHeadline: pick(data.ai?.bandHeadline, SITE_FALLBACK.ai.bandHeadline),
+    },
   }
 }
 

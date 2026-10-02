@@ -11,6 +11,9 @@ import { ScrubHero } from '../../components/ScrubHero'
 import { VoteCard } from '../../components/polls/VoteCard'
 import { getFeaturedPoll, getPollView } from '../../lib/polls'
 import { pollVerifyMode } from '../../lib/voterVerification'
+import { MeetZenfestAI } from '../../components/ai/MeetZenfestAI'
+import { getAgentProfiles } from '../../lib/ai/knowledge'
+import { aiAvailable } from '../../lib/ai/status'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,7 +46,12 @@ async function getHomeData() {
 }
 
 export default async function HomePage() {
-  const [data, settings, homePoll] = await Promise.all([getHomeData(), getSiteSettings(), getHomePoll()])
+  const [data, settings, homePoll, agents] = await Promise.all([
+    getHomeData(),
+    getSiteSettings(),
+    getHomePoll(),
+    getAgentProfiles(),
+  ])
   const hero = { ...SITE_FALLBACK.hero, ...(settings?.hero || {}) }
   const wa = whatsappLink(settings?.contact?.whatsapp, DEFAULT_WA_MESSAGE)
 
@@ -54,6 +62,11 @@ export default async function HomePage() {
         headline={hero.headline}
         subheadline={hero.subheadline}
       />
+
+      {/* ---------- ZENFEST AI: the AI planner and its specialist team ---------- */}
+      {aiAvailable(settings) && (
+        <MeetZenfestAI headline={settings.ai?.bandHeadline || 'Plan your whole event with Zenfest AI'} agents={agents} />
+      )}
 
       {/* ---------- FEATURED WORK ---------- */}
       <section className="section">

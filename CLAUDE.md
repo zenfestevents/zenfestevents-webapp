@@ -50,6 +50,8 @@ src/
     signup/page.tsx       Signup / offer form (branches on "planning an event?")
     vendors/page.tsx      Vendor enrollment form
     earn/page.tsx         "Earn from events" — families apply to host foreign guests
+    plan/                 Zenfest AI: full-screen chat page, chat/route.ts (NDJSON
+                          stream), actions.ts (contact card → Lead, restore chat)
     layout.tsx            Root layout, Header, Footer, MobileCTABar
     styles.css            Design tokens (colors, typography, spacing)
     parts.css             Component & section styles
@@ -159,8 +161,9 @@ src/
   offset via `--header-h` and the hero cancels it. The bar hides over the hero
   (`body.hero-immersive`) and returns as the film leaves. Phones show the emblem **and**
   the "ZENFEST EVENTS™" wordmark (it used to be hidden below 420px).
-- **Mobile bottom bar (`MobileCTABar`, <900px, every page except the registry's `/r/*` and `/dashboard/*`):** Earn from events
-  (`/earn`, ivory) · Enquire (`/contact`, gold "zari" sheen — `zari-sheen` keyframes) ·
+- **Mobile bottom bar (`MobileCTABar`, <900px, every page except the registry's `/r/*`, `/dashboard/*` and `/plan`):** Earn from events
+  (`/earn`, ivory) · **Ask Zenfest AI** (gold "zari" sheen — `zari-sheen` keyframes; opens
+  the AI chat full-screen, and falls back to "Enquire" → `/contact` when the AI is off) ·
   Enroll as a vendor (`/vendors`). No Call button by the owner's choice; WhatsApp was
   swapped out for Earn from events (here and in the desktop hero's buttons) — it is
   still on the homepage's other sections and `/contact`. The sheen stops under
@@ -290,6 +293,89 @@ src/
     module clash **crashed the dev server**. Polls use the poll image or the logo instead.
   - Marketing consent is opt-in (unticked) and only ever switched on by the voter.
   - Styles in `polls.css` (imported after `registry.css`).
+- **Zenfest AI (`lib/ai/*`, `components/ai/*`, `/plan`) — multi-agent event planner on
+  open-source models.** The owner chose a coordinator + one specialist agent per service,
+  and open models to avoid per-use API costs. Everything goes through the **OpenAI-compatible**
+  API (`openai` SDK, `lib/ai/client.ts`), **Groq by default**: coordinator
+  `qwen/qwen3.8-27b`, all specialists `openai/gpt-oss-120b` — env `AI_BASE_URL`,
+  `AI_API_KEY`, `AI_COORDINATOR_MODEL`, `AI_COORDINATOR_FALLBACK_MODEL`,
+  `AI_SPECIALIST_MODEL` (+ optional `AI_SPECIALIST_BASE_URL/_API_KEY`). Chosen by testing
+  real chats: GPT-OSS-120B as coordinator kept asking questions instead of routing and
+  slipped Korean into Tamil; GPT-OSS-20B as specialist mixed up options and ignored
+  budgets. Qwen is a Groq **preview** model, so a 429/404/400 on the coordinator's first
+  request retries that request on the fallback model (GPT-OSS-120B). `orchestrator.ts` runs **Zenfest** (streamed tool loop);
+  its `consult_specialists` tool runs `specialist.ts` — a separate call that sees **only
+  that service's `ai` group** from Services and answers in strict JSON. Easy to get wrong:
+  - **Intake first** (`components/ai/IntakeForm.tsx`, `lib/ai/intake.ts`): a new chat shows a
+    4-step form instead of a message box — event type + who's planning (+ relation); a
+    **required month** per wedding function / event with an optional exact date inside it;
+    where; guests; **at least one service or "Complete event planning"** (= every
+    specialist) + name/phone/consent; then a **Confirm** step naming the specialists and
+    offering to add more. Every field above is mandatory by the owner's call:
+    `checkIntakeStep()` is the one rule set, used per step by the form and for all steps by
+    `parseIntake()` on the server. `startChat()` (plan/actions.ts)
+    validates it (`parseIntake`), creates the conversation with the answers as its `brief`
+    and an `intake` transcript card, and **saves the Lead immediately**. The client then
+    POSTs `/plan/chat` with `kickoff: true`; `runKickoff()` consults the chosen specialists
+    **from code** (Qwen sent `"null"` placeholders when asked to do this first call itself)
+    and has Zenfest write the summary + next question. Name/phone are prefilled as
+    "Is this you? … Change" after "New chat" — the same slot a future customer-account
+    profile should fill (owner plans sign-in later; then phone needn't be asked).
+  - **Zenfest must not re-ask the form.** Every coordinator request gets a
+    `CONFIRMED EVENT FACTS` block (`factsBlock()`), rebuilt from `state.brief` each time and
+    never stored in history. New details go through `save_event_details` into
+    `brief.extra` (facts block + lead plan); its `replan` list re-consults those
+    specialists **in the same tool call** — Qwen otherwise saved the detail and only *said*
+    the team would update. `consult_specialists` needs only `requests`; event fields are
+    filled from the brief, and intake values are never overwritten by the model's.
+  - **Previous chats:** the browser keeps its last 10 chats (`localStorage
+    zenfest-ai-chats`: id, token, title); "New chat" only clears the active pointer.
+    `switchTo()` reloads one through `loadChat()`; chats the server no longer has are dropped.
+  - **One `consult_specialists` call carries every service** (`requests[]`), and the server
+    runs those specialists in parallel. GPT-OSS on Groq can't make parallel tool calls, so
+    one-tool-per-specialist would mean a full round-trip (and free-tier tokens) per service.
+  - **The AI never writes a price.** Specialists pick option ids + quantities;
+    `priceCard()` prices them from the admin's ranges, drops unknown ids/duplicates and
+    raises quantities to `minQty`. A service with no options answers "team will advise"
+    without calling the model. Keep it that way — invented prices are the main risk.
+  - Specialist JSON uses `response_format` strict `json_schema` (from the zod schema) **and**
+    is re-validated with zod, with one retry — small open models sometimes return bad JSON.
+    Groq doesn't allow structured outputs together with tools/streaming, which is why only
+    the (tool-less, non-streamed) specialist uses it.
+  - `effortParam()`: `reasoning_effort` only for GPT-OSS; Qwen on Groq gets
+    `reasoning_format: 'hidden'` instead, or its `<think>` text lands in the reply.
+  - Specialists pick options by **exact name** (a zod enum of the service's option names,
+    so strict mode can only return real options). Opaque Payload ids got swapped: the
+    model meant one option and wrote another's id, pricing the wrong item.
+  - **Specialist cards go to the customer unedited** (the UI renders the JSON); Zenfest only
+    adds a short line. History (`state.messages`) is append-only; context notes go into the
+    new user message.
+  - **Free tier:** ~1,000 requests / ~200K tokens a day per model (about 5–10 full chats). A
+    provider 429 (`isRateLimit`) or any API error becomes a "busy, leave your number" notice
+    + contact card, so the lead is still captured. `ZENFEST_AI_DAILY_USD_CAP` (default 5)
+    only matters on a paid plan; prices per model are in `config.ts`.
+  - **Off unless `AI_API_KEY` is set** (or `AI_BASE_URL` is a key-less localhost server
+    such as Ollama) and Site Settings → Zenfest AI is ticked (`aiAvailable()`); then every
+    `AiLink` falls back to `/contact`, the band, bubble and header button disappear, and
+    `/plan/chat` returns 503. The route lives under `/plan`, not `/api`, to stay clear of
+    Payload's catch-all.
+  - Placement (phone/desktop parity): homepage band under the hero (`MeetZenfestAI`),
+    desktop bubble + side panel (`ChatLauncher`, ≥900px), phone = bottom bar's gold
+    button → full-screen (no bubble on phones), header button (≥1280px only — it doesn't
+    fit beside eight nav links below that; `ai.css` widens the tight-nav rule to 1439px),
+    phone-menu link, hero + outro first button, footer link, `/plan`.
+  - Chats are stored in `ai-conversations` (admin-only): `transcript` is what the customer
+    saw; `messages` is the raw OpenAI-format history. The chat token is scrypt-hashed like
+    the registry key.
+  - The lead link is **one-way** (`ai-conversations.lead`; Leads shows it through a
+    virtual `join` field). A two-way relationship made the local SQLite dev push fail
+    on every start. If a push still fails with "index … already exists", restart a few
+    times — each run rebuilds one table and it settles.
+  - This PC (GTX 1650 Super 4 GB, 24 GB RAM) is too small to run these models itself;
+    local dev uses the same Groq key. First built on Claude, switched to open models
+    2026-10-02 before any real traffic.
+  - Styles in `ai.css` (imported after `polls.css`). `npm run seed:ai` adds sample
+    options/prices locally — never on production.
 - **"Earn from events" (`/earn`) is hosts-only.** Modelled on joinmywedding.com: families
   in Tamil Nadu apply (`HostForm` → `/api/host-applications`) to let foreign travellers
   attend their wedding or function for a fee. Guest browsing, booking and payment are
