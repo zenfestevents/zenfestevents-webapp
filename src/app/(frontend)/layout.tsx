@@ -7,6 +7,7 @@ import './parts.css'
 import './registry.css'
 import './polls.css'
 import './ai.css'
+import './marketplace.css'
 import { Header } from '../../components/Header'
 import { Footer } from '../../components/Footer'
 import { MobileCTABar } from '../../components/MobileCTABar'
@@ -52,7 +53,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const agents = ai ? await getAgentProfiles() : []
 
   return (
-    <html lang="en" className={`${display.variable} ${body.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${body.variable}`}>
       <body>
         <a className="skip-link" href="#main">
           Skip to content

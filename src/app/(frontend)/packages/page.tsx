@@ -4,6 +4,8 @@ import type { Metadata } from 'next'
 
 import { getPayloadClient } from '../../../lib/payload'
 import { Reveal } from '../../../components/Reveal'
+import { aiAvailable } from '../../../lib/ai/status'
+import { getSiteSettings } from '../../../lib/getSettings'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,6 +23,7 @@ export const metadata: Metadata = {
 const PACKAGES_READY = false
 
 export default async function PackagesPage() {
+  const ai = aiAvailable(await getSiteSettings())
   let packages: any[] = []
   if (PACKAGES_READY) {
     try {
@@ -73,16 +76,39 @@ export default async function PackagesPage() {
             ))}
           </div>
         ) : (
-          <div className="empty">
-            <p className="eyebrow">Coming soon</p>
-            <p className="lede">
-              We&apos;re putting our packages together right now. In the meantime, tell us
-              what you&apos;re planning and we&apos;ll build a quote around it — which is
-              usually the better fit anyway.
-            </p>
-            <Link className="btn btn--primary" href="/contact">
-              Get a custom quote
-            </Link>
+          <div className="pkg-soon">
+            <div className="pkg-soon__note">
+              <p className="eyebrow">Coming soon</p>
+              <p className="lede">
+                We&apos;re putting our packages together right now. Until then, here&apos;s how to
+                plan — and a quote built around your event is usually the better fit anyway.
+              </p>
+            </div>
+            <ul className="pkg-soon__ways">
+              <li className="pkg-soon__way pkg-soon__way--main">
+                <h2>Get a custom quote</h2>
+                <p>Tell us the date, guests and what you need. Our team calls back with a plan and a price.</p>
+                <Link className="btn btn--primary" href="/contact">
+                  Get a custom quote
+                </Link>
+              </li>
+              {ai && (
+                <li className="pkg-soon__way">
+                  <h2>Plan with Zenfest AI</h2>
+                  <p>Describe your event and get an itemised estimate from our specialists in minutes.</p>
+                  <Link className="link-arrow" href="/plan">
+                    Start planning →
+                  </Link>
+                </li>
+              )}
+              <li className="pkg-soon__way">
+                <h2>Book vendors yourself</h2>
+                <p>Compare listed vendors with prices upfront and request quotes directly.</p>
+                <Link className="link-arrow" href="/marketplace">
+                  Browse the marketplace →
+                </Link>
+              </li>
+            </ul>
           </div>
         )}
       </div>

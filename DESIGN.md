@@ -41,6 +41,11 @@ on the hero, dividers, and around the gallery. Kept restrained so it complements
 competes with, the emblem. The divider is a thin gold stroke (`.kolam-divider`), never a
 filled shape — it closes the phone hero's text band and separates sections elsewhere.
 
+On light page heads (any section whose container starts with `.page-head` — Services,
+Gallery, Packages, About) the rosette appears as a large, faint gold watermark in the empty
+space to the right (`--kolam-rosette` in `styles.css`), turning very slowly and still under
+reduced motion. One rosette per page; don't add more.
+
 A second, smaller echo is **zari** — the gold thread border of a silk saree: the phone
 bar's gold "Enquire" button has a slow sheen crossing it, and the vendor button is
 outlined in a double gold line.
@@ -71,6 +76,18 @@ speech bubble: *"Vanakkam! Welcome to Zenfest Events — Let's plan your event!"
   gold location line, the headline, the description, and a kolam divider.
 - **Actions live in the bottom bar, not the hero** (see Quality floor).
 
+## Surfaces & details
+- Black bands carry a fine warm grain plus a soft bronze glow from the top right
+  (`--grain-ink`); the ivory page has a fainter grain (`--grain-ivory`). Never flat black.
+- Headings use `text-wrap: balance` (no lone last words); paragraphs `pretty`.
+- Gold text on ivory uses `--gold-text` (#8a6414) for readability; brand gold
+  (`--marigold`) stays for large type and anything on black.
+- Buttons press (scale .98) and the gold ones cast a gold-tinted shadow on hover.
+- Prices use tabular figures.
+- Services: the odd last service ("Complete coordination") is the black card — the
+  "hand us the whole event" option — and service cards are not numbered (they're not a
+  sequence; step lists like Registry/Earn keep their numbers).
+
 ## Motion (restrained)
 Hero: the scroll-scrubbed film above. Elsewhere the kolam line draws itself once and
 gallery items get a one-shot scroll-reveal. `prefers-reduced-motion` fully respected —
@@ -86,6 +103,10 @@ the hero becomes an ordinary stacked section on a still poster, with no video fe
   when ready)
 - **About:** Company story and values (content managed via Payload CMS)
 - **Contact:** Inquiry form (POST to `/api/leads`); includes WhatsApp / Call CTAs
+- **Marketplace (`/marketplace`):** the DIY lane — vendor cards with cover, service, areas
+  and "From ₹"; a homepage band (after Zenfest AI, so the two lanes sit together) shows the
+  newest four listings with a slight table-top stagger.
+- **404:** black band, self-drawing gold rosette, "This doorway has no kolam yet".
 - **Vendor signup:** Partner enrollment form (POST to `/api/vendor-applications`)
 - **Earn from events (`/earn`):** families in Tamil Nadu apply to host foreign guests at
   their wedding or function. Intro + application form, "How it works" ink band with gold

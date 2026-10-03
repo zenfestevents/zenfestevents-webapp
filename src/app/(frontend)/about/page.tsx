@@ -29,16 +29,18 @@ export default async function AboutPage() {
   return (
     <>
       <section className="section">
-        <div className="container about-hero">
-          <p className="eyebrow">About us</p>
-          <h1 className="display-l">
-            Calm planning, <span className="italic accent">joyful</span> celebrations
-          </h1>
-          <p className="lede">
-            Zenfest Events is a full-service event management company near Chennai. From
-            the first idea to the last guest leaving, we plan, style and run events across
-            Tamil Nadu — so you can enjoy the day instead of managing it.
-          </p>
+        <div className="container">
+          <header className="page-head about-hero">
+            <p className="eyebrow">About us</p>
+            <h1 className="display-l">
+              Calm planning, <span className="italic accent">joyful</span> celebrations
+            </h1>
+            <p className="lede">
+              Zenfest Events is a full-service event management company near Chennai. From
+              the first idea to the last guest leaving, we plan, style and run events across
+              Tamil Nadu — so you can enjoy the day instead of managing it.
+            </p>
+          </header>
         </div>
       </section>
 

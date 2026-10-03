@@ -57,7 +57,6 @@ export default async function ServicesPage() {
                   <img className="svc-row__img" src={mediaUrl(s.image, 'card')} alt={s.title} loading="lazy" />
                 )}
                 <div className="svc-row__body">
-                  <span className="svc-row__num">{String(i + 1).padStart(2, '0')}</span>
                   <h2 className="display-m">{s.title}</h2>
                   <p className="muted">{s.description || s.summary}</p>
                 </div>

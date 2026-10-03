@@ -843,21 +843,24 @@ body.zai-open {
 }
 
 /* ---------- header + menu entry points ----------
-   The header button only fits beside the eight nav links from 1280px; below
-   that the bubble (always on screen on desktop) is the AI entry. 1280–1439
-   reuses parts.css's tight-nav sizing so the vendor button stays on one line. */
+   The header button only fits beside the nine nav links (Marketplace added)
+   from 1440px; below that the bubble (always on screen on desktop) is the AI
+   entry. 1280–1599 reuses parts.css's tight-nav sizing so everything stays on
+   one line. */
 .site-header__ai {
   display: none !important;
 }
-@media (min-width: 1280px) {
+@media (min-width: 1440px) {
   .site-header__ai {
     display: inline-flex !important;
   }
+}
+@media (min-width: 1200px) {
   .site-header__cta .btn {
     white-space: nowrap;
   }
 }
-@media (min-width: 1280px) and (max-width: 1439px) {
+@media (min-width: 1280px) and (max-width: 1599px) {
   .site-nav {
     gap: 0.85rem;
   }

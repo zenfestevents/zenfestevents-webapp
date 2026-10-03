@@ -82,6 +82,10 @@
 }
 /* Phones keep the full "ZENFEST EVENTS™" lockup beside the emblem — the bar only
    holds the logo and the menu button there, so it fits down to ~320px. */
+/* The bar may run wider than the 1200px content column so all nine links fit. */
+.site-header__inner {
+  max-width: 1400px;
+}
 @media (max-width: 340px) {
   .wordmark__lockup {
     height: 26px;
@@ -177,9 +181,9 @@
   margin-top: 1.2rem;
 }
 
-/* 1080, not 900: the bar now carries two CTAs (vendor + signup) alongside the
-   nav. Below this the menu collapses to the hamburger. */
-@media (min-width: 1080px) {
+/* 1200, not 900: the bar carries nine nav links (Marketplace added) plus the
+   vendor, AI and account buttons. Below this the menu collapses to the hamburger. */
+@media (min-width: 1200px) {
   .site-nav {
     display: flex;
     gap: 1.25rem;
@@ -194,9 +198,9 @@
     white-space: nowrap;
   }
 }
-/* Seven nav links + the CTA only just fit on a small laptop: tighten them there
+/* Nine nav links + the CTAs only just fit on a small laptop: tighten them there
    rather than let labels wrap onto two lines. */
-@media (min-width: 1080px) and (max-width: 1279px) {
+@media (min-width: 1200px) and (max-width: 1279px) {
   .site-nav {
     gap: 0.85rem;
   }
@@ -237,6 +241,39 @@
 .page-head {
   max-width: 60ch;
   margin-bottom: clamp(2rem, 1rem + 4vw, 3.5rem);
+}
+/* Light page heads get the kolam as a faint gold watermark in the empty space to
+   their right — the threshold "welcome" drawn at the door of each page. */
+.section:has(> .container > .page-head) {
+  position: relative;
+  overflow: hidden;
+}
+@media (min-width: 900px) {
+  .section:has(> .container > .page-head)::before {
+    content: '';
+    position: absolute;
+    top: clamp(1rem, 4vw, 3rem);
+    right: max(-140px, calc((100vw - var(--container)) / 2 - 140px));
+    width: min(46vw, 560px);
+    aspect-ratio: 1;
+    background: var(--kolam-rosette) center / contain no-repeat;
+    opacity: 0.28;
+    pointer-events: none;
+    animation: rosette-turn 120s linear infinite;
+  }
+}
+@keyframes rosette-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .section:has(> .container > .page-head)::before {
+    animation: none;
+  }
+}
+.section:has(> .container > .page-head) > .container {
+  position: relative;
 }
 .page-head h1 {
   margin: 0.6rem 0 1rem;
@@ -396,14 +433,55 @@
   }
 }
 @media (min-width: 960px) {
+  /* Six tracks: cards take two, so a short last row (e.g. 5 services) stretches
+     its cards to fill the row instead of leaving a hole. */
   .svc-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(6, 1fr);
   }
+  .svc-grid > * {
+    grid-column: span 2;
+  }
+  .svc-grid > :nth-child(3n + 1):nth-last-child(2),
+  .svc-grid > :nth-child(3n + 2):last-child {
+    grid-column: span 3;
+  }
+  .svc-grid > :nth-child(3n + 1):last-child {
+    grid-column: 1 / -1;
+  }
+}
+.svc-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.svc-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-soft);
+  border-color: rgba(217, 178, 76, 0.55);
 }
 
 .svc-list {
   display: grid;
   gap: 1.2rem;
+}
+@media (min-width: 900px) {
+  .svc-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  /* An odd last service (Complete coordination) spans the row as the ink card:
+     it's the "hand us the whole event" option. */
+  .svc-list > .svc-row:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+.svc-list > .svc-row:last-child:nth-child(odd) {
+  background: var(--grain-ink), var(--ink);
+  border-color: transparent;
+  color: var(--jasmine);
+}
+.svc-list > .svc-row:last-child:nth-child(odd) .muted {
+  color: rgba(255, 253, 249, 0.72);
+}
+.svc-list > .svc-row:last-child:nth-child(odd) h2 {
+  color: var(--marigold);
 }
 .svc-row {
   display: grid;
@@ -421,11 +499,28 @@
   object-fit: cover;
   border-radius: var(--radius-m);
 }
-.svc-row__num {
-  font-family: var(--font-display), serif;
-  font-style: italic;
-  font-size: 1.2rem;
-  color: var(--marigold-deep);
+.svc-row {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.svc-row:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-soft);
+  border-color: rgba(217, 178, 76, 0.55);
+}
+.svc-row__body h2 {
+  position: relative;
+  padding-top: 0.9rem;
+}
+/* A short zari (gold thread) rule above each service name. */
+.svc-row__body h2::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2.4rem;
+  height: 3px;
+  border-top: 1px solid var(--marigold);
+  border-bottom: 1px solid var(--marigold);
 }
 .svc-row__body h2 {
   margin: 0.2rem 0 0.5rem;
@@ -569,12 +664,11 @@
   border-color: var(--ink);
 }
 .gal-grid {
-  columns: 1;
-  column-gap: 1rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
 }
 .gal-card {
-  break-inside: avoid;
-  margin-bottom: 1rem;
   width: 100%;
   border: none;
   padding: 0;
@@ -587,6 +681,8 @@
 }
 .gal-card img {
   width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
   display: block;
   transition: transform 0.5s ease, opacity 0.3s ease;
 }
@@ -627,12 +723,12 @@
 }
 @media (min-width: 620px) {
   .gal-grid {
-    columns: 2;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 @media (min-width: 1000px) {
   .gal-grid {
-    columns: 3;
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -1185,6 +1281,7 @@
 /* ---------- about ---------- */
 .about-hero {
   max-width: 62ch;
+  margin-bottom: 0;
 }
 .about-hero h1 {
   margin: 0.6rem 0 1rem;
@@ -1235,13 +1332,33 @@
   display: grid;
   gap: 2.5rem;
 }
+@media (min-width: 560px) and (max-width: 899px) {
+  .site-footer__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .site-footer__brand {
+    grid-column: 1 / -1;
+  }
+}
+.site-footer__col a {
+  transition: color 0.18s ease;
+  width: fit-content;
+}
 .footer-logo {
   width: 190px;
   height: auto;
   margin: -1rem 0 0.5rem -0.5rem;
+  /* The lockup is drawn on pure black; "lighten" lets the band's own tone show
+     through, so there's no visible black square. */
+  mix-blend-mode: lighten;
 }
 .site-footer__brand .btn-row {
   margin-top: 1.4rem;
+  gap: 0.6rem;
+}
+.site-footer__brand .btn {
+  padding: 0.75rem 1.15rem;
+  font-size: 0.95rem;
 }
 .site-footer__col {
   display: flex;
@@ -1287,9 +1404,9 @@
 .site-footer__social a:hover {
   color: var(--marigold);
 }
-@media (min-width: 760px) {
+@media (min-width: 900px) {
   .site-footer__grid {
-    grid-template-columns: 1.6fr 1fr 1.2fr;
+    grid-template-columns: 1.75fr 1fr 0.9fr 1.25fr;
     gap: 3rem;
   }
 }
@@ -1920,5 +2037,60 @@
   .scrubhero__divider {
     display: flex;
     margin-top: 1.4rem;
+  }
+}
+
+/* ---------- packages: coming-soon ways to plan ---------- */
+.pkg-soon {
+  display: grid;
+  gap: 2rem;
+}
+.pkg-soon__note .lede {
+  margin-top: 0.8rem;
+}
+.pkg-soon__ways {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 1rem;
+}
+.pkg-soon__way {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 1.6rem;
+  border-radius: var(--radius-m);
+  background: var(--jasmine);
+  border: 1px solid rgba(111, 100, 85, 0.16);
+}
+.pkg-soon__way h2 {
+  font-size: var(--step-2);
+}
+.pkg-soon__way p {
+  color: var(--clay);
+}
+.pkg-soon__way .link-arrow {
+  margin-top: auto;
+  padding-top: 0.4rem;
+}
+.pkg-soon__way .btn {
+  margin-top: auto;
+}
+.pkg-soon__way--main {
+  background: var(--grain-ink), var(--ink);
+  border-color: transparent;
+  color: var(--jasmine);
+}
+.pkg-soon__way--main h2 {
+  color: var(--marigold);
+}
+.pkg-soon__way--main p {
+  color: rgba(255, 253, 249, 0.75);
+}
+@media (min-width: 900px) {
+  .pkg-soon__ways {
+    grid-template-columns: 1.3fr 1fr 1fr;
   }
 }

@@ -8,6 +8,7 @@ import {
   editingFor,
   PHOTO_SERVICES_SUMMARY,
   photoServiceLabel,
+  CHENNAI_AREAS,
   type PhotoService,
 } from '../lib/vendorOptions'
 import { CakeFields, cakePayload, uploadVendorFiles } from './CakeFields'
@@ -22,30 +23,38 @@ const VENDOR_TYPES = [
   ['other', 'Other'],
 ]
 
-// Major Chennai areas, alphabetical. The chosen area (or the typed one, for
-// "Other") is saved in the collection's `city` field.
-const CHENNAI_AREAS = [
-  'Adyar', 'Alwarpet', 'Ambattur', 'Anna Nagar', 'Ashok Nagar', 'Avadi',
-  'Besant Nagar', 'Chengalpattu', 'Chromepet', 'ECR', 'Egmore', 'Guduvanchery',
-  'Guindy', 'Kelambakkam', 'Kilpauk', 'KK Nagar', 'Kodambakkam', 'Kolathur',
-  'Madhavaram', 'Madipakkam', 'Medavakkam', 'Mogappair', 'Mylapore',
-  'Nungambakkam', 'OMR', 'Pallavaram', 'Perambur', 'Perungudi', 'Poonamallee',
-  'Porur', 'Purasaiwakkam', 'Red Hills', 'Royapettah', 'Saidapet',
-  'Sholinganallur', 'Sriperumbudur', 'T. Nagar', 'Tambaram', 'Thiruvanmiyur',
-  'Thiruvottiyur', 'Tiruvallur', 'Tondiarpet', 'Triplicane', 'Vadapalani',
-  'Valasaravakkam', 'Velachery', 'Vepery', 'Virugambakkam', 'Washermanpet',
-  'West Mambalam',
-]
+/**
+ * A logged-in marketplace vendor answering these questions from their dashboard:
+ * name, business, phone and type come from the account (the server links the
+ * application to it and trusts the account's phone — see requireVerifiedPhone).
+ */
+export type VendorAccountPrefill = {
+  name: string
+  businessName: string
+  phone: string
+  vendorType: 'photography' | 'cake'
+  area: string
+}
 
-export function VendorForm({ verifyMode }: { verifyMode: VerifyMode }) {
+export function VendorForm({
+  verifyMode,
+  account,
+  onDone,
+}: {
+  verifyMode: VerifyMode
+  account?: VendorAccountPrefill
+  onDone?: () => void
+}) {
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const [phoneProof, setPhoneProof] = useState<PhoneProof>(null)
-  const [vendorType, setVendorType] = useState('')
-  const [name, setName] = useState('')
+  const [vendorType, setVendorType] = useState<string>(account?.vendorType ?? '')
+  const [name, setName] = useState(account?.name ?? '')
   const [sameAsName, setSameAsName] = useState(false)
-  const [businessName, setBusinessName] = useState('')
-  const [area, setArea] = useState('')
+  const [businessName, setBusinessName] = useState(account?.businessName ?? '')
+  const [area, setArea] = useState(
+    account && (CHENNAI_AREAS.includes(account.area) || account.area === 'All over Chennai') ? account.area : '',
+  )
   const [coverage, setCoverage] = useState('')
   const [specialty, setSpecialty] = useState<PhotoService | ''>('')
   // True when a baker has no FSSAI registration or doesn't deliver — the form
@@ -74,7 +83,7 @@ export function VendorForm({ verifyMode }: { verifyMode: VerifyMode }) {
       form.reportValidity()
       return
     }
-    if (verifyMode !== 'off' && !phoneProof) {
+    if (!account && verifyMode !== 'off' && !phoneProof) {
       setErrorMsg('Verify your phone number on WhatsApp first.')
       setStatus('error')
       document.getElementById('phone-verify-input')?.focus()
@@ -134,6 +143,7 @@ export function VendorForm({ verifyMode }: { verifyMode: VerifyMode }) {
         throw new Error(body?.errors?.[0]?.message || '')
       }
       setStatus('done')
+      onDone?.()
       form.reset()
       setVendorType('')
       setName('')
@@ -147,6 +157,18 @@ export function VendorForm({ verifyMode }: { verifyMode: VerifyMode }) {
       setErrorMsg(err instanceof Error ? err.message : '')
       setStatus('error')
     }
+  }
+
+  if (status === 'done' && account) {
+    return (
+      <div className="form-success" role="status">
+        <h3 className="display-m">Answers saved</h3>
+        <p className="muted">
+          Thanks — our team sees these with your listing. Your prices were added to your price card
+          if it was empty; check the Prices tab.
+        </p>
+      </div>
+    )
   }
 
   if (status === 'done') {
@@ -198,28 +220,40 @@ export function VendorForm({ verifyMode }: { verifyMode: VerifyMode }) {
         </div>
       </div>
 
-      <PhoneVerify mode={verifyMode} purpose="vendor" onVerified={setPhoneProof} />
+      {account ? (
+        <div className="field">
+          <span className="field__label">Phone</span>
+          <input name="phone" value={account.phone} readOnly />
+          <span className="field__hint">From your account. Change it in the Listing tab.</span>
+        </div>
+      ) : (
+        <PhoneVerify mode={verifyMode} purpose="vendor" onVerified={setPhoneProof} />
+      )}
 
-      <div className="form__row">
-        <label className="field">
-          <span className="field__label">What you offer *</span>
-          <select
-            name="vendorType"
-            required
-            value={vendorType}
-            onChange={(e) => setVendorType(e.target.value)}
-          >
-            <option value="" disabled>
-              Choose one
-            </option>
-            {VENDOR_TYPES.map(([v, l]) => (
-              <option key={v} value={v}>
-                {l}
+      {account ? (
+        <input type="hidden" name="vendorType" value={account.vendorType} />
+      ) : (
+        <div className="form__row">
+          <label className="field">
+            <span className="field__label">What you offer *</span>
+            <select
+              name="vendorType"
+              required
+              value={vendorType}
+              onChange={(e) => setVendorType(e.target.value)}
+            >
+              <option value="" disabled>
+                Choose one
               </option>
-            ))}
-          </select>
-        </label>
-      </div>
+              {VENDOR_TYPES.map(([v, l]) => (
+                <option key={v} value={v}>
+                  {l}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      )}
 
       {vendorType === 'other' && (
         <label className="field">
@@ -362,7 +396,7 @@ export function VendorForm({ verifyMode }: { verifyMode: VerifyMode }) {
 
       {!(vendorType === 'cake' && cakeBlocked) && (
         <button className="btn btn--primary form__submit" type="submit" disabled={status === 'sending'}>
-          {status === 'sending' ? 'Sending…' : 'Submit application'}
+          {status === 'sending' ? 'Sending…' : account ? 'Save answers' : 'Submit application'}
         </button>
       )}
     </form>

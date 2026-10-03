@@ -6,10 +6,12 @@ import React, { useEffect, useState } from 'react'
 
 import type { SiteSettings } from '../lib/site'
 import { AiLink } from './ai/ChatLauncher'
+import { AccountButton } from './market/AccountButton'
 
 const SIGNUP_ENABLED = false
 
 const NAV = [
+  { href: '/marketplace', label: 'Marketplace' },
   { href: '/gallery', label: 'Our Work' },
   { href: '/services', label: 'Services' },
   { href: '/packages', label: 'Packages' },
@@ -61,7 +63,7 @@ export function Header(_props: { settings: SiteSettings }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`site-nav__link ${pathname === item.href ? 'is-active' : ''}`}
+              className={`site-nav__link ${pathname === item.href || pathname.startsWith(`${item.href}/`) ? 'is-active' : ''}`}
             >
               {item.label}
             </Link>
@@ -75,8 +77,9 @@ export function Header(_props: { settings: SiteSettings }) {
             ✦ Zenfest AI
           </AiLink>
           <Link className="btn btn--gold" href="/vendors">
-            Enroll as a Vendor
+            For Vendors
           </Link>
+          <AccountButton />
           {SIGNUP_ENABLED && (
             <Link className="btn btn--primary btn--stack" href="/signup">
               <span className="btn__main">Sign Up</span>
@@ -110,8 +113,9 @@ export function Header(_props: { settings: SiteSettings }) {
               </Link>
             ))}
             <Link href="/vendors" className="mobile-menu__link mobile-menu__link--sub">
-              Enroll as a vendor
+              For vendors — list your business free
             </Link>
+            <AccountButton variant="menu" />
             {SIGNUP_ENABLED && (
               <Link href="/signup" className="mobile-menu__link mobile-menu__link--sub">
                 Sign up — ₹100 off your total bill

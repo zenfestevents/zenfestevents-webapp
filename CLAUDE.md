@@ -3,12 +3,16 @@
 Guidance for working in this repository.
 
 ## Project
-Zenfest Events — V1 marketing & lead-generation website for an event management
-company near Chennai. Public site + a self-service admin/back-end in one codebase.
-**Scope is intentionally limited:** no client login or payments. The `/admin` login is
-for the business owner/team only. The one client-facing tool is the **gift registry**
-(below), and its hosts use a secret link, not an account. See [README.md](README.md) for
-setup and [DESIGN.md](DESIGN.md) for the visual direction.
+Zenfest Events — an event company near Chennai growing from a marketing site into a
+wedding/event **web app** (an ecosystem: fund → plan → book → guests → run the day → after).
+Public site + a self-service admin/back-end in one codebase. Business model has two lanes:
+**DIY couples book vendors themselves on the marketplace**; couples who want a planner hand
+off to the Zenfest team (Leads). There are **three kinds of login**, all Payload auth:
+admin/staff (`users`, `/admin`), **vendors** (`vendors`, `/vendors/*`) and **couples**
+(`customers`, `/account/*`) — see "Vendor marketplace" below. Still no payments. The gift
+registry (secret host link) and **Zenfest AI** (chat token in the browser) predate accounts
+and don't use them yet; Zenfest AI's intake has the slot for profile name/phone. See
+[README.md](README.md) for setup and [DESIGN.md](DESIGN.md) for the visual direction.
 
 ## Stack
 - **Next.js 16.3.3** (App Router) + **Payload CMS 3.88.0** in the same app
@@ -31,6 +35,9 @@ npm run devsafe          # dev with .next cache cleared (use if Turbopack fails)
 npm run build            # production build
 npm run start            # run production build locally
 npm run seed             # seed demo content (FORCE_SEED=1 to re-run over data)
+npm run seed:ai          # add sample Zenfest AI options/prices to local services (never prod)
+npm run seed:marketplace # 4 live demo vendors + 1 couple, local SQLite only (logins in src/seed/marketplaceDemo.ts)
+npm run migrate:create   # new Postgres migration after schema changes (needs a postgres DATABASE_URI, no DB)
 npm run generate:types   # regenerate src/payload-types.ts after schema changes
 npm run generate:importmap  # regenerate the admin import map
 npm run lint             # run ESLint
@@ -48,16 +55,27 @@ src/
     packages/page.tsx     Bundled packages (PACKAGES_READY flag)
     contact/page.tsx      Contact form (inquiry)
     signup/page.tsx       Signup / offer form (branches on "planning an event?")
-    vendors/page.tsx      Vendor enrollment form
+    vendors/              /vendors landing (VENDOR_ACCOUNTS flag; old VendorForm kept),
+                          signup, login, forgot/reset-password, dashboard, actions.ts
+    account/              Couple account: /account (enquiries, shortlist, planner
+                          hand-off, profile), signup, login, forgot/reset-password,
+                          session/route.ts (header button), actions.ts
+    marketplace/          /marketplace, /marketplace/[category] (+ 'all'),
+                          /marketplace/v/[slug] (vendor listing + quote form)
     earn/page.tsx         "Earn from events" — families apply to host foreign guests
     plan/                 Zenfest AI: full-screen chat page, chat/route.ts (NDJSON
-                          stream), actions.ts (contact card → Lead, restore chat)
+                          stream; kickoff after the intake), actions.ts (startChat =
+                          intake → conversation + Lead, contact card, loadChat)
     layout.tsx            Root layout, Header, Footer, MobileCTABar
     styles.css            Design tokens (colors, typography, spacing)
     parts.css             Component & section styles
+    registry.css, polls.css, ai.css, marketplace.css   Feature styles (imported in that order)
   app/(payload)/        Payload admin (generated boilerplate — avoid hand-editing)
-  collections/          Users, Media, Categories, Services, Packages, Projects,
-                        Leads, Signups, VendorApplications, HostApplications
+  collections/          Users, Media, Categories, Services (+ `ai` specialist group),
+                        Packages, Projects, Leads, Signups, VendorApplications,
+                        HostApplications, registry-*, polls / poll-votes / poll-voters,
+                        AiConversations (Zenfest AI chats), Vendors + Customers (auth),
+                        VendorMedia, Enquiries (marketplace)
   globals/              SiteSettings
   components/
     Header.tsx, Footer.tsx, MobileCTABar.tsx
@@ -66,12 +84,29 @@ src/
     Reveal.tsx           Scroll-in animation (fade/rise)
     ScrubHero.tsx        Full-bleed scroll-scrubbed hero
     InquiryForm.tsx, VendorForm.tsx, SignupForm.tsx  Forms
+    ai/                  Zenfest AI UI: ZenfestAIProvider (state, chat history),
+                         ZenfestChat, IntakeForm, ChatLauncher (bubble + AiLink),
+                         MeetZenfestAI (homepage band)
+    market/              Marketplace + accounts UI: AuthForm/AuthShell, AccountButton
+                         (header), VendorDashboard, AccountDashboard, VendorCard,
+                         QuoteForm, EnquiryThread, MonthCalendar, SearchBar
   lib/
     payload.ts           Payload client (server-side)
     getSettings.ts       getSiteSettings() (server-side, merges fallback)
     site.ts              Client-safe exports (types, helpers, fallbacks)
     media.ts             Media URL helpers
-  seed/                  Demo-content seed script
+    ai/                  Zenfest AI (server-only except types.ts / intake.ts):
+                         config (models, limits), client (OpenAI-compatible),
+                         orchestrator (Zenfest), specialist, knowledge (from
+                         Services), conversation (storage, lead plan), intake
+                         (form rules), status (aiAvailable), types
+    session.ts           Who is logged in (server-only): getVendor/getCustomer,
+                         requireVendor/requireCustomer, session cookie helpers
+    authActions.ts       'use server' sign-up / log-in / log-out / forgot / reset
+    marketplace.ts       Server-only privacy boundary: PublicVendor DTOs, enquiries
+    marketplaceOptions.ts, listing.ts, formCheck.ts   Client-safe options/validators
+  seed/                  Demo-content seed script (+ aiDemo.ts for Zenfest AI,
+                         marketplaceDemo.ts for demo vendors/couple)
   access/                Access control for collections
   fields/                Custom Payload field types
   hooks/                 Payload hooks (e.g., notifySubmission)
@@ -80,7 +115,7 @@ src/
 - **Public pages** fetch content through Payload's **Local API** (`getPayloadClient()`),
   marked `export const dynamic = 'force-dynamic'`. Pages: home (featured work + services),
   gallery (all projects), services (all services), packages (with "Coming soon" flag),
-  about, contact, signup (with event-planning branch), vendors.
+  about, contact, signup (with event-planning branch), vendors, plan (Zenfest AI).
 - **Forms** (`InquiryForm`, `VendorForm`, `SignupForm`) POST to Payload's REST API
   (`/api/leads`, `/api/vendor-applications`, `/api/signups`). Public users **create**
   submissions; only admin can **read** them (see `src/access/index.ts`). New submissions
@@ -160,7 +195,11 @@ src/
   pushed the hero's `100svh` stage down and cropped the film. `#main` pays back the
   offset via `--header-h` and the hero cancels it. The bar hides over the hero
   (`body.hero-immersive`) and returns as the film leaves. Phones show the emblem **and**
-  the "ZENFEST EVENTS™" wordmark (it used to be hidden below 420px).
+  the "ZENFEST EVENTS™" wordmark (it used to be hidden below 420px). Desktop holds nine
+  links (Marketplace first) + "✦ Zenfest AI" (≥1440px) + "For Vendors" + the account
+  button (icon-only below 1440px), so the bar collapses to the hamburger **below 1200px**
+  and its inner container may run to 1400px (wider than the 1200px content column).
+  Adding a tenth link means re-measuring 1200 / 1280 / 1440.
 - **Mobile bottom bar (`MobileCTABar`, <900px, every page except the registry's `/r/*`, `/dashboard/*` and `/plan`):** Earn from events
   (`/earn`, ivory) · **Ask Zenfest AI** (gold "zari" sheen — `zari-sheen` keyframes; opens
   the AI chat full-screen, and falls back to "Enquire" → `/contact` when the AI is off) ·
@@ -168,6 +207,15 @@ src/
   swapped out for Earn from events (here and in the desktop hero's buttons) — it is
   still on the homepage's other sections and `/contact`. The sheen stops under
   `prefers-reduced-motion`.
+- **Polish rules (see DESIGN.md "Surfaces & details"):** page heads get the rosette
+  watermark automatically via `.section:has(> .container > .page-head)::before` — wrap new
+  light page intros in `<header className="page-head">` to get it. `.band-ink` now sets a
+  `background` with grain + glow, so a class that needs its own background must set it
+  after. The gallery is a CSS grid (cards crop to 4:3), not CSS columns — columns left
+  ragged holes. `svc-grid` uses 6 tracks so a short last row stretches. Footer links are
+  split into "Plan your event" / "Zenfest"; the footer logo uses `mix-blend-mode: lighten`
+  to hide its black square. `(frontend)/not-found.tsx` is the branded 404. Don't run
+  Prettier on files — the repo has no config, so it rewrites quotes/semicolons.
 - **`KolamDivider` needs `.kolam-divider path/circle` in `styles.css`** for its stroke;
   before that rule existed, dividers on Home/About/Services rendered as filled black blobs.
 - **Media URLs are made root-relative** by `mediaUrl()` in `src/lib/media.ts`. Payload
@@ -334,8 +382,8 @@ src/
   - **One `consult_specialists` call carries every service** (`requests[]`), and the server
     runs those specialists in parallel. GPT-OSS on Groq can't make parallel tool calls, so
     one-tool-per-specialist would mean a full round-trip (and free-tier tokens) per service.
-  - **The AI never writes a price.** Specialists pick option ids + quantities;
-    `priceCard()` prices them from the admin's ranges, drops unknown ids/duplicates and
+  - **The AI never writes a price.** Specialists pick option names + quantities;
+    `priceCard()` prices them from the admin's ranges, drops unknown names/duplicates and
     raises quantities to `minQty`. A service with no options answers "team will advise"
     without calling the model. Keep it that way — invented prices are the main risk.
   - Specialist JSON uses `response_format` strict `json_schema` (from the zod schema) **and**
@@ -361,8 +409,8 @@ src/
     Payload's catch-all.
   - Placement (phone/desktop parity): homepage band under the hero (`MeetZenfestAI`),
     desktop bubble + side panel (`ChatLauncher`, ≥900px), phone = bottom bar's gold
-    button → full-screen (no bubble on phones), header button (≥1280px only — it doesn't
-    fit beside eight nav links below that; `ai.css` widens the tight-nav rule to 1439px),
+    button → full-screen (no bubble on phones), header button (≥1440px only — it doesn't
+    fit beside the nine nav links below that; `ai.css` widens the tight-nav rule to 1599px),
     phone-menu link, hero + outro first button, footer link, `/plan`.
   - Chats are stored in `ai-conversations` (admin-only): `transcript` is what the customer
     saw; `messages` is the raw OpenAI-format history. The chat token is scrypt-hashed like
@@ -376,6 +424,56 @@ src/
     2026-10-02 before any real traffic.
   - Styles in `ai.css` (imported after `polls.css`). `npm run seed:ai` adds sample
     options/prices locally — never on production.
+  - **Go-live status (2026-10-02):** pushed to `master` but dormant until the owner adds
+    `AI_API_KEY` in Vercel and, in the live admin, ticks "AI specialist enabled" on each
+    service with real option price ranges (prod has none; with no specialists the intake
+    offers only "Complete event planning" and Zenfest just asks which services).
+- **Vendor marketplace + vendor/couple accounts (`/marketplace`, `/vendors/*`, `/account/*`).**
+  Built after researching WedMeGood / WeddingBazaar (ex-ShaadiSaga) / WeddingWire India
+  reviews: couples hate "price on request" and biased reviews; vendors hate ₹50k
+  non-refundable packages and fake leads. So listings are **free**, show an all-in
+  **price card**, are **reviewed by the team before going live**, and every enquiry comes
+  from a **logged-in couple** with date/guests/area/budget. No payments yet (commission
+  later via Razorpay Route). Easy to get wrong:
+  - **Access: `req.user` is set for admins, vendors AND couples.** `authenticated` in
+    `access/index.ts` is now an alias of `isAdmin` (`collection === 'users'`) — it used to
+    be `Boolean(req.user)`, which would have let any vendor read every lead. Never check
+    "is someone logged in"; check the collection. Same for field access (`isAdminField`).
+  - **One login per browser.** All auth collections share Payload's `payload-token`
+    cookie; logging in as a vendor logs an admin out of `/admin` in that browser.
+  - **Vendors/customers are never written over REST** (create/update are admin-only).
+    Sign-up and every dashboard edit are Server Actions (`lib/authActions.ts`,
+    `vendors/actions.ts`, `account/actions.ts`) that take the account from the session,
+    whitelist fields and re-check ownership. Exceptions: Payload's own login/me/forgot
+    endpoints, and **photo uploads** — vendors POST multipart to `/api/vendor-media`
+    (cookie auth; a hook stamps `vendor` from the session) to dodge Next's 1 MB Server
+    Action body limit.
+  - **Privacy boundary is `lib/marketplace.ts`** (like `lib/registry.ts`): the public only
+    gets `PublicVendor`s of `listingStatus: 'published'` — no email/phone. A couple sees
+    the vendor's phone only after the vendor replies (`vendorContact`); the vendor sees
+    the couple's phone with the enquiry (it's their lead).
+  - `listingStatus` (draft → pending → published/paused/rejected) and `reviewNote` are
+    admin-only fields. The vendor's "Send for review" (`submitForReview`) requires
+    `lib/listing.ts` gaps to be empty and emails the team; **publishing = setting
+    "Listing status" to Live in /admin**. Vendors can then pause/resume themselves.
+  - **Photo & cake vendors also answer the original questionnaire** (Questions tab =
+    `VendorForm` with an `account` prefill) → a `vendor-applications` row, so the FSSAI
+    rules, team email and **Airtable sync keep working**. `requireVerifiedPhone` strips any
+    client-sent `vendor`, and for a logged-in vendor stamps `vendor` + trusts the
+    account's phone; `linkVendorApplication` links it back and seeds an empty price card.
+  - Payload rejects a cookie session unless the request carries a browser
+    `Origin` in `csrf` or `Sec-Fetch-Site: same-origin|same-site|none`. So **curl needs
+    `-H 'Sec-Fetch-Site: same-origin'`** (or `Authorization: JWT <token>`), and on a phone
+    over Wi-Fi (`http://<LAN IP>:3000`) Server Actions see you as logged out — the LAN
+    origin isn't in `csrf` (dev only).
+  - Without SMTP, Payload logs only an email's subject; `collections/accountAuth.ts`
+    prints the **password-reset link** to the dev console so resets can be tested.
+    Production needs SMTP for resets.
+  - Booking an enquiry ("Mark booked") also blocks that date; date search hides vendors
+    who blocked it. `areas` is a text `hasMany` (validated against `MARKET_AREAS`) to avoid
+    enum migrations; categories/units/statuses *are* enums → `migrate:create` on change.
+  - `/signup` is still the ₹100-offer form — account pages live at `/account/signup` and
+    `/vendors/signup`.
 - **"Earn from events" (`/earn`) is hosts-only.** Modelled on joinmywedding.com: families
   in Tamil Nadu apply (`HostForm` → `/api/host-applications`) to let foreign travellers
   attend their wedding or function for a fee. Guest browsing, booking and payment are

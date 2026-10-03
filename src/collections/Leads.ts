@@ -1,10 +1,10 @@
-import type { CollectionConfig, FieldAccess } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-import { anyone, authenticated } from '../access'
+import { anyone, authenticated, isAdminField } from '../access'
 import { notifySubmission } from '../hooks/notifySubmission'
 
 /** Field-level: only signed-in admins (the Local API used by Zenfest AI bypasses access). */
-const adminOnly: FieldAccess = ({ req }) => Boolean(req.user)
+const adminOnly = isAdminField
 
 /** Inquiry-form submissions. Public can create; only admin can read/manage. */
 export const Leads: CollectionConfig = {

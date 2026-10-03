@@ -13,6 +13,7 @@
   --marigold: #d9b24c; /* brand gold — primary accent */
   --marigold-deep: #a9791f; /* deep gold / bronze */
   --marigold-bright: #f3de8e; /* champagne highlight */
+  --gold-text: #8a6414; /* gold for small text on ivory — readable (~4.6:1) where brand gold is not */
   --emerald: #9c6b1a; /* bronze — rare secondary accent */
   --blush: #f6f1e7; /* warm ivory surface */
   --blush-200: #ece2d1;
@@ -31,8 +32,17 @@
   --radius-m: 14px;
   --radius-l: 26px;
 
-  --shadow-soft: 0 18px 50px -24px rgba(0, 0, 0, 0.5);
-  --shadow-lift: 0 30px 70px -30px rgba(0, 0, 0, 0.65);
+  --shadow-soft: 0 18px 50px -24px rgba(36, 24, 8, 0.45);
+  --shadow-lift: 0 30px 70px -30px rgba(36, 24, 8, 0.6);
+  --shadow-gold: 0 14px 34px -16px rgba(169, 121, 31, 0.6);
+
+  /* Fine grain so the black bands read like silk/paper rather than flat screen
+     black. Same SVG noise, two strengths (light on ink, fainter on ivory). */
+  /* The kolam rosette as a background image, for ambient page-head watermarks. */
+  --kolam-rosette: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-62 -62 124 124'%3E%3Cg fill='none' stroke='%23d9b24c' stroke-width='0.9'%3E%3Cpath transform='rotate(0)' d='M0 0 C 11 -15, 37 -15, 50 0 C 37 15, 11 15, 0 0 Z'/%3E%3Cpath transform='rotate(45)' d='M0 0 C 11 -15, 37 -15, 50 0 C 37 15, 11 15, 0 0 Z'/%3E%3Cpath transform='rotate(90)' d='M0 0 C 11 -15, 37 -15, 50 0 C 37 15, 11 15, 0 0 Z'/%3E%3Cpath transform='rotate(135)' d='M0 0 C 11 -15, 37 -15, 50 0 C 37 15, 11 15, 0 0 Z'/%3E%3Cpath transform='rotate(180)' d='M0 0 C 11 -15, 37 -15, 50 0 C 37 15, 11 15, 0 0 Z'/%3E%3Cpath transform='rotate(225)' d='M0 0 C 11 -15, 37 -15, 50 0 C 37 15, 11 15, 0 0 Z'/%3E%3Cpath transform='rotate(270)' d='M0 0 C 11 -15, 37 -15, 50 0 C 37 15, 11 15, 0 0 Z'/%3E%3Cpath transform='rotate(315)' d='M0 0 C 11 -15, 37 -15, 50 0 C 37 15, 11 15, 0 0 Z'/%3E%3Ccircle r='58' stroke-dasharray='1 5'/%3E%3C/g%3E%3Cg fill='%23d9b24c'%3E%3Ccircle cx='54.0' cy='0.0' r='1.6'/%3E%3Ccircle cx='38.2' cy='38.2' r='1.6'/%3E%3Ccircle cx='0.0' cy='54.0' r='1.6'/%3E%3Ccircle cx='-38.2' cy='38.2' r='1.6'/%3E%3Ccircle cx='-54.0' cy='0.0' r='1.6'/%3E%3Ccircle cx='-38.2' cy='-38.2' r='1.6'/%3E%3Ccircle cx='-0.0' cy='-54.0' r='1.6'/%3E%3Ccircle cx='38.2' cy='-38.2' r='1.6'/%3E%3Ccircle r='2.6'/%3E%3C/g%3E%3C/svg%3E");
+
+  --grain-ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 0.9  0 0 0 0 0.7  0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --grain-ivory: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.25  0 0 0 0 0.1  0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 
   --step--1: clamp(0.8rem, 0.75rem + 0.2vw, 0.9rem);
   --step-0: clamp(1rem, 0.96rem + 0.25vw, 1.13rem);
@@ -62,7 +72,7 @@ html {
 
 body {
   margin: 0;
-  background: var(--bg);
+  background: var(--grain-ivory), var(--bg);
   color: var(--fg);
   font-family: var(--font-body), system-ui, sans-serif;
   font-size: var(--step-0);
@@ -84,6 +94,19 @@ h4 {
 
 p {
   margin: 0;
+  text-wrap: pretty;
+}
+
+/* No lone last words in headings ("One team for every part of the / day"). */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+::selection {
+  background: var(--marigold);
+  color: var(--ink);
 }
 
 a {
@@ -114,7 +137,7 @@ img {
 
 /* Feature bands: deep plum, photos & CTAs glow against them */
 .band-ink {
-  background: var(--ink);
+  background: var(--grain-ink), radial-gradient(120% 90% at 85% 0%, #1b150d 0%, var(--ink) 60%);
   color: var(--jasmine);
 }
 .band-ink h1,
@@ -164,6 +187,17 @@ img {
 .accent {
   color: var(--marigold);
 }
+/* Gold links on light surfaces use the darker text gold; on black bands they stay brand gold. */
+a.accent {
+  color: var(--gold-text);
+  text-underline-offset: 3px;
+}
+a.accent:hover {
+  text-decoration: underline;
+}
+.band-ink a.accent {
+  color: var(--marigold);
+}
 
 .lede {
   font-size: var(--step-1);
@@ -202,12 +236,26 @@ img {
   cursor: pointer;
   transition:
     transform 0.18s ease,
-    box-shadow 0.18s ease,
-    background 0.18s ease;
+    box-shadow 0.22s ease,
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
 }
 .btn:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-soft);
+}
+/* A physical press. */
+.btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: none;
+  transition-duration: 0.06s;
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 .btn:focus-visible {
   outline: 3px solid var(--marigold);
@@ -216,6 +264,10 @@ img {
 .btn--primary {
   --btn-bg: var(--marigold);
   --btn-fg: var(--ink);
+  background-image: linear-gradient(180deg, rgba(255, 245, 210, 0.35), rgba(255, 245, 210, 0) 55%);
+}
+.btn--primary:hover {
+  box-shadow: var(--shadow-gold);
 }
 .btn--ghost {
   --btn-bg: transparent;
@@ -267,8 +319,11 @@ img {
 /* ---------- cards ---------- */
 .card {
   background: var(--jasmine);
-  border: 1px solid var(--clay-line);
+  border: 1px solid rgba(111, 100, 85, 0.16);
   border-radius: var(--radius-m);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 1px 2px rgba(36, 24, 8, 0.04);
   overflow: hidden;
 }
 

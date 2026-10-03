@@ -14,11 +14,12 @@ export type MediaDoc =
 /**
  * Payload prefixes locally-stored media with its serverURL (`http://localhost:3000`
  * in dev), which breaks on any other host — e.g. a phone testing the dev server over
- * Wi-Fi, where "localhost" is the phone. Serve our own /api/media URLs root-relative;
+ * Wi-Fi, where "localhost" is the phone. Serve our own /api/media and
+ * /api/vendor-media URLs root-relative;
  * external URLs (Vercel Blob) pass through untouched.
  */
 function relativeIfOwnMedia(url: string): string {
-  return url.replace(/^https?:\/\/[^/]+(?=\/api\/media\/)/, '')
+  return url.replace(/^https?:\/\/[^/]+(?=\/api\/(?:media|vendor-media)\/)/, '')
 }
 
 /** Pick the best available URL for a media doc, preferring a named size. */

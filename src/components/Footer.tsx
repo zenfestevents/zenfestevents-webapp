@@ -37,17 +37,23 @@ export function Footer({ settings }: { settings: SiteSettings }) {
           </div>
 
           <div className="site-footer__col">
-            <h4 className="site-footer__heading">Explore</h4>
+            <h4 className="site-footer__heading">Plan your event</h4>
             <Link href="/plan">Zenfest AI planner</Link>
+            <Link href="/marketplace">Vendor marketplace</Link>
+            <Link href="/registry">Gift registry</Link>
+            <Link href="/polls">Polls</Link>
+            <Link href="/earn">Earn from events</Link>
+            <Link href="/account">My account</Link>
+          </div>
+
+          <div className="site-footer__col">
+            <h4 className="site-footer__heading">Zenfest</h4>
             <Link href="/gallery">Our Work</Link>
             <Link href="/services">Services</Link>
             <Link href="/packages">Packages</Link>
             <Link href="/about">About</Link>
             <Link href="/contact">Contact</Link>
-            <Link href="/earn">Earn from events</Link>
-            <Link href="/registry">Gift registry</Link>
-            <Link href="/polls">Polls</Link>
-            <Link href="/vendors">Enroll as a vendor</Link>
+            <Link href="/vendors">For vendors</Link>
           </div>
 
           <div className="site-footer__col">

@@ -64,6 +64,8 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    vendors: VendorAuthOperations;
+    customers: CustomerAuthOperations;
   };
   blocks: {};
   collections: {
@@ -89,6 +91,10 @@ export interface Config {
     'poll-votes': PollVote;
     'poll-voters': PollVoter;
     'ai-conversations': AiConversation;
+    vendors: Vendor;
+    customers: Customer;
+    'vendor-media': VendorMedia;
+    enquiries: Enquiry;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -122,6 +128,10 @@ export interface Config {
     'poll-votes': PollVotesSelect<false> | PollVotesSelect<true>;
     'poll-voters': PollVotersSelect<false> | PollVotersSelect<true>;
     'ai-conversations': AiConversationsSelect<false> | AiConversationsSelect<true>;
+    vendors: VendorsSelect<false> | VendorsSelect<true>;
+    customers: CustomersSelect<false> | CustomersSelect<true>;
+    'vendor-media': VendorMediaSelect<false> | VendorMediaSelect<true>;
+    enquiries: EnquiriesSelect<false> | EnquiriesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -141,13 +151,49 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User;
+  user: User | Vendor | Customer;
   jobs: {
     tasks: unknown;
     workflows: unknown;
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface VendorAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface CustomerAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -626,6 +672,7 @@ export interface VendorApplication {
    */
   portfolioUrl?: string | null;
   message?: string | null;
+  vendor?: (number | null) | Vendor;
   status?: ('new' | 'reviewing' | 'approved' | 'rejected') | null;
   updatedAt: string;
   createdAt: string;
@@ -650,6 +697,133 @@ export interface VendorUpload {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * Vendor accounts and their marketplace listings. Set "Listing status" to Live to publish one.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vendors".
+ */
+export interface Vendor {
+  id: number;
+  name: string;
+  businessName: string;
+  slug: string;
+  phone: string;
+  phoneVerified?: boolean | null;
+  category:
+    | 'photography'
+    | 'makeup'
+    | 'mehendi'
+    | 'decoration'
+    | 'catering'
+    | 'cake'
+    | 'venue'
+    | 'dj'
+    | 'invitations'
+    | 'other';
+  otherService?: string | null;
+  areas?: string[] | null;
+  about?: string | null;
+  priceCard?:
+    | {
+        item: string;
+        unit: 'event' | 'session' | 'day' | 'hour' | 'plate' | 'kg' | 'person' | 'piece' | 'package';
+        price: number;
+        gstIncluded?: boolean | null;
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Lowest price on the card.
+   */
+  startingPrice?: number | null;
+  cover?: (number | null) | VendorMedia;
+  gallery?: (number | VendorMedia)[] | null;
+  instagram?: string | null;
+  languages?: ('tamil' | 'english' | 'hindi' | 'telugu' | 'malayalam' | 'kannada')[] | null;
+  blockedDates?:
+    | {
+        date: string;
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The photo / cake / service questions the vendor answered from the dashboard.
+   */
+  application?: (number | null) | VendorApplication;
+  listingStatus: 'draft' | 'pending' | 'published' | 'paused' | 'rejected';
+  /**
+   * Shown on their dashboard — e.g. what to fix when you set "Needs changes".
+   */
+  reviewNote?: string | null;
+  submittedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'vendors';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vendor-media".
+ */
+export interface VendorMedia {
+  id: number;
+  vendor: number | Vendor;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    feature?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * WhatsApp phone checks from the website forms. Created automatically.
@@ -951,6 +1125,71 @@ export interface PollVoter {
   createdAt: string;
 }
 /**
+ * Couples and families with a Zenfest account.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers".
+ */
+export interface Customer {
+  id: number;
+  name: string;
+  phone: string;
+  phoneVerified?: boolean | null;
+  city?: string | null;
+  eventDate?: string | null;
+  shortlist?: (number | Vendor)[] | null;
+  marketingConsent?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'customers';
+}
+/**
+ * Quote requests couples sent to vendors through the marketplace.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enquiries".
+ */
+export interface Enquiry {
+  id: number;
+  summary?: string | null;
+  customer: number | Customer;
+  vendor: number | Vendor;
+  eventType?: ('wedding' | 'engagement' | 'reception' | 'birthday' | 'housewarming' | 'corporate' | 'other') | null;
+  eventDate?: string | null;
+  guests?: number | null;
+  area?: string | null;
+  budget?: number | null;
+  message?: string | null;
+  status: 'new' | 'replied' | 'quoted' | 'booked' | 'declined' | 'closed';
+  unreadFor?: ('vendor' | 'customer') | null;
+  thread?:
+    | {
+        from: 'vendor' | 'customer';
+        text: string;
+        quote?: number | null;
+        at: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -1053,12 +1292,37 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'ai-conversations';
         value: number | AiConversation;
+      } | null)
+    | ({
+        relationTo: 'vendors';
+        value: number | Vendor;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: number | Customer;
+      } | null)
+    | ({
+        relationTo: 'vendor-media';
+        value: number | VendorMedia;
+      } | null)
+    | ({
+        relationTo: 'enquiries';
+        value: number | Enquiry;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'vendors';
+        value: number | Vendor;
+      }
+    | {
+        relationTo: 'customers';
+        value: number | Customer;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -1068,10 +1332,19 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: number;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'vendors';
+        value: number | Vendor;
+      }
+    | {
+        relationTo: 'customers';
+        value: number | Customer;
+      };
   key?: string | null;
   value?:
     | {
@@ -1376,6 +1649,7 @@ export interface VendorApplicationsSelect<T extends boolean = true> {
   city?: T;
   portfolioUrl?: T;
   message?: T;
+  vendor?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1634,6 +1908,173 @@ export interface AiConversationsSelect<T extends boolean = true> {
       };
   tokenHash?: T;
   ipHash?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vendors_select".
+ */
+export interface VendorsSelect<T extends boolean = true> {
+  name?: T;
+  businessName?: T;
+  slug?: T;
+  phone?: T;
+  phoneVerified?: T;
+  category?: T;
+  otherService?: T;
+  areas?: T;
+  about?: T;
+  priceCard?:
+    | T
+    | {
+        item?: T;
+        unit?: T;
+        price?: T;
+        gstIncluded?: T;
+        note?: T;
+        id?: T;
+      };
+  startingPrice?: T;
+  cover?: T;
+  gallery?: T;
+  instagram?: T;
+  languages?: T;
+  blockedDates?:
+    | T
+    | {
+        date?: T;
+        note?: T;
+        id?: T;
+      };
+  application?: T;
+  listingStatus?: T;
+  reviewNote?: T;
+  submittedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers_select".
+ */
+export interface CustomersSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
+  phoneVerified?: T;
+  city?: T;
+  eventDate?: T;
+  shortlist?: T;
+  marketingConsent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vendor-media_select".
+ */
+export interface VendorMediaSelect<T extends boolean = true> {
+  vendor?: T;
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        feature?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enquiries_select".
+ */
+export interface EnquiriesSelect<T extends boolean = true> {
+  summary?: T;
+  customer?: T;
+  vendor?: T;
+  eventType?: T;
+  eventDate?: T;
+  guests?: T;
+  area?: T;
+  budget?: T;
+  message?: T;
+  status?: T;
+  unreadFor?: T;
+  thread?:
+    | T
+    | {
+        from?: T;
+        text?: T;
+        quote?: T;
+        at?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

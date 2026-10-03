@@ -14,8 +14,9 @@ admin/back-end share one deployment.
 - **Media:** local filesystem locally, Vercel Blob in production (when
   `BLOB_READ_WRITE_TOKEN` is set).
 
-> Scope note (V1): no client login, payments, or client portal — by design.
-> The `/admin` login is for the business owner/team only.
+> Accounts: the `/admin` login is for the business owner/team. Vendors and couples have
+> their own logins (`/vendors/login`, `/account/login`) for the vendor marketplace.
+> No online payments yet.
 
 ## Requirements
 - Node.js ≥ 20.9
@@ -47,6 +48,11 @@ Useful scripts:
 - `npm run generate:types` — regenerate `src/payload-types.ts`
 - `npm run generate:importmap` — regenerate the admin import map
 - `npm run seed` — seed demo content (set `FORCE_SEED=1` to re-run over existing data)
+- `npm run seed:ai` — add sample Zenfest AI options and prices to the local services
+  (local demo only; enter real prices in the live admin)
+- `npm run seed:marketplace` — add 4 live demo vendors (with placeholder photos) and one
+  demo couple to the **local SQLite** database. The demo logins and their password are in
+  `src/seed/marketplaceDemo.ts`. It refuses to run against Postgres.
 
 ## How leads work
 The inquiry form and vendor form POST to Payload's REST API and store each
@@ -54,6 +60,22 @@ submission in the database (visible under **Leads** and **Vendor Applications**
 in `/admin`). When SMTP is configured (see `.env.example`), a notification email
 is also sent to `LEAD_NOTIFICATION_EMAIL`. Every page also offers Call and
 WhatsApp actions, since that's how most clients get in touch.
+
+### Vendor marketplace (vendor + couple accounts)
+- **Vendors** sign up at `/vendors/signup` (free), build their listing in
+  `/vendors/dashboard`, and press **Send for review**. The team gets an email, opens
+  **Admin → Marketplace → Vendors**, checks the listing and sets **Listing status → Live**
+  (or **Needs changes** with a note the vendor sees). Photo and cake vendors also answer the
+  usual questionnaire, which still lands in **Vendor Applications** and Airtable.
+- **Couples** sign up at `/account/signup`, browse `/marketplace`, shortlist (♡) and send
+  **Request a quote**. The vendor is emailed, replies from the dashboard (optionally with a
+  quote), and can mark it booked (which blocks the date). The couple sees the vendor's
+  phone once they reply. "Plan with Zenfest" in the couple's account turns their shortlist
+  into a **Lead** for the planning team.
+- Everything is also in the admin: **Customers**, **Marketplace Enquiries**, **Vendor
+  Photos**. Logging in as a vendor or couple in the same browser logs you out of `/admin`.
+- **Password resets need SMTP in production** (`SMTP_*` below). Locally, the reset link is
+  printed in the dev-server console.
 
 ### Gift registry
 Families make a free registry at `/registry/create` and share `/r/<slug>` with guests.
@@ -232,7 +254,8 @@ One-time Meta setup (free):
      `serverURL`, CORS and CSRF, so a wrong value makes the admin panel and the
      public forms fail even though the build succeeds.
    - `BLOB_READ_WRITE_TOKEN` — the Vercel Blob token
-   - (optional) `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`,
+   - (optional, but **required for vendor/couple password resets** and marketplace
+     emails) `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`,
      `LEAD_NOTIFICATION_EMAIL`
    - (optional) `AIRTABLE_TOKEN`, `AIRTABLE_PHOTO_BASE_ID`, `AIRTABLE_PHOTO_TABLE`
      — see "Vendor applications → Airtable"

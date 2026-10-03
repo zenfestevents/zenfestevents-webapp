@@ -1,6 +1,7 @@
 import { APIError, type CollectionBeforeChangeHook, type CollectionConfig } from 'payload'
 
 import { anyone, authenticated } from '../access'
+import { linkVendorApplication } from '../hooks/linkVendorApplication'
 import { notifySubmission } from '../hooks/notifySubmission'
 import { requireVerifiedPhone } from '../hooks/requireVerifiedPhone'
 import { syncToAirtable } from '../hooks/syncToAirtable'
@@ -92,6 +93,7 @@ export const VendorApplications: CollectionConfig = {
         'message',
       ]),
       syncToAirtable,
+      linkVendorApplication,
     ],
   },
   fields: [
@@ -286,6 +288,15 @@ export const VendorApplications: CollectionConfig = {
       admin: { description: 'Link to work samples / Instagram / website.' },
     },
     { name: 'message', type: 'textarea' },
+    {
+      // Set server-side (requireVerifiedPhone) when a logged-in marketplace vendor
+      // answers this questionnaire from their dashboard; never from the request.
+      name: 'vendor',
+      type: 'relationship',
+      relationTo: 'vendors',
+      label: 'Marketplace account',
+      admin: { position: 'sidebar', readOnly: true },
+    },
     {
       name: 'status',
       type: 'select',

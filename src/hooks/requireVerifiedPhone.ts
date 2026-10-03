@@ -15,6 +15,19 @@ export const requireVerifiedPhone: CollectionBeforeChangeHook = async ({
   req,
 }) => {
   if (operation !== 'create') return data
+  // Only ever set from the session below, never from the request body.
+  delete data.vendor
+
+  // A logged-in marketplace vendor answering the questionnaire from their
+  // dashboard: their account's phone (verified at sign-up) is used as-is.
+  if (req.user?.collection === 'vendors') {
+    const vendor = req.user as { id: number | string; phone?: string; phoneVerified?: boolean | null }
+    delete data.phoneVerification
+    data.vendor = vendor.id
+    data.phone = vendor.phone
+    data.phoneVerified = Boolean(vendor.phoneVerified)
+    return data
+  }
 
   const claim = data.phoneVerification as { id?: unknown; token?: unknown } | undefined
   delete data.phoneVerification

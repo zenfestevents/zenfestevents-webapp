@@ -3,6 +3,7 @@ import sharp from 'sharp'
 import { getPayload } from 'payload'
 import config from '../payload.config'
 import { AI_DEMO } from './aiDemo'
+import { seedMarketplace } from './marketplaceDemo'
 
 /* ---------- placeholder image generator (brand-safe, offline) ---------- */
 const PLUM = '#2e1026'
@@ -183,6 +184,9 @@ async function run() {
       },
     })
   }
+
+  /* ---------- Marketplace demo (local SQLite only) ---------- */
+  await seedMarketplace(payload)
 
   payload.logger.info('✅ Seed complete.')
   process.exit(0)

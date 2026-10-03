@@ -31,6 +31,10 @@ import { Polls } from './collections/Polls'
 import { PollVotes } from './collections/PollVotes'
 import { PollVoters } from './collections/PollVoters'
 import { AiConversations } from './collections/AiConversations'
+import { Vendors } from './collections/Vendors'
+import { Customers } from './collections/Customers'
+import { VendorMedia } from './collections/VendorMedia'
+import { Enquiries } from './collections/Enquiries'
 import { SiteSettings } from './globals/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
@@ -76,6 +80,10 @@ export default buildConfig({
     PollVotes,
     PollVoters,
     AiConversations,
+    Vendors,
+    Customers,
+    VendorMedia,
+    Enquiries,
   ],
   globals: [SiteSettings],
   editor: lexicalEditor(),
@@ -115,7 +123,7 @@ export default buildConfig({
             enabled: true,
             // Vendor uploads (FSSAI certificates) stay behind Payload's access
             // control: they're served via /api, not straight from the Blob URL.
-            collections: { media: true, 'vendor-uploads': true },
+            collections: { media: true, 'vendor-uploads': true, 'vendor-media': true },
             token: process.env.BLOB_READ_WRITE_TOKEN,
           }),
         ]

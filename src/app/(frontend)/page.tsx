@@ -14,6 +14,10 @@ import { pollVerifyMode } from '../../lib/voterVerification'
 import { MeetZenfestAI } from '../../components/ai/MeetZenfestAI'
 import { getAgentProfiles } from '../../lib/ai/knowledge'
 import { aiAvailable } from '../../lib/ai/status'
+import { VendorCard } from '../../components/market/VendorCard'
+import { listVendors, type PublicVendor } from '../../lib/marketplace'
+import { MARKET_CATEGORIES } from '../../lib/marketplaceOptions'
+import { getCustomer } from '../../lib/session'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,12 +49,24 @@ async function getHomeData() {
   }
 }
 
+/** Newest live marketplace listings and the visitor's shortlist (empty if the DB is down). */
+async function getHomeMarket(): Promise<{ vendors: PublicVendor[]; saved: Set<number> }> {
+  try {
+    const [vendors, customer] = await Promise.all([listVendors({ sort: 'new' }), getCustomer()])
+    const saved = new Set((customer?.shortlist ?? []).map((s) => (typeof s === 'object' ? s.id : s)))
+    return { vendors: vendors.slice(0, 4), saved }
+  } catch {
+    return { vendors: [], saved: new Set() }
+  }
+}
+
 export default async function HomePage() {
-  const [data, settings, homePoll, agents] = await Promise.all([
+  const [data, settings, homePoll, agents, market] = await Promise.all([
     getHomeData(),
     getSiteSettings(),
     getHomePoll(),
     getAgentProfiles(),
+    getHomeMarket(),
   ])
   const hero = { ...SITE_FALLBACK.hero, ...(settings?.hero || {}) }
   const wa = whatsappLink(settings?.contact?.whatsapp, DEFAULT_WA_MESSAGE)
@@ -67,6 +83,46 @@ export default async function HomePage() {
       {aiAvailable(settings) && (
         <MeetZenfestAI headline={settings.ai?.bandHeadline || 'Plan your whole event with Zenfest AI'} agents={agents} />
       )}
+
+      {/* ---------- MARKETPLACE: the DIY lane — book vendors directly ---------- */}
+      <section className="section band-soft home-market">
+        <div className="container home-market__inner">
+          <Reveal className="home-market__intro">
+            <p className="eyebrow">Zenfest marketplace</p>
+            <h2 className="display-l">
+              Book vendors <span className="accent">directly</span>
+            </h2>
+            <p className="lede">
+              Doing it yourself? Compare photographers, makeup artists, decorators, caterers and halls across
+              Chennai — real prices upfront, dates you can trust, every listing checked by our team.
+            </p>
+            <ul className="home-market__cats">
+              {MARKET_CATEGORIES.filter(([v]) => v !== 'other').map(([v, label]) => (
+                <li key={v}>
+                  <Link href={`/marketplace/${v}`}>{label}</Link>
+                </li>
+              ))}
+            </ul>
+            <div className="btn-row">
+              <Link className="btn btn--primary" href="/marketplace">
+                Browse the marketplace
+              </Link>
+              <Link className="home-market__vendor-link" href="/vendors">
+                Are you a vendor? List free →
+              </Link>
+            </div>
+          </Reveal>
+          {market.vendors.length > 0 && (
+            <div className="home-market__grid">
+              {market.vendors.map((v, i) => (
+                <Reveal key={v.id} delay={i * 70}>
+                  <VendorCard vendor={v} shortlisted={market.saved.has(v.id)} />
+                </Reveal>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* ---------- FEATURED WORK ---------- */}
       <section className="section">

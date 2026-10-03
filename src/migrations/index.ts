@@ -4,6 +4,7 @@ import * as migration_20261001_044341_host_applications from './20261001_044341_
 import * as migration_20261001_111304_gift_registry from './20261001_111304_gift_registry';
 import * as migration_20261001_114626_polls from './20261001_114626_polls';
 import * as migration_20261002_132939_zenfest_ai from './20261002_132939_zenfest_ai';
+import * as migration_20261003_183428_marketplace_accounts from './20261003_183428_marketplace_accounts';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20261002_132939_zenfest_ai.up,
     down: migration_20261002_132939_zenfest_ai.down,
-    name: '20261002_132939_zenfest_ai'
+    name: '20261002_132939_zenfest_ai',
+  },
+  {
+    up: migration_20261003_183428_marketplace_accounts.up,
+    down: migration_20261003_183428_marketplace_accounts.down,
+    name: '20261003_183428_marketplace_accounts'
   },
 ];

@@ -69,6 +69,23 @@ export const MIN_ORDERS = [
 /** Bakers must list at least this many flavours with their per-kg rate. */
 export const MIN_FLAVOURS = 3
 
+/**
+ * Major Chennai areas, alphabetical. The vendor form saves the chosen one in
+ * `vendor-applications.city`; marketplace vendors pick the areas they serve.
+ */
+export const CHENNAI_AREAS = [
+  'Adyar', 'Alwarpet', 'Ambattur', 'Anna Nagar', 'Ashok Nagar', 'Avadi',
+  'Besant Nagar', 'Chengalpattu', 'Chromepet', 'ECR', 'Egmore', 'Guduvanchery',
+  'Guindy', 'Kelambakkam', 'Kilpauk', 'KK Nagar', 'Kodambakkam', 'Kolathur',
+  'Madhavaram', 'Madipakkam', 'Medavakkam', 'Mogappair', 'Mylapore',
+  'Nungambakkam', 'OMR', 'Pallavaram', 'Perambur', 'Perungudi', 'Poonamallee',
+  'Porur', 'Purasaiwakkam', 'Red Hills', 'Royapettah', 'Saidapet',
+  'Sholinganallur', 'Sriperumbudur', 'T. Nagar', 'Tambaram', 'Thiruvanmiyur',
+  'Thiruvottiyur', 'Tiruvallur', 'Tondiarpet', 'Triplicane', 'Vadapalani',
+  'Valasaravakkam', 'Velachery', 'Vepery', 'Virugambakkam', 'Washermanpet',
+  'West Mambalam',
+]
+
 export const toOptions = (list: readonly (readonly [string, string])[]) =>
   list.map(([value, label]) => ({ value, label }))
 
