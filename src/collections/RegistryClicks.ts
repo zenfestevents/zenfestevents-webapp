@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../access'
 
-/** One row per guest sent to a store from a registry — affiliate click tracking. */
+/** One row per visitor sent to a partner store from a registry or the shop — affiliate click tracking. */
 export const RegistryClicks: CollectionConfig = {
   slug: 'registry-clicks',
   labels: { singular: 'Store click', plural: 'Store clicks' },
@@ -14,12 +14,13 @@ export const RegistryClicks: CollectionConfig = {
   },
   admin: {
     group: 'Gift Registry',
-    defaultColumns: ['merchant', 'item', 'event', 'affiliated', 'createdAt'],
+    defaultColumns: ['merchant', 'product', 'item', 'event', 'affiliated', 'createdAt'],
   },
   defaultSort: '-createdAt',
   fields: [
     { name: 'item', type: 'relationship', relationTo: 'registry-items', index: true },
     { name: 'event', type: 'relationship', relationTo: 'registry-events', index: true },
+    { name: 'product', type: 'relationship', relationTo: 'products', index: true },
     { name: 'merchant', type: 'text' },
     {
       name: 'affiliated',

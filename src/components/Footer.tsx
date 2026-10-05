@@ -40,6 +40,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
             <h4 className="site-footer__heading">Plan your event</h4>
             <Link href="/plan">Zenfest AI planner</Link>
             <Link href="/marketplace">Vendor marketplace</Link>
+            <Link href="/shop">Zenfest Shop</Link>
             <Link href="/registry">Gift registry</Link>
             <Link href="/polls">Polls</Link>
             <Link href="/earn">Earn from events</Link>

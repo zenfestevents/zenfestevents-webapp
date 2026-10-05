@@ -37,6 +37,7 @@ npm run start            # run production build locally
 npm run seed             # seed demo content (FORCE_SEED=1 to re-run over data)
 npm run seed:ai          # add sample Zenfest AI options/prices to local services (never prod)
 npm run seed:marketplace # 4 live demo vendors + 1 couple, local SQLite only (logins in src/seed/marketplaceDemo.ts)
+npm run seed:shop        # 15 demo shop products (affiliate + seller), local SQLite only; run seed:marketplace first
 npm run migrate:create   # new Postgres migration after schema changes (needs a postgres DATABASE_URI, no DB)
 npm run generate:types   # regenerate src/payload-types.ts after schema changes
 npm run generate:importmap  # regenerate the admin import map
@@ -62,6 +63,8 @@ src/
                           session/route.ts (header button), actions.ts
     marketplace/          /marketplace, /marketplace/[category] (+ 'all'),
                           /marketplace/v/[slug] (vendor listing + quote form)
+    shop/                 Zenfest Shop: /shop, /shop/[occasion] (+ 'all'), /shop/p/[slug],
+                          /shop/go/[id] (affiliate redirect), /shop/policies
     earn/page.tsx         "Earn from events" — families apply to host foreign guests
     plan/                 Zenfest AI: full-screen chat page, chat/route.ts (NDJSON
                           stream; kickoff after the intake), actions.ts (startChat =
@@ -69,7 +72,7 @@ src/
     layout.tsx            Root layout, Header, Footer, MobileCTABar
     styles.css            Design tokens (colors, typography, spacing)
     parts.css             Component & section styles
-    registry.css, polls.css, ai.css, marketplace.css   Feature styles (imported in that order)
+    registry.css, polls.css, ai.css, marketplace.css, shop.css   Feature styles (imported in that order)
   app/(payload)/        Payload admin (generated boilerplate — avoid hand-editing)
   collections/          Users, Media, Categories, Services (+ `ai` specialist group),
                         Packages, Projects, Leads, Signups, VendorApplications,
@@ -490,6 +493,36 @@ src/
     enum migrations; categories/units/statuses *are* enums → `migrate:create` on change.
   - `/signup` is still the ₹100-offer form — account pages live at `/account/signup` and
     `/vendors/signup`.
+- **Zenfest Shop (`/shop`, `collections/Products.ts`, `lib/shop.ts`, `lib/shopOptions.ts`) —
+  phase A of an event-only store.** The owner wants affiliate + dropshipping + a seller
+  marketplace mixed, **without GST** (turnover < ₹15L) but selling all over India. So Zenfest
+  is a **platform, never the seller of goods**: each product's `source` is `affiliate` (bought
+  on Amazon/Flipkart/FNP via `/shop/go/[id]` → `toAffiliateUrl()`, click logged in
+  `registry-clicks` with `product`) or `seller` (a marketplace vendor sells, ships and is paid
+  directly; Zenfest bills commission later). `zenfest` (own stock) exists in the enum but is
+  filtered out everywhere until GST — selling goods inter-state needs GST from ₹1, and
+  collecting buyers' money for sellers makes Zenfest a TCS-collecting e-commerce operator.
+  Research and phases B/C are in `IDEAS.md`. Easy to get wrong:
+  - `lib/shop.ts` is the privacy boundary (like `lib/marketplace.ts`): only `published`, non-
+    `zenfest` products; seller products appear only while their vendor listing is live; sellers
+    shown by business name only.
+  - Every card/page states who sells, delivery and returns ("Sold by" box) — required for
+    mixing the models honestly; affiliate pages carry a commission disclosure.
+  - `occasions` is text `hasMany` validated against `SHOP_OCCASIONS` (no enum migration);
+    `productType`, `source`, `shipsTo` are enums → `migrate:create` on change.
+  - **The gift registry lives inside the shop**: nav "Gift Registry" became "Shop" (still nine
+    links; `also: ['/registry']` keeps it lit on registry pages). The registry dashboard's
+    "Pick gifts from the Zenfest Shop" stores `{slug, key, title}` in localStorage
+    (`zenfest-registry-host`, `components/shop/AddToRegistry.tsx`); product pages then call
+    `addProductToRegistry` (registry/actions.ts), which re-checks the manage key, dedupes per
+    product and stores an `affiliate_link` item with `product` set and an **absolute**
+    `imageUrl` (the host's editor only accepts https). `/r/[slug]/go/[itemId]` sends gifts with
+    a `product` to its partner store (tagged) or its shop page — never wraps a zenfestevents.in
+    URL with the affiliate template.
+  - `/shop/policies` holds the E-commerce Rules text (who sells, returns, grievance officer —
+    the officer's name is still a placeholder constant in that file).
+  - Styles in `shop.css` (after `marketplace.css`), class prefix `sp-`; reuses `mk-hero`,
+    `mk-cats`, `mk-section-head`.
 - **"Earn from events" (`/earn`) is hosts-only.** Modelled on joinmywedding.com: families
   in Tamil Nadu apply (`HostForm` → `/api/host-applications`) to let foreign travellers
   attend their wedding or function for a fee. Guest browsing, booking and payment are

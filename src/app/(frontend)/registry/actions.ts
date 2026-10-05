@@ -16,6 +16,7 @@ import {
   verifySecret,
 } from '../../../lib/registry'
 import { scrapeMetadata, type LinkPreview } from '../../../lib/scrapeMetadata'
+import { findLiveProductById, toPublicProduct } from '../../../lib/shop'
 import {
   GUEST_SIDES,
   ITEM_TYPES,
@@ -239,6 +240,62 @@ export async function saveItem(slug: string, key: string, input: ItemInput): Pro
         overrideAccess: true,
       })
     }
+    refresh()
+    return { ok: true }
+  } catch (err) {
+    return fail(err)
+  }
+}
+
+/**
+ * "Add to my registry" on a Zenfest Shop product. The gift keeps a link to the
+ * product, so a guest's "Buy" goes to its partner store or seller (see
+ * /r/[slug]/go/[itemId]). Adding the same product twice is a no-op.
+ */
+export async function addProductToRegistry(
+  slug: string,
+  key: string,
+  productId: number,
+): Promise<Result<{ already?: boolean }>> {
+  try {
+    const event = await hostEvent(slug, key)
+    const product = await findLiveProductById(Number(productId))
+    if (!product) return { ok: false, error: 'This product is no longer in the shop.' }
+    const payload = await getPayloadClient()
+
+    const existing = await payload.count({
+      collection: 'registry-items',
+      where: { and: [{ event: { equals: event.id } }, { product: { equals: product.id } }] },
+      overrideAccess: true,
+    })
+    if (existing.totalDocs) return { ok: true, already: true }
+
+    const { totalDocs } = await payload.count({
+      collection: 'registry-items',
+      where: { event: { equals: event.id } },
+      overrideAccess: true,
+    })
+    if (totalDocs >= 300) return { ok: false, error: 'A registry can hold up to 300 gifts.' }
+
+    const pub = toPublicProduct(await payload.findByID({ collection: 'products', id: product.id, depth: 1, overrideAccess: true }))
+    const img = pub.images[0]?.card || ''
+    await payload.create({
+      collection: 'registry-items',
+      data: {
+        event: event.id,
+        itemType: 'affiliate_link',
+        title: pub.title.slice(0, 160),
+        price: pub.price,
+        // Absolute, so the host's gift editor (https only) can still save the item.
+        imageUrl: img.startsWith('/') ? `${siteUrl()}${img}` : img,
+        originalUrl: `${siteUrl()}/shop/p/${pub.slug}`,
+        merchant: pub.source === 'affiliate' ? pub.merchant : pub.seller?.businessName || 'Zenfest Shop',
+        note: '',
+        product: product.id,
+        sortOrder: totalDocs,
+      },
+      overrideAccess: true,
+    })
     refresh()
     return { ok: true }
   } catch (err) {

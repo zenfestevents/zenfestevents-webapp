@@ -6,6 +6,7 @@ import * as migration_20261001_114626_polls from './20261001_114626_polls';
 import * as migration_20261002_132939_zenfest_ai from './20261002_132939_zenfest_ai';
 import * as migration_20261003_183428_marketplace_accounts from './20261003_183428_marketplace_accounts';
 import * as migration_20261005_142133_email_verification_google from './20261005_142133_email_verification_google';
+import * as migration_20261005_173802_zenfest_shop from './20261005_173802_zenfest_shop';
 
 export const migrations = [
   {
@@ -46,6 +47,11 @@ export const migrations = [
   {
     up: migration_20261005_142133_email_verification_google.up,
     down: migration_20261005_142133_email_verification_google.down,
-    name: '20261005_142133_email_verification_google'
+    name: '20261005_142133_email_verification_google',
+  },
+  {
+    up: migration_20261005_173802_zenfest_shop.up,
+    down: migration_20261005_173802_zenfest_shop.down,
+    name: '20261005_173802_zenfest_shop'
   },
 ];

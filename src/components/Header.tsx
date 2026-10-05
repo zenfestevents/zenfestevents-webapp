@@ -10,17 +10,21 @@ import { AccountButton } from './market/AccountButton'
 
 const SIGNUP_ENABLED = false
 
-const NAV = [
+const NAV: { href: string; label: string; also?: string[] }[] = [
   { href: '/marketplace', label: 'Marketplace' },
   { href: '/gallery', label: 'Our Work' },
   { href: '/services', label: 'Services' },
   { href: '/packages', label: 'Packages' },
   { href: '/earn', label: 'Earn from events' },
-  { href: '/registry', label: 'Gift Registry' },
+  // The gift registry is part of the shop now; its pages light up "Shop".
+  { href: '/shop', label: 'Shop', also: ['/registry'] },
   { href: '/polls', label: 'Polls' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ]
+
+const isActive = (pathname: string, item: (typeof NAV)[number]) =>
+  [item.href, ...(item.also ?? [])].some((h) => pathname === h || pathname.startsWith(`${h}/`))
 
 // `settings` is unused since WhatsApp left the menu; kept so layout.tsx needn't change.
 export function Header(_props: { settings: SiteSettings }) {
@@ -63,7 +67,7 @@ export function Header(_props: { settings: SiteSettings }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`site-nav__link ${pathname === item.href || pathname.startsWith(`${item.href}/`) ? 'is-active' : ''}`}
+              className={`site-nav__link ${isActive(pathname, item) ? 'is-active' : ''}`}
             >
               {item.label}
             </Link>

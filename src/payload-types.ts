@@ -95,6 +95,7 @@ export interface Config {
     customers: Customer;
     'vendor-media': VendorMedia;
     enquiries: Enquiry;
+    products: Product;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -132,6 +133,7 @@ export interface Config {
     customers: CustomersSelect<false> | CustomersSelect<true>;
     'vendor-media': VendorMediaSelect<false> | VendorMediaSelect<true>;
     enquiries: EnquiriesSelect<false> | EnquiriesSelect<true>;
+    products: ProductsSelect<false> | ProductsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -967,12 +969,57 @@ export interface RegistryItem {
   originalUrl?: string | null;
   merchant?: string | null;
   note?: string | null;
+  product?: (number | null) | Product;
   targetAmount?: number | null;
   /**
    * Updated by the host as shagun arrives (guests pay the family directly).
    */
   raisedAmount?: number | null;
   sortOrder?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Event products in the Zenfest Shop. Set "Status" to Live to show one on the site.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: number;
+  title: string;
+  /**
+   * Web address. Filled from the title if left empty.
+   */
+  slug?: string | null;
+  status: 'draft' | 'pending' | 'published' | 'paused' | 'rejected';
+  featured?: boolean | null;
+  sortOrder?: number | null;
+  source: 'affiliate' | 'seller' | 'zenfest';
+  /**
+   * wedding, haldi, mehendi, sangeet, reception, engagement, birthday, baby-shower, housewarming, pooja, corporate
+   */
+  occasions: string[];
+  productType: 'decor' | 'return-gifts' | 'gifts' | 'outfits' | 'jewellery' | 'stationery' | 'pooja' | 'party';
+  price: number;
+  mrp?: number | null;
+  description?: string | null;
+  images?: (number | Media)[] | null;
+  /**
+   * https:// link to the product photo, e.g. from the partner store.
+   */
+  imageUrl?: string | null;
+  affiliateUrl?: string | null;
+  /**
+   * Filled from the link.
+   */
+  merchant?: string | null;
+  vendor?: (number | null) | Vendor;
+  sellerImages?: (number | VendorMedia)[] | null;
+  shipsTo?: ('india' | 'state') | null;
+  dispatchDays?: number | null;
+  stock?: number | null;
+  returnPolicy?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1001,6 +1048,7 @@ export interface RegistryClick {
   id: number;
   item?: (number | null) | RegistryItem;
   event?: (number | null) | RegistryEvent;
+  product?: (number | null) | Product;
   merchant?: string | null;
   affiliated?: boolean | null;
   updatedAt: string;
@@ -1320,6 +1368,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'enquiries';
         value: number | Enquiry;
+      } | null)
+    | ({
+        relationTo: 'products';
+        value: number | Product;
       } | null);
   globalSlug?: string | null;
   user:
@@ -1766,6 +1818,7 @@ export interface RegistryItemsSelect<T extends boolean = true> {
   originalUrl?: T;
   merchant?: T;
   note?: T;
+  product?: T;
   targetAmount?: T;
   raisedAmount?: T;
   sortOrder?: T;
@@ -1793,6 +1846,7 @@ export interface RegistryClaimsSelect<T extends boolean = true> {
 export interface RegistryClicksSelect<T extends boolean = true> {
   item?: T;
   event?: T;
+  product?: T;
   merchant?: T;
   affiliated?: T;
   updatedAt?: T;
@@ -2093,6 +2147,35 @@ export interface EnquiriesSelect<T extends boolean = true> {
         at?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_select".
+ */
+export interface ProductsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  status?: T;
+  featured?: T;
+  sortOrder?: T;
+  source?: T;
+  occasions?: T;
+  productType?: T;
+  price?: T;
+  mrp?: T;
+  description?: T;
+  images?: T;
+  imageUrl?: T;
+  affiliateUrl?: T;
+  merchant?: T;
+  vendor?: T;
+  sellerImages?: T;
+  shipsTo?: T;
+  dispatchDays?: T;
+  stock?: T;
+  returnPolicy?: T;
   updatedAt?: T;
   createdAt?: T;
 }

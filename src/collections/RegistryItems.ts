@@ -39,6 +39,13 @@ export const RegistryItems: CollectionConfig = {
     { name: 'merchant', type: 'text' },
     { name: 'note', type: 'textarea', label: 'Note for guests (colour, size, where to buy)' },
     {
+      // Added from the Zenfest Shop: "Buy" goes to the product (its store or seller), not `originalUrl`.
+      name: 'product',
+      type: 'relationship',
+      relationTo: 'products',
+      admin: { position: 'sidebar' },
+    },
+    {
       name: 'targetAmount',
       type: 'number',
       min: 0,

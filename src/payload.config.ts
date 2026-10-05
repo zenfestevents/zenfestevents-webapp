@@ -35,6 +35,7 @@ import { Vendors } from './collections/Vendors'
 import { Customers } from './collections/Customers'
 import { VendorMedia } from './collections/VendorMedia'
 import { Enquiries } from './collections/Enquiries'
+import { Products } from './collections/Products'
 import { SiteSettings } from './globals/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
@@ -84,6 +85,7 @@ export default buildConfig({
     Customers,
     VendorMedia,
     Enquiries,
+    Products,
   ],
   globals: [SiteSettings],
   editor: lexicalEditor(),

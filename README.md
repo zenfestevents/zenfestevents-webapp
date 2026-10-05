@@ -84,6 +84,16 @@ WhatsApp actions, since that's how most clients get in touch.
   "finish signing up" form (phone, business…); an existing email account is linked on its
   first Google sign-in.
 
+### Zenfest Shop
+`/shop` is an event-only store: decor, props, return gifts and outfits by occasion (haldi,
+mehendi, sangeet, wedding, birthday…). Add products in **/admin → Shop → Products**: choose
+**Sold by** (partner store with its product link, or a marketplace vendor), the occasions,
+price/MRP and photos, then set **Status** to **Live**. Partner-store "Buy" buttons go through
+`/shop/go/<id>`, which adds your affiliate tag (`AMAZON_ASSOCIATE_TAG` /
+`AFFILIATE_REDIRECT_TEMPLATE`) and logs the click. Any product can be added to a gift registry
+("Pick gifts from the Zenfest Shop" on the registry dashboard). Locally, `npm run seed:shop`
+adds demo products. Ideas for the next phases are in [IDEAS.md](IDEAS.md).
+
 ### Gift registry
 Families make a free registry at `/registry/create` and share `/r/<slug>` with guests.
 There are no host accounts: each registry gets a secret **manage link**
