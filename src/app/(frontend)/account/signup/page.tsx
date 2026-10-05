@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 
 import { AuthForm } from '../../../../components/market/AuthForm'
 import { AuthShell, param, type SearchParams } from '../../../../components/market/AuthShell'
+import { googleEnabled, googleNotice } from '../../../../lib/googleAuth'
 import { verifyMode } from '../../../../lib/phoneVerification'
 import { getCustomer, safeNext } from '../../../../lib/session'
 
@@ -22,7 +23,8 @@ const POINTS = [
 ] as const
 
 export default async function CustomerSignupPage({ searchParams }: { searchParams: SearchParams }) {
-  const next = param((await searchParams).next)
+  const sp = await searchParams
+  const next = param(sp.next)
   if (await getCustomer()) redirect(safeNext(next, '/account'))
   return (
     <AuthShell
@@ -32,7 +34,14 @@ export default async function CustomerSignupPage({ searchParams }: { searchParam
       points={POINTS}
       formTitle="Create your account"
     >
-      <AuthForm kind="customer" mode="signup" verifyMode={verifyMode()} next={next || undefined} />
+      <AuthForm
+        kind="customer"
+        mode="signup"
+        verifyMode={verifyMode()}
+        next={next || undefined}
+        google={googleEnabled()}
+        notice={googleNotice(param(sp.google))}
+      />
     </AuthShell>
   )
 }

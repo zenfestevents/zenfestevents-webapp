@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminOrSelf, isAdmin } from '../access'
+import { adminOrSelf, isAdmin, isAdminField } from '../access'
 import { accountAuth } from './accountAuth'
 
 /**
@@ -11,7 +11,7 @@ import { accountAuth } from './accountAuth'
 export const Customers: CollectionConfig = {
   slug: 'customers',
   labels: { singular: 'Customer', plural: 'Customers' },
-  auth: accountAuth('/account/reset-password'),
+  auth: accountAuth({ reset: '/account/reset-password', verify: '/account/verify-email' }),
   access: {
     read: adminOrSelf('customers'),
     create: isAdmin,
@@ -34,6 +34,16 @@ export const Customers: CollectionConfig = {
       defaultValue: false,
       label: 'Phone verified on WhatsApp',
       admin: { position: 'sidebar', readOnly: true },
+    },
+    {
+      // Set when the account signs in with Google (lib/googleAuth.ts).
+      name: 'googleId',
+      type: 'text',
+      unique: true,
+      index: true,
+      label: 'Google account ID',
+      access: { create: isAdminField, read: isAdminField, update: isAdminField },
+      admin: { position: 'sidebar', readOnly: true, description: 'Set when they sign in with Google.' },
     },
     { name: 'city', type: 'text', label: 'Area / city' },
     { name: 'eventDate', type: 'date', label: 'Event date (if known)' },

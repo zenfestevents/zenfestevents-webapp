@@ -118,7 +118,9 @@ export async function seedMarketplace(payload: Payload) {
         priceCard: v.priceCard.map((r) => ({ ...r })),
         languages: [...v.languages],
         listingStatus: 'published',
+        _verified: true,
       },
+      disableVerificationEmail: true,
       overrideAccess: true,
     })
     const photos: number[] = []
@@ -149,7 +151,9 @@ export async function seedMarketplace(payload: Payload) {
       name: 'Priya & Arjun',
       phone: '9000000001',
       city: 'Tambaram',
+      _verified: true,
     },
+    disableVerificationEmail: true,
     overrideAccess: true,
   })
   payload.logger.info('Seeded couple account couple@zenfest.test.')

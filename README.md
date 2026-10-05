@@ -74,8 +74,15 @@ WhatsApp actions, since that's how most clients get in touch.
   into a **Lead** for the planning team.
 - Everything is also in the admin: **Customers**, **Marketplace Enquiries**, **Vendor
   Photos**. Logging in as a vendor or couple in the same browser logs you out of `/admin`.
-- **Password resets need SMTP in production** (`SMTP_*` below). Locally, the reset link is
-  printed in the dev-server console.
+- **New accounts confirm their email** before they can log in (a link is emailed at
+  sign-up; the login page offers "Resend the confirmation email"). This needs SMTP: in
+  production without `SMTP_*`, accounts are created already confirmed so nobody is locked
+  out. **Password resets need SMTP in production** too. Locally, both links are printed in
+  the dev-server console.
+- **Continue with Google** (vendors and couples) appears on the log-in / sign-up pages
+  once `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` are set. New Google users fill a short
+  "finish signing up" form (phone, business…); an existing email account is linked on its
+  first Google sign-in.
 
 ### Gift registry
 Families make a free registry at `/registry/create` and share `/r/<slug>` with guests.
@@ -257,6 +264,8 @@ One-time Meta setup (free):
    - (optional, but **required for vendor/couple password resets** and marketplace
      emails) `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`,
      `LEAD_NOTIFICATION_EMAIL`
+   - (optional) `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — "Continue with Google" for
+     vendor/couple accounts (redirect URI `https://www.zenfestevents.in/auth/google/callback`)
    - (optional) `AIRTABLE_TOKEN`, `AIRTABLE_PHOTO_BASE_ID`, `AIRTABLE_PHOTO_TABLE`
      — see "Vendor applications → Airtable"
    - (optional) `WHATSAPP_*` — see "Phone verification (WhatsApp)"

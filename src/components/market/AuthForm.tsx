@@ -4,12 +4,20 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { forgotPassword, logIn, resetPassword, signUp } from '../../lib/authActions'
+import {
+  completeGoogleSignUp,
+  forgotPassword,
+  logIn,
+  resendVerification,
+  resetPassword,
+  signUp,
+} from '../../lib/authActions'
 import { MARKET_AREAS, MARKET_CATEGORIES, PASSWORD_MIN } from '../../lib/marketplaceOptions'
 import { PhoneVerify, type PhoneProof, type VerifyMode } from '../PhoneVerify'
 
 type Kind = 'vendor' | 'customer'
-type Mode = 'signup' | 'login' | 'forgot' | 'reset'
+/** `google` = the short finish-sign-up form after a new "Continue with Google". */
+type Mode = 'signup' | 'login' | 'forgot' | 'reset' | 'google'
 
 const PATHS = {
   vendor: { signup: '/vendors/signup', login: '/vendors/login', forgot: '/vendors/forgot-password' },
@@ -22,10 +30,16 @@ type Props = {
   verifyMode?: VerifyMode
   next?: string
   token?: string
+  /** Show "Continue with Google" (signup / login; only when it's configured). */
+  google?: boolean
+  /** A message from a redirect, e.g. a failed Google sign-in. */
+  notice?: string
+  /** `google` mode: the name and email Google gave us. */
+  prefill?: { name: string; email: string }
 }
 
 /** Sign-up / log-in / forgot / reset for vendor and couple accounts. */
-export function AuthForm({ kind, mode, verifyMode = 'off', next, token }: Props) {
+export function AuthForm({ kind, mode, verifyMode = 'off', next, token, google, notice, prefill }: Props) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -33,6 +47,10 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token }: Props)
   const [proof, setProof] = useState<PhoneProof>(null)
   const [category, setCategory] = useState('')
   const [showPw, setShowPw] = useState(false)
+  // After sign-up: "check your inbox" for this address. After a login refused for
+  // an unconfirmed email: offer to resend to the address they typed.
+  const [checkEmail, setCheckEmail] = useState('')
+  const [unconfirmed, setUnconfirmed] = useState('')
   const paths = PATHS[kind]
   const withNext = (p: string) => (next ? `${p}?next=${encodeURIComponent(next)}` : p)
 
@@ -45,7 +63,7 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token }: Props)
     }
     const fd = new FormData(form)
     const s = (k: string) => String(fd.get(k) ?? '')
-    if (mode === 'signup' && verifyMode !== 'off' && !proof) {
+    if ((mode === 'signup' || mode === 'google') && verifyMode !== 'off' && !proof) {
       setError('Verify your phone number on WhatsApp first.')
       return
     }
@@ -55,6 +73,7 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token }: Props)
     }
     setBusy(true)
     setError('')
+    setUnconfirmed('')
     try {
       if (mode === 'forgot') {
         const res = await forgotPassword({ kind, email: s('email') })
@@ -62,28 +81,36 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token }: Props)
         setSent(true)
         return
       }
+      const details = {
+        name: s('name'),
+        phone: s('phone'),
+        phoneProof: proof,
+        businessName: s('businessName'),
+        category: s('category'),
+        otherService: s('otherService'),
+        city: s('city'),
+        eventDate: s('eventDate'),
+        consent: fd.get('consent') === 'on',
+        next,
+        company: s('company'),
+      }
       const res =
-        mode === 'signup'
-          ? await signUp({
-              kind,
-              name: s('name'),
-              email: s('email'),
-              password: s('password'),
-              phone: s('phone'),
-              phoneProof: proof,
-              businessName: s('businessName'),
-              category: s('category'),
-              otherService: s('otherService'),
-              city: s('city'),
-              eventDate: s('eventDate'),
-              consent: fd.get('consent') === 'on',
-              next,
-              company: s('company'),
-            })
+        mode === 'google'
+          ? await completeGoogleSignUp(details)
+          : mode === 'signup'
+          ? await signUp({ kind, email: s('email'), password: s('password'), ...details })
           : mode === 'login'
             ? await logIn({ kind, email: s('email'), password: s('password'), next })
             : await resetPassword({ kind, token: token ?? '', password: s('password') })
-      if (!res.ok) throw new Error(res.error)
+      if (!res.ok) {
+        if ('unverified' in res && res.unverified) setUnconfirmed(s('email'))
+        throw new Error(res.error)
+      }
+      if ('checkEmail' in res) {
+        setCheckEmail(res.checkEmail)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        return
+      }
       router.push(res.redirect)
       router.refresh()
     } catch (err) {
@@ -91,6 +118,26 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token }: Props)
     } finally {
       setBusy(false)
     }
+  }
+
+  if (checkEmail) {
+    return (
+      <div className="form-success" role="status">
+        <h2 className="display-m">Confirm your email</h2>
+        <p className="muted">
+          We&apos;ve sent a link to <strong>{checkEmail}</strong>. Open it to switch on your account, then log in.
+          Don&apos;t see it in a few minutes? Check spam.
+        </p>
+        <ResendLink kind={kind} email={checkEmail} />
+        <p className="auth__switch muted">
+          Wrong email?{' '}
+          <button type="button" className="auth__linkbtn" onClick={() => setCheckEmail('')}>
+            Sign up again
+          </button>{' '}
+          · <Link href={paths.login}>Log in</Link>
+        </p>
+      </div>
+    )
   }
 
   if (sent) {
@@ -129,11 +176,41 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token }: Props)
 
   return (
     <form className="form auth" onSubmit={onSubmit} noValidate>
-      {mode === 'signup' && (
+      {google && (mode === 'signup' || mode === 'login') && (
+        <>
+          <a
+            className="btn auth__google"
+            href={`/auth/google?kind=${kind}${next ? `&next=${encodeURIComponent(next)}` : ''}`}
+          >
+            <GoogleMark />
+            Continue with Google
+          </a>
+          <p className="auth__or">
+            <span>or {mode === 'signup' ? 'sign up' : 'log in'} with email</span>
+          </p>
+        </>
+      )}
+
+      {notice && (
+        <p className="form__error" role="alert">
+          {notice}
+        </p>
+      )}
+
+      {mode === 'google' && prefill && (
+        <p className="auth__google-as">
+          <GoogleMark />
+          <span>
+            Signing up as <strong>{prefill.email}</strong>
+          </span>
+        </p>
+      )}
+
+      {(mode === 'signup' || mode === 'google') && (
         <>
           <label className="field">
             <span className="field__label">Your name *</span>
-            <input name="name" required autoComplete="name" minLength={2} />
+            <input name="name" required autoComplete="name" minLength={2} defaultValue={prefill?.name} />
           </label>
           {kind === 'vendor' && (
             <>
@@ -166,7 +243,7 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token }: Props)
         </>
       )}
 
-      {mode !== 'reset' && (
+      {mode !== 'reset' && mode !== 'google' && (
         <label className="field">
           <span className="field__label">Email {mode === 'signup' ? '*' : ''}</span>
           <input name="email" type="email" required autoComplete="email" spellCheck={false} />
@@ -183,7 +260,7 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token }: Props)
         </label>
       )}
 
-      {mode === 'signup' && kind === 'customer' && (
+      {(mode === 'signup' || mode === 'google') && kind === 'customer' && (
         <>
           <div className="form__row">
             <label className="field">
@@ -220,11 +297,12 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token }: Props)
           {error}
         </p>
       )}
+      {unconfirmed && <ResendLink kind={kind} email={unconfirmed} />}
 
       <button className="btn btn--primary form__submit" type="submit" disabled={busy}>
         {busy
           ? 'Please wait…'
-          : mode === 'signup'
+          : mode === 'signup' || mode === 'google'
             ? kind === 'vendor'
               ? 'Create vendor account'
               : 'Create account'
@@ -236,7 +314,7 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token }: Props)
       </button>
 
       <p className="auth__switch muted">
-        {mode === 'signup' ? (
+        {mode === 'signup' || mode === 'google' ? (
           <>
             Already have an account? <Link href={withNext(paths.login)}>Log in</Link>
           </>
@@ -249,5 +327,45 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token }: Props)
         )}
       </p>
     </form>
+  )
+}
+
+/** "Resend the confirmation email" — always says sent, so it can't reveal who has an account. */
+function ResendLink({ kind, email }: { kind: Kind; email: string }) {
+  const [state, setState] = useState<'idle' | 'busy' | 'sent'>('idle')
+  const [error, setError] = useState('')
+  async function resend() {
+    setState('busy')
+    setError('')
+    const res = await resendVerification({ kind, email })
+    if (res.ok) setState('sent')
+    else {
+      setError(res.error)
+      setState('idle')
+    }
+  }
+  return (
+    <p className="auth__resend">
+      {state === 'sent' ? (
+        <span role="status">Sent again — check your inbox (and spam).</span>
+      ) : (
+        <button type="button" className="btn btn--ghost" onClick={resend} disabled={state === 'busy'}>
+          {state === 'busy' ? 'Sending…' : 'Resend the confirmation email'}
+        </button>
+      )}
+      {error && <span className="form__error">{error}</span>}
+    </p>
+  )
+}
+
+/** Google's "G" in its brand colours (shown on the Google button only). */
+function GoogleMark() {
+  return (
+    <svg className="auth__google-mark" viewBox="0 0 48 48" width="18" height="18" aria-hidden="true">
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+    </svg>
   )
 }

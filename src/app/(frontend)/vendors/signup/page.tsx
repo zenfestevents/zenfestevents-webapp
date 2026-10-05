@@ -3,7 +3,8 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 import { AuthForm } from '../../../../components/market/AuthForm'
-import { AuthShell } from '../../../../components/market/AuthShell'
+import { AuthShell, param, type SearchParams } from '../../../../components/market/AuthShell'
+import { googleEnabled, googleNotice } from '../../../../lib/googleAuth'
 import { verifyMode } from '../../../../lib/phoneVerification'
 import { getVendor } from '../../../../lib/session'
 
@@ -21,8 +22,9 @@ const POINTS = [
   ['Your prices, upfront', 'Show an all-in price card so the people who call can afford you.'],
 ] as const
 
-export default async function VendorSignupPage() {
+export default async function VendorSignupPage({ searchParams }: { searchParams: SearchParams }) {
   if (await getVendor()) redirect('/vendors/dashboard')
+  const sp = await searchParams
   return (
     <AuthShell
       eyebrow="For vendors"
@@ -31,7 +33,13 @@ export default async function VendorSignupPage() {
       points={POINTS}
       formTitle="Create your vendor account"
     >
-      <AuthForm kind="vendor" mode="signup" verifyMode={verifyMode()} />
+      <AuthForm
+        kind="vendor"
+        mode="signup"
+        verifyMode={verifyMode()}
+        google={googleEnabled()}
+        notice={googleNotice(param(sp.google))}
+      />
     </AuthShell>
   )
 }

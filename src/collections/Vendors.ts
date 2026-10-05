@@ -31,7 +31,7 @@ const setStartingPrice: CollectionBeforeChangeHook = ({ data }) => {
 export const Vendors: CollectionConfig = {
   slug: 'vendors',
   labels: { singular: 'Vendor', plural: 'Vendors' },
-  auth: accountAuth('/vendors/reset-password'),
+  auth: accountAuth({ reset: '/vendors/reset-password', verify: '/vendors/verify-email' }),
   access: {
     read: adminOrSelf('vendors'),
     create: isAdmin,
@@ -58,6 +58,16 @@ export const Vendors: CollectionConfig = {
       defaultValue: false,
       label: 'Phone verified on WhatsApp',
       admin: { position: 'sidebar', readOnly: true },
+    },
+    {
+      // Set when the account signs in with Google (lib/googleAuth.ts).
+      name: 'googleId',
+      type: 'text',
+      unique: true,
+      index: true,
+      label: 'Google account ID',
+      access: { create: isAdminField, read: isAdminField, update: isAdminField },
+      admin: { position: 'sidebar', readOnly: true, description: 'Set when they sign in with Google.' },
     },
     { name: 'category', type: 'select', required: true, options: CATEGORY_OPTIONS },
     {

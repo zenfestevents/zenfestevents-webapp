@@ -17,6 +17,13 @@ export async function sendMail(to: string | undefined | null, subject: string, l
   }
 }
 
+/**
+ * Do new accounts have to confirm their email? Only when we can actually send
+ * the link: production without SMTP creates accounts already confirmed (as
+ * before this check existed), so nobody gets locked out. Dev prints the link.
+ */
+export const emailChecksOn = () => Boolean(process.env.SMTP_HOST) || process.env.NODE_ENV !== 'production'
+
 /** Copy to the team inbox, so they can see marketplace activity without logging in. */
 export function teamInbox() {
   return process.env.LEAD_NOTIFICATION_EMAIL || 'zenfestevents@gmail.com'

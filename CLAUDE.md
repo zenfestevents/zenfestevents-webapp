@@ -467,8 +467,24 @@ src/
     over Wi-Fi (`http://<LAN IP>:3000`) Server Actions see you as logged out — the LAN
     origin isn't in `csrf` (dev only).
   - Without SMTP, Payload logs only an email's subject; `collections/accountAuth.ts`
-    prints the **password-reset link** to the dev console so resets can be tested.
-    Production needs SMTP for resets.
+    prints the **password-reset and confirm-email links** to the dev console so they can
+    be tested. Production needs SMTP for resets.
+  - **Email confirmation** is Payload's `auth.verify`: a new account can't log in (and its
+    JWT is rejected) until `_verified`. `signUp` returns `checkEmail` instead of logging in;
+    `/account|vendors/verify-email?token=` confirms; `resendVerification` re-sends the stored
+    token. `emailChecksOn()` (`lib/marketplaceMail.ts`) = SMTP set **or** dev — production
+    without SMTP creates accounts already confirmed. The 2026-10-05 migration backfilled
+    `_verified = true`; anything that creates accounts in code (seeds, scripts) must pass
+    `_verified: true` + `disableVerificationEmail` or the account is locked out.
+  - **Continue with Google** (`lib/googleAuth.ts`, `/auth/google` → `/auth/google/callback`,
+    under `/auth` not `/api`): hand-rolled OAuth code flow + PKCE, profile from the userinfo
+    endpoint, no extra packages; buttons only when `GOOGLE_CLIENT_ID/SECRET` are set. Known
+    `googleId` or email → `startSession()` in `lib/session.ts` (passwordless login built from
+    Payload's own `addSessionToUser` + `getFieldsToSign` + `jwtSign`); an email account gets
+    `googleId` linked and `_verified`. New → signed `zf_google_pending` cookie →
+    `/account|vendors/complete-signup` (`AuthForm` mode `google`, `completeGoogleSignUp`)
+    for the phone/business fields; the password is random. Sign-up validation is shared by
+    both paths (`checkSignUpFields`).
   - Booking an enquiry ("Mark booked") also blocks that date; date search hides vendors
     who blocked it. `areas` is a text `hasMany` (validated against `MARKET_AREAS`) to avoid
     enum migrations; categories/units/statuses *are* enums → `migrate:create` on change.

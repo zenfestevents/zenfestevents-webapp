@@ -711,6 +711,10 @@ export interface Vendor {
   slug: string;
   phone: string;
   phoneVerified?: boolean | null;
+  /**
+   * Set when they sign in with Google.
+   */
+  googleId?: string | null;
   category:
     | 'photography'
     | 'makeup'
@@ -767,6 +771,8 @@ export interface Vendor {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -1135,6 +1141,10 @@ export interface Customer {
   name: string;
   phone: string;
   phoneVerified?: boolean | null;
+  /**
+   * Set when they sign in with Google.
+   */
+  googleId?: string | null;
   city?: string | null;
   eventDate?: string | null;
   shortlist?: (number | Vendor)[] | null;
@@ -1146,6 +1156,8 @@ export interface Customer {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -1921,6 +1933,7 @@ export interface VendorsSelect<T extends boolean = true> {
   slug?: T;
   phone?: T;
   phoneVerified?: T;
+  googleId?: T;
   category?: T;
   otherService?: T;
   areas?: T;
@@ -1958,6 +1971,8 @@ export interface VendorsSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1976,6 +1991,7 @@ export interface CustomersSelect<T extends boolean = true> {
   name?: T;
   phone?: T;
   phoneVerified?: T;
+  googleId?: T;
   city?: T;
   eventDate?: T;
   shortlist?: T;
@@ -1987,6 +2003,8 @@ export interface CustomersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:

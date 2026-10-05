@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 
 import { AuthForm } from '../../../../components/market/AuthForm'
 import { AuthShell, param, type SearchParams } from '../../../../components/market/AuthShell'
+import { googleEnabled, googleNotice } from '../../../../lib/googleAuth'
 import { getVendor, safeNext } from '../../../../lib/session'
 
 export const dynamic = 'force-dynamic'
@@ -11,7 +12,8 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Vendor log in', robots: { index: false } }
 
 export default async function VendorLoginPage({ searchParams }: { searchParams: SearchParams }) {
-  const next = param((await searchParams).next)
+  const sp = await searchParams
+  const next = param(sp.next)
   if (await getVendor()) redirect(safeNext(next, '/vendors/dashboard'))
   return (
     <AuthShell
@@ -20,7 +22,13 @@ export default async function VendorLoginPage({ searchParams }: { searchParams: 
       lede="Log in to update your listing, prices and dates, and reply to couples."
       formTitle="Vendor log in"
     >
-      <AuthForm kind="vendor" mode="login" next={next || undefined} />
+      <AuthForm
+        kind="vendor"
+        mode="login"
+        next={next || undefined}
+        google={googleEnabled()}
+        notice={googleNotice(param(sp.google))}
+      />
     </AuthShell>
   )
 }
