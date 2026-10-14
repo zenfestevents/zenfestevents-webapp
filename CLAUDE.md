@@ -147,6 +147,21 @@ src/
   set, **test** in dev (a Simulate button), **off** in production otherwise (no
   verification, so deploying without Meta set up doesn't break the form). Pages that
   use it must be `force-dynamic` so the mode is read at request time.
+- **Vendor and couple accounts are WhatsApp-number only (owner, 2026-10-14).** Switches in
+  `lib/accountOptions.ts`: `EMAIL_LOGIN = false` (email + password sign-up/login, forgot/
+  reset, confirm-email — code kept, pages redirect to login, actions refuse) and
+  `GOOGLE_SIGNIN = false` (gates `googleEnabled()`; the Google env vars stay set in Vercel).
+  Sign-up = name + WhatsApp number (+ business name first with "Same as business name",
+  and category, for vendors) + the PhoneVerify proof; login = PhoneVerify proof only
+  (`signUpWithWhatsApp` / `logInWithWhatsApp` in `lib/authActions.ts`, logic in
+  `lib/whatsappAuth.ts`, session via `startSession`). Easy to get wrong:
+  - **No fallback by the owner's choice:** with `verifyMode() === 'off'` sign-up/login show
+    "WhatsApp verification is not available", so the WHATSAPP_* env must stay set.
+  - A login only opens an account whose number is `phoneVerified` (`verifiedAccountsWithPhone`);
+    one verified account per number per kind. The number changes only through `changeMyPhone`
+    (dashboards' `ChangePhone`, verify first); `updateProfile` / `saveListing` keep the old one.
+  - Payload auth still needs an email, so these accounts get `<phone>@whatsapp.invalid`
+    (`placeholderEmail`); `sendMail` skips it and dashboards hide emails while `EMAIL_LOGIN` is off.
 - **`getSiteSettings()`** merges `SITE_FALLBACK` into the CMS-stored global, filling
   blank fields with sensible defaults. Components read `settings.contact.whatsapp`
   directly; without this merge an empty admin field would silently hide every WhatsApp

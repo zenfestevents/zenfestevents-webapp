@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { AuthForm } from '../../../../components/market/AuthForm'
 import { AuthShell, param, type SearchParams } from '../../../../components/market/AuthShell'
 import { googleEnabled, googleNotice } from '../../../../lib/googleAuth'
+import { verifyMode } from '../../../../lib/phoneVerification'
 import { getVendor, safeNext } from '../../../../lib/session'
 
 export const dynamic = 'force-dynamic'
@@ -25,6 +26,7 @@ export default async function VendorLoginPage({ searchParams }: { searchParams: 
       <AuthForm
         kind="vendor"
         mode="login"
+        verifyMode={verifyMode()}
         next={next || undefined}
         google={googleEnabled()}
         notice={googleNotice(param(sp.google))}

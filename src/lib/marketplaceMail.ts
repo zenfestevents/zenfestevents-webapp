@@ -1,12 +1,14 @@
 // Server-only. Marketplace notification emails. Like notifySubmission they fail
 // softly: without SMTP (local dev) Payload logs the email to the console, and an
 // error never undoes the enquiry that was already saved.
+import { isPlaceholderEmail } from './accountOptions'
 import { getPayloadClient } from './payload'
 
 export const siteUrl = () => (process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000').replace(/\/$/, '')
 
 export async function sendMail(to: string | undefined | null, subject: string, lines: string[]) {
-  if (!to) return
+  // WhatsApp-only accounts have a placeholder address that can't receive mail.
+  if (!to || isPlaceholderEmail(to)) return
   const payload = await getPayloadClient()
   try {
     await payload.sendEmail({ to, subject, text: [...lines, '', '— Zenfest Events'].join('\n') })

@@ -1,12 +1,15 @@
 import React from 'react'
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 
 import { AuthForm } from '../../../../components/market/AuthForm'
 import { AuthShell } from '../../../../components/market/AuthShell'
+import { EMAIL_LOGIN } from '../../../../lib/accountOptions'
 
 export const metadata: Metadata = { title: 'Reset your password', robots: { index: false } }
 
 export default function VendorForgotPage() {
+  if (!EMAIL_LOGIN) redirect('/vendors/login')
   return (
     <AuthShell
       eyebrow="For vendors"

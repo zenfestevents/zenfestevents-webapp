@@ -27,7 +27,9 @@ import {
   PRICE_UNITS,
   type ListingStatus,
 } from '../../lib/marketplaceOptions'
+import { EMAIL_LOGIN } from '../../lib/accountOptions'
 import type { VerifyMode } from '../PhoneVerify'
+import { ChangePhone } from './ChangePhone'
 import { VendorForm } from '../VendorForm'
 import { EnquiryFacts, EnquiryThread, StatusPill, formatDay } from './EnquiryThread'
 import { MonthCalendar } from './MonthCalendar'
@@ -104,7 +106,7 @@ export function VendorDashboard({
             <p className="eyebrow">Vendor dashboard</p>
             <h1 className="display-m">{vendor.businessName}</h1>
             <p className="muted dash__meta">
-              <ListingPill status={vendor.listingStatus} /> {vendor.email}
+              <ListingPill status={vendor.listingStatus} /> {EMAIL_LOGIN && vendor.email}
             </p>
           </div>
           <div className="dash__head-actions">
@@ -147,7 +149,7 @@ export function VendorDashboard({
 
         <div className="dash__panel card">
           {tab === 'enquiries' && <EnquiriesTab enquiries={enquiries} live={live} />}
-          {tab === 'listing' && <ListingTab vendor={vendor} />}
+          {tab === 'listing' && <ListingTab vendor={vendor} verifyMode={verifyMode} />}
           {tab === 'prices' && <PricesTab vendor={vendor} />}
           {tab === 'photos' && <PhotosTab vendor={vendor} />}
           {tab === 'availability' && <DatesTab vendor={vendor} />}
@@ -348,7 +350,7 @@ function EnquiriesTab({ enquiries, live }: { enquiries: VendorEnquiry[]; live: b
 
 // ---------- listing ----------
 
-function ListingTab({ vendor }: { vendor: DashboardVendor }) {
+function ListingTab({ vendor, verifyMode }: { vendor: DashboardVendor; verifyMode: VerifyMode }) {
   const s = useSave(LOGIN)
   const [category, setCategory] = useState(vendor.category)
   const [areas, setAreas] = useState<string[]>(vendor.areas)
@@ -456,13 +458,23 @@ function ListingTab({ vendor }: { vendor: DashboardVendor }) {
           <span className="field__label">Contact name *</span>
           <input name="name" defaultValue={vendor.name} required />
         </label>
-        <label className="field">
-          <span className="field__label">Phone *</span>
-          <input name="phone" defaultValue={vendor.phone} required inputMode="tel" />
-          <span className="field__hint">
-            {vendor.phoneVerified ? '✓ Verified on WhatsApp. ' : ''}Couples see it only after you reply to them.
-          </span>
-        </label>
+        {EMAIL_LOGIN ? (
+          <label className="field">
+            <span className="field__label">Phone *</span>
+            <input name="phone" defaultValue={vendor.phone} required inputMode="tel" />
+            <span className="field__hint">
+              {vendor.phoneVerified ? '✓ Verified on WhatsApp. ' : ''}Couples see it only after you reply to them.
+            </span>
+          </label>
+        ) : (
+          <ChangePhone
+            kind="vendor"
+            phone={vendor.phone}
+            verified={vendor.phoneVerified}
+            verifyMode={verifyMode}
+            hint="Couples see it only after you reply to them."
+          />
+        )}
       </div>
 
       <SaveBar s={s} label="Save listing" />

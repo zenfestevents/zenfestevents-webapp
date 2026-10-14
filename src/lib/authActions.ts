@@ -10,14 +10,26 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 import { VERIFY_SUBJECT, verifyEmailHTML } from '../collections/accountAuth'
-import { UserError, dayToDate, fail, isEmail, slugify, text } from './formCheck'
-import { PENDING_COOKIE, openCookie, type PendingGoogle } from './googleAuth'
+import { EMAIL_LOGIN } from './accountOptions'
+import { signUpData, type SignUpDetails } from './accountSignup'
+import { UserError, fail, isEmail, text } from './formCheck'
+import { PENDING_COOKIE, googleEnabled, openCookie, type PendingGoogle } from './googleAuth'
 import { emailChecksOn, sendMail, siteUrl, teamInbox } from './marketplaceMail'
-import { PASSWORD_MIN, categoryLabel, isCategory } from './marketplaceOptions'
+import { PASSWORD_MIN, categoryLabel } from './marketplaceOptions'
 import { getPayloadClient } from './payload'
-import { consumePhoneProof, normalizePhone, verifyMode } from './phoneVerification'
+import { consumePhoneProof, verifyMode } from './phoneVerification'
 import { rateLimited } from './rateLimit'
-import { ACCOUNT, clearSessionCookie, safeNext, setSessionCookie, startSession, type AccountKind } from './session'
+import {
+  ACCOUNT,
+  clearSessionCookie,
+  getCustomer,
+  getVendor,
+  safeNext,
+  setSessionCookie,
+  startSession,
+  type AccountKind,
+} from './session'
+import { changeAccountPhone, createWhatsAppAccount, whatsAppLoginAccount } from './whatsappAuth'
 
 type AuthResult =
   | { ok: true; redirect: string }
@@ -27,39 +39,13 @@ type AuthResult =
 
 const kindOf = (v: unknown): AccountKind => (v === 'vendor' ? 'vendor' : 'customer')
 
-export type SignUpInput = {
+export type SignUpInput = SignUpDetails & {
   kind: AccountKind
-  name: string
   email: string
   password: string
-  phone: string
-  phoneProof?: { id: string | number; token: string } | null
-  // vendor
-  businessName?: string
-  category?: string
-  otherService?: string
-  // couple
-  city?: string
-  eventDate?: string
-  consent?: boolean
-  next?: string
-  company?: string // honeypot
 }
 
-async function uniqueSlug(base: string) {
-  const payload = await getPayloadClient()
-  const root = slugify(base) || 'vendor'
-  for (let i = 1; i < 50; i++) {
-    const slug = i === 1 ? root : `${root}-${i}`
-    const { totalDocs } = await payload.count({
-      collection: 'vendors',
-      where: { slug: { equals: slug } },
-      overrideAccess: true,
-    })
-    if (!totalDocs) return slug
-  }
-  return `${root}-${Date.now().toString(36)}`
-}
+const EMAIL_OFF = 'Sign up and log in with your WhatsApp number.'
 
 /**
  * The sign-up fields shared by the email form and the Google "finish sign-up"
@@ -72,33 +58,7 @@ async function checkSignUpFields(
   email: string,
 ) {
   const { collection } = ACCOUNT[kind]
-  const name = text(input.name, 120)
-  const phone = normalizePhone(input.phone)
-  if (name.length < 2) throw new UserError('Enter your name.')
-  if (!phone) throw new UserError('Enter a valid 10-digit mobile number.')
-
-  const data: Record<string, unknown> = { name, phone }
-  if (kind === 'vendor') {
-    const businessName = text(input.businessName, 120)
-    if (businessName.length < 2) throw new UserError('Enter your business name.')
-    if (!isCategory(input.category)) throw new UserError('Choose what you offer.')
-    const otherService = input.category === 'other' ? text(input.otherService, 80) : ''
-    if (input.category === 'other' && !otherService) throw new UserError('Tell us which service you offer.')
-    Object.assign(data, {
-      businessName,
-      category: input.category,
-      otherService: otherService || undefined,
-      slug: await uniqueSlug(businessName),
-      listingStatus: 'draft',
-    })
-  } else {
-    const eventDate = input.eventDate ? dayToDate(input.eventDate) : null
-    Object.assign(data, {
-      city: text(input.city, 80) || undefined,
-      eventDate: eventDate?.toISOString(),
-      marketingConsent: input.consent === true,
-    })
-  }
+  const { data, phone } = await signUpData(kind, input)
 
   const payload = await getPayloadClient()
   const existing = await payload.count({
@@ -137,6 +97,7 @@ const afterSignUp = (kind: AccountKind, next?: string) =>
 
 export async function signUp(input: SignUpInput): Promise<AuthResult> {
   try {
+    if (!EMAIL_LOGIN) throw new UserError(EMAIL_OFF)
     const kind = kindOf(input?.kind)
     const { collection } = ACCOUNT[kind]
     if (text(input.company, 100)) return { ok: false, error: 'Please try again.' }
@@ -186,6 +147,7 @@ export async function completeGoogleSignUp(
   input: Omit<SignUpInput, 'kind' | 'email' | 'password'>,
 ): Promise<AuthResult> {
   try {
+    if (!googleEnabled()) throw new UserError(EMAIL_OFF)
     const jar = await cookies()
     const pending = openCookie<PendingGoogle>(jar.get(PENDING_COOKIE)?.value)
     if (!pending) throw new UserError('Your Google sign-in timed out. Please choose “Continue with Google” again.')
@@ -256,6 +218,7 @@ export async function logIn(input: {
   const kind = kindOf(input?.kind)
   const { collection, home } = ACCOUNT[kind]
   try {
+    if (!EMAIL_LOGIN) throw new UserError(EMAIL_OFF)
     if (await rateLimited('login', 20, 15 * 60 * 1000)) {
       throw new UserError('Too many attempts from this connection. Please wait a few minutes.')
     }
@@ -299,6 +262,7 @@ export async function logOut(formData?: FormData) {
 
 /** Always answers the same, so the form can't be used to find out who has an account. */
 export async function forgotPassword(input: { kind: AccountKind; email: string }) {
+  if (!EMAIL_LOGIN) return { ok: false as const, error: EMAIL_OFF }
   const kind = kindOf(input?.kind)
   const email = text(input?.email, 200).toLowerCase()
   if (!isEmail(email)) return { ok: false as const, error: 'Enter a valid email address.' }
@@ -322,6 +286,7 @@ export async function resetPassword(input: {
   const kind = kindOf(input?.kind)
   const { collection, home } = ACCOUNT[kind]
   try {
+    if (!EMAIL_LOGIN) throw new UserError(EMAIL_OFF)
     const password = typeof input.password === 'string' ? input.password : ''
     if (password.length < PASSWORD_MIN || password.length > 128) {
       throw new UserError(`Choose a password of at least ${PASSWORD_MIN} characters.`)
@@ -339,6 +304,70 @@ export async function resetPassword(input: {
     }
     if (result.token) await setSessionCookie(result.token, Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30)
     return { ok: true, redirect: home }
+  } catch (err) {
+    return fail(err)
+  }
+}
+
+// ---------- WhatsApp-number accounts (EMAIL_LOGIN off) ----------
+
+const WHATSAPP_DOWN = 'WhatsApp verification is not available right now. Please WhatsApp us and we will set up your account.'
+
+/** Sign up with name + WhatsApp number (+ business details for vendors); no email or password. */
+export async function signUpWithWhatsApp(input: SignUpDetails & { kind: AccountKind }): Promise<AuthResult> {
+  try {
+    const kind = kindOf(input?.kind)
+    if (text(input.company, 100)) return { ok: false, error: 'Please try again.' }
+    if (verifyMode() === 'off') throw new UserError(WHATSAPP_DOWN)
+    if (await rateLimited(`signup-${kind}`, 10, 60 * 60 * 1000)) {
+      throw new UserError('Too many sign-ups from this connection. Please try again later.')
+    }
+    const payload = await getPayloadClient()
+    const { id, data } = await createWhatsAppAccount(payload, kind, input)
+    await startSession(ACCOUNT[kind].collection, id)
+    if (kind === 'vendor') await tellTeamAboutVendor(data, '—', id, 'WhatsApp')
+    return { ok: true, redirect: afterSignUp(kind, input.next) }
+  } catch (err) {
+    return fail(err)
+  }
+}
+
+/** Log in by proving the number on WhatsApp. */
+export async function logInWithWhatsApp(input: {
+  kind: AccountKind
+  phone: string
+  phoneProof?: SignUpDetails['phoneProof']
+  next?: string
+}): Promise<AuthResult> {
+  const kind = kindOf(input?.kind)
+  try {
+    if (verifyMode() === 'off') throw new UserError(WHATSAPP_DOWN)
+    if (await rateLimited('login', 20, 15 * 60 * 1000)) {
+      throw new UserError('Too many attempts from this connection. Please wait a few minutes.')
+    }
+    const payload = await getPayloadClient()
+    const id = await whatsAppLoginAccount(payload, kind, input.phone, input.phoneProof)
+    await startSession(ACCOUNT[kind].collection, id)
+    return { ok: true, redirect: safeNext(input.next, ACCOUNT[kind].home) }
+  } catch (err) {
+    return fail(err)
+  }
+}
+
+/** The logged-in vendor / couple moves to a new WhatsApp number (verified first). */
+export async function changeMyPhone(input: {
+  kind: AccountKind
+  phone: string
+  phoneProof?: SignUpDetails['phoneProof']
+}): Promise<{ ok: true; phone: string } | { ok: false; error: string }> {
+  try {
+    const kind = kindOf(input?.kind)
+    if (verifyMode() === 'off') throw new UserError(WHATSAPP_DOWN)
+    const account = kind === 'vendor' ? await getVendor() : await getCustomer()
+    if (!account) throw new UserError('Please log in again.')
+    const payload = await getPayloadClient()
+    const phone = await changeAccountPhone(payload, kind, account.id, input.phone, input.phoneProof)
+    return { ok: true, phone }
   } catch (err) {
     return fail(err)
   }

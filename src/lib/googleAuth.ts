@@ -7,10 +7,12 @@
 // and GOOGLE_CLIENT_SECRET are set; the buttons are hidden otherwise.
 import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 
+import { GOOGLE_SIGNIN } from './accountOptions'
 import { siteUrl } from './marketplaceMail'
 import type { AccountKind } from './session'
 
-export const googleEnabled = () => Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)
+export const googleEnabled = () =>
+  GOOGLE_SIGNIN && Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)
 
 /** Must be listed under "Authorised redirect URIs" in Google Cloud Console. */
 export const googleRedirectUri = () => `${siteUrl()}/auth/google/callback`
