@@ -20,8 +20,8 @@ export default function NotFound() {
           <Link className="btn btn--primary" href="/">
             Go to the homepage
           </Link>
-          <Link className="btn btn--ghost" href="/marketplace">
-            Browse vendors
+          <Link className="btn btn--ghost" href="/enquire">
+            Plan your event
           </Link>
           <Link className="btn btn--ghost" href="/contact">
             Contact us

@@ -259,6 +259,37 @@ One-time Meta setup (free):
 5. Publish the app (switch it from Development to **Live**) so messages from any
    number reach the webhook, then test from a phone.
 
+### Occasion reminders (internal)
+Staff-only, in `/admin` under **Occasion Reminders**. Turns every known yearly date of a
+client or unconverted lead (birthday, wedding/engagement anniversary, child's birthday,
+housewarming, corporate annual day) into a WhatsApp pitch a few days before it comes round.
+
+- **Contacts** — one per phone number, with their **Occasions** (type, original date,
+  whose occasion, "year is correct", "Zenfest did this event"). Tag **Relationship**
+  (client / lead / cold), **Where they came from** and **Details verified**.
+- **Reminders** — created automatically when an occasion is inside its lead time
+  (default 10–30 days by type, set in **Reminder Settings**). Each holds a ready
+  message. Click the WhatsApp number: WhatsApp opens with the text typed in and the
+  reminder is marked **Sent**. Update the status when they reply; **Interested** /
+  **Booked** creates a Lead, **Booked** makes the contact a client, **Asked not to be
+  contacted** stops all future reminders.
+- **Daily run** — Vercel Cron calls `/api/reminders/cron` at 09:00 IST (`vercel.json`)
+  with `Authorization: Bearer $CRON_SECRET`. It rolls dates forward, creates due
+  reminders, marks unsent ones whose date has passed as **Missed**, and emails the
+  list to send (SMTP needed). The dashboard's **Check now** runs it without the email.
+- **Import an existing list** — fill `docs/occasions-import-template.csv` (one row per
+  occasion; dates DD-MM-YYYY, or DD-MM when the year is unknown), then:
+  ```bash
+  npm run import:occasions -- my-list.csv          # check only
+  npm run import:occasions -- my-list.csv --save   # write (DATABASE_URI decides which DB)
+  ```
+  Re-running the same file adds nothing twice.
+- **Website data** is off by default: tick **Reminder Settings → Add website enquiries
+  and sign-ups as contacts** once the site has real customers. They arrive unverified.
+- Sending is manual (free, from the normal WhatsApp Business app). Automatic sending
+  through the WhatsApp Cloud API (Meta-approved marketing templates, ≈₹1/message) is
+  a later phase; `channel: wa_api` is reserved for it.
+
 ## Production (Vercel + Neon + Vercel Blob)
 1. Create a **Neon** Postgres database; copy its **pooled** connection string
    (the one whose host contains `-pooler`) — serverless functions open many short
@@ -279,6 +310,8 @@ One-time Meta setup (free):
    - (optional) `AIRTABLE_TOKEN`, `AIRTABLE_PHOTO_BASE_ID`, `AIRTABLE_PHOTO_TABLE`
      — see "Vendor applications → Airtable"
    - (optional) `WHATSAPP_*` — see "Phone verification (WhatsApp)"
+   - `CRON_SECRET` — any long random string; Vercel Cron sends it to the daily
+     occasion-reminder run (see "Occasion reminders")
    - (optional) `AI_API_KEY` (free Groq key) and the other `AI_*` settings — turns on
      Zenfest AI (see "Zenfest AI")
    - (optional) `AMAZON_ASSOCIATE_TAG`, `AFFILIATE_REDIRECT_TEMPLATE` — gift-registry

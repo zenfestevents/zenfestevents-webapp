@@ -36,7 +36,10 @@ import { Customers } from './collections/Customers'
 import { VendorMedia } from './collections/VendorMedia'
 import { Enquiries } from './collections/Enquiries'
 import { Products } from './collections/Products'
+import { Contacts } from './collections/Contacts'
+import { Reminders } from './collections/Reminders'
 import { SiteSettings } from './globals/SiteSettings'
+import { ReminderSettings } from './globals/ReminderSettings'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -51,8 +54,16 @@ export default buildConfig({
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
     components: {
-      // Gift-registry numbers on the admin home (events, gifts, clicks, leads).
-      beforeDashboard: ['/components/admin/RegistryStats#RegistryStats'],
+      // Zenfest emblem + wordmark instead of the Payload logo (login page, nav, breadcrumb).
+      graphics: {
+        Logo: '/components/admin/BrandGraphics#AdminLogo',
+        Icon: '/components/admin/BrandGraphics#AdminIcon',
+      },
+      // Occasion reminders to send today, then gift-registry numbers (events, gifts, clicks, leads).
+      beforeDashboard: [
+        '/components/admin/UpcomingOccasions#UpcomingOccasions',
+        '/components/admin/RegistryStats#RegistryStats',
+      ],
     },
     meta: {
       titleSuffix: ' — Zenfest Events',
@@ -86,8 +97,10 @@ export default buildConfig({
     VendorMedia,
     Enquiries,
     Products,
+    Contacts,
+    Reminders,
   ],
-  globals: [SiteSettings],
+  globals: [SiteSettings, ReminderSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

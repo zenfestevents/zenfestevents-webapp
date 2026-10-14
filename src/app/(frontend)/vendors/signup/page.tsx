@@ -7,13 +7,15 @@ import { AuthShell, param, type SearchParams } from '../../../../components/mark
 import { googleEnabled, googleNotice } from '../../../../lib/googleAuth'
 import { verifyMode } from '../../../../lib/phoneVerification'
 import { getVendor } from '../../../../lib/session'
+import { FEATURES } from '../../../../lib/features'
+import { ComingSoon } from '../../../../components/ComingSoon'
 
 // Reads the session and the WhatsApp verification env at request time.
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'List your business — vendor sign-up',
-  description: 'Create a free Zenfest vendor account and get enquiries from couples across Chennai.',
+  description: 'Create a free Zenfest vendor account and get enquiries from couples across Tamil Nadu.',
 }
 
 const POINTS = [
@@ -23,6 +25,7 @@ const POINTS = [
 ] as const
 
 export default async function VendorSignupPage({ searchParams }: { searchParams: SearchParams }) {
+  if (!FEATURES.marketplace) return <ComingSoon feature="marketplace" title="Marketplace listings open soon" body="Vendor accounts open with the Zenfest Marketplace. Want to work on events Zenfest plans? You can apply as a Zenfest partner today from the For Vendors page." />
   if (await getVendor()) redirect('/vendors/dashboard')
   const sp = await searchParams
   return (

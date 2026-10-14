@@ -8,10 +8,9 @@ type ListingLike = {
   areas?: unknown[] | null
   priceCard?: unknown[] | null
   gallery?: unknown[] | null
-  application?: unknown
 }
 
-export type Gap = { tab: 'listing' | 'prices' | 'photos' | 'questions'; text: string }
+export type Gap = { tab: 'listing' | 'prices' | 'photos'; text: string }
 
 export function listingGapList(v: ListingLike): Gap[] {
   const gaps: Gap[] = []
@@ -23,19 +22,10 @@ export function listingGapList(v: ListingLike): Gap[] {
   if ((v.gallery ?? []).length < LISTING_MIN.photos) {
     gaps.push({ tab: 'photos', text: `Upload at least ${LISTING_MIN.photos} photos of your work.` })
   }
-  if (needsQuestionnaire(v.category) && !v.application) {
-    gaps.push({
-      tab: 'questions',
-      text:
-        v.category === 'cake'
-          ? 'Answer the cake questions (FSSAI, flavours, delivery).'
-          : 'Answer the photography questions (services, cameras, editing).',
-    })
-  }
   return gaps
 }
 
 export const listingGaps = (v: ListingLike) => listingGapList(v).map((g) => g.text)
 
-/** Photo and cake vendors answer the same detailed questions as the public vendor form. */
-export const needsQuestionnaire = (category: string) => category === 'photography' || category === 'cake'
+// The partner questions (VendorForm) are not part of a marketplace listing: they belong
+// to the separate "Partner with Zenfest" application at /vendors/partner.

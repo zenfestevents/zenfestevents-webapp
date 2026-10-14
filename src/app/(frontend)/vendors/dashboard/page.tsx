@@ -5,7 +5,6 @@ import { param, type SearchParams } from '../../../../components/market/AuthShel
 import { VendorDashboard, type DashboardVendor } from '../../../../components/market/VendorDashboard'
 import { dayKey, enquiriesForVendor, photo, type PublicPhoto } from '../../../../lib/marketplace'
 import { getPayloadClient } from '../../../../lib/payload'
-import { verifyMode } from '../../../../lib/phoneVerification'
 import { requireVendor } from '../../../../lib/session'
 import type { Vendor } from '../../../../payload-types'
 
@@ -69,7 +68,6 @@ export default async function VendorDashboardPage({ searchParams }: { searchPara
     <VendorDashboard
       vendor={vendor}
       enquiries={await enquiriesForVendor(v.id)}
-      verifyMode={verifyMode()}
       initialTab={param(sp.tab)}
       welcome={param(sp.welcome) === '1'}
     />

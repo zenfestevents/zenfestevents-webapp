@@ -34,15 +34,15 @@ const body = Hanken_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'),
   title: {
-    default: 'Zenfest Events — Event Management in Chennai',
+    default: 'Zenfest Events — Event Management Company in Tamil Nadu',
     template: '%s — Zenfest Events',
   },
   description:
-    'Full-service event management in Chennai. Weddings, birthdays, corporate functions, housewarmings and sports events — décor, catering, photography, DJ and complete packages.',
+    'Full-service event management company in Tamil Nadu — Chennai, Coimbatore, Madurai, Trichy, Salem and beyond. Weddings, birthdays, corporate functions, housewarmings and sports events — décor, catering, photography, DJ and complete packages.',
   openGraph: {
-    title: 'Zenfest Events — Event Management in Chennai',
+    title: 'Zenfest Events — Event Management Company in Tamil Nadu',
     description:
-      'Weddings, birthdays, corporate functions and more across Chennai. See our work and request a callback.',
+      'Weddings, birthdays, corporate functions and more across Tamil Nadu. See our work and plan your event.',
     type: 'website',
   },
 }

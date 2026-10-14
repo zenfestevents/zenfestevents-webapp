@@ -1,0 +1,5 @@
+name,phone,relationship,source,branch,occasion_type,date,person_name,occasion_name,event_with_us,email,notes
+Priya Karthik,98400 12345,client,past_event_import,guduvancheri,wedding_anniversary,09-10-2025,,,yes,,Wedding décor + catering at Guduvancheri
+Priya Karthik,98400 12345,client,past_event_import,guduvancheri,birthday,14-03,,,no,,Year of birth unknown
+Ramesh Kumar,+91 90000 11111,lead,phone_call,thiruverkadu,kid_birthday,22-11-2023,Aarav,,no,,Enquired for 1st birthday; went with another vendor
+Acme Tools Pvt Ltd,9123456780,client,referral,any,corporate_annual,15-01-2024,,annual day,yes,hr@example.com,

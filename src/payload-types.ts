@@ -96,6 +96,8 @@ export interface Config {
     'vendor-media': VendorMedia;
     enquiries: Enquiry;
     products: Product;
+    contacts: Contact;
+    reminders: Reminder;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -134,6 +136,8 @@ export interface Config {
     'vendor-media': VendorMediaSelect<false> | VendorMediaSelect<true>;
     enquiries: EnquiriesSelect<false> | EnquiriesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
+    contacts: ContactsSelect<false> | ContactsSelect<true>;
+    reminders: RemindersSelect<false> | RemindersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -145,9 +149,11 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'site-settings': SiteSetting;
+    'reminder-settings': ReminderSetting;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'reminder-settings': ReminderSettingsSelect<false> | ReminderSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -486,10 +492,23 @@ export interface Lead {
   name: string;
   phone: string;
   email?: string | null;
-  eventType?: ('wedding' | 'birthday' | 'corporate' | 'housewarming' | 'sports' | 'other') | null;
+  eventType?: ('wedding' | 'birthday' | 'corporate' | 'babyshower' | 'housewarming' | 'sports' | 'other') | null;
   eventDate?: string | null;
   branch?: ('guduvancheri' | 'thiruverkadu' | 'any') | null;
   message?: string | null;
+  requirements?: {
+    weddingParts?: string | null;
+    startTime?: string | null;
+    location?: string | null;
+    services?: string[] | null;
+    receptionServices?: string[] | null;
+    weddingServices?: string[] | null;
+    extraShoots?: string[] | null;
+    birthdayFor?: string | null;
+    birthdaySurprise?: boolean | null;
+    guestCount?: number | null;
+    budget?: string | null;
+  };
   /**
    * Drafted with the customer by Zenfest AI. Estimates only — confirm before quoting.
    */
@@ -1250,6 +1269,137 @@ export interface Enquiry {
   createdAt: string;
 }
 /**
+ * Clients and leads whose birthdays and anniversaries we remember. Add the person once, then all their occasions below — reminders are created automatically before each date.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contacts".
+ */
+export interface Contact {
+  id: number;
+  name: string;
+  /**
+   * Saved as 91XXXXXXXXXX. Each number can be added only once — search before adding.
+   */
+  phone: string;
+  relationship: 'client' | 'lead' | 'cold';
+  source: 'whatsapp' | 'phone_call' | 'walk_in' | 'referral' | 'past_event_import' | 'website_lead' | 'website_signup';
+  /**
+   * Every yearly date for this person or family: their birthday, wedding, children, housewarming…
+   */
+  occasions?:
+    | {
+        type:
+          | 'birthday'
+          | 'kid_birthday'
+          | 'wedding_anniversary'
+          | 'engagement_anniversary'
+          | 'housewarming_anniversary'
+          | 'corporate_annual'
+          | 'other';
+        /**
+         * The wedding / birth / event date. Year unknown? Pick any year and untick below.
+         */
+        date: string;
+        /**
+         * Blank = the contact. Else as it should read: "Aarav", "Priya & Karthik".
+         */
+        personName?: string | null;
+        /**
+         * e.g. "company anniversary", "shop opening anniversary".
+         */
+        label?: string | null;
+        /**
+         * Blank = the default in Reminder Settings.
+         */
+        leadTimeDays?: number | null;
+        /**
+         * Needed to say "5th anniversary".
+         */
+        yearKnown?: boolean | null;
+        eventWithUs?: boolean | null;
+        active?: boolean | null;
+        /**
+         * Worked out automatically.
+         */
+        nextDate?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Anything that helps the pitch: budget, likes, last event.
+   */
+  notes?: string | null;
+  email?: string | null;
+  altPhone?: string | null;
+  nextOccasionDate?: string | null;
+  /**
+   * Website contacts arrive unverified (typed by the visitor). Tick after confirming on a call/chat.
+   */
+  verified?: boolean | null;
+  tier?: ('regular' | 'vip') | null;
+  /**
+   * Their reminders are assigned to this person.
+   */
+  owner?: (number | null) | User;
+  branch?: ('guduvancheri' | 'thiruverkadu' | 'any') | null;
+  language?: ('en' | 'ta') | null;
+  /**
+   * They asked us to stop. No more reminders are created.
+   */
+  doNotContact?: boolean | null;
+  websiteLead?: (number | null) | Lead;
+  websiteSignup?: (number | null) | Signup;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Upcoming occasions to pitch. Click the WhatsApp number to open the ready message (it is marked Sent), then update the status when they reply.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reminders".
+ */
+export interface Reminder {
+  id: number;
+  title?: string | null;
+  contactName?: string | null;
+  phone?: string | null;
+  milestone?: string | null;
+  occurrenceDate?: string | null;
+  dueDate?: string | null;
+  /**
+   * Edit before sending if you like — the WhatsApp link uses this text.
+   */
+  message?: string | null;
+  outcomeNotes?: string | null;
+  status:
+    'pending' | 'sent' | 'replied' | 'interested' | 'booked' | 'not_interested' | 'skipped' | 'missed' | 'opted_out';
+  channel?: ('wa_manual' | 'wa_api' | 'call') | null;
+  assignedTo?: (number | null) | User;
+  /**
+   * Created automatically on Interested / Booked.
+   */
+  lead?: (number | null) | Lead;
+  sentAt?: string | null;
+  sentBy?: (number | null) | User;
+  contact: number | Contact;
+  occasionType?:
+    | (
+        | 'birthday'
+        | 'kid_birthday'
+        | 'wedding_anniversary'
+        | 'engagement_anniversary'
+        | 'housewarming_anniversary'
+        | 'corporate_annual'
+        | 'other'
+      )
+    | null;
+  occasionId: string;
+  occurrenceYear: number;
+  nthYear?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -1372,6 +1522,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'products';
         value: number | Product;
+      } | null)
+    | ({
+        relationTo: 'contacts';
+        value: number | Contact;
+      } | null)
+    | ({
+        relationTo: 'reminders';
+        value: number | Reminder;
       } | null);
   globalSlug?: string | null;
   user:
@@ -1627,6 +1785,21 @@ export interface LeadsSelect<T extends boolean = true> {
   eventDate?: T;
   branch?: T;
   message?: T;
+  requirements?:
+    | T
+    | {
+        weddingParts?: T;
+        startTime?: T;
+        location?: T;
+        services?: T;
+        receptionServices?: T;
+        weddingServices?: T;
+        extraShoots?: T;
+        birthdayFor?: T;
+        birthdaySurprise?: T;
+        guestCount?: T;
+        budget?: T;
+      };
   aiPlan?: T;
   aiConversation?: T;
   status?: T;
@@ -2181,6 +2354,71 @@ export interface ProductsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contacts_select".
+ */
+export interface ContactsSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
+  relationship?: T;
+  source?: T;
+  occasions?:
+    | T
+    | {
+        type?: T;
+        date?: T;
+        personName?: T;
+        label?: T;
+        leadTimeDays?: T;
+        yearKnown?: T;
+        eventWithUs?: T;
+        active?: T;
+        nextDate?: T;
+        id?: T;
+      };
+  notes?: T;
+  email?: T;
+  altPhone?: T;
+  nextOccasionDate?: T;
+  verified?: T;
+  tier?: T;
+  owner?: T;
+  branch?: T;
+  language?: T;
+  doNotContact?: T;
+  websiteLead?: T;
+  websiteSignup?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reminders_select".
+ */
+export interface RemindersSelect<T extends boolean = true> {
+  title?: T;
+  contactName?: T;
+  phone?: T;
+  milestone?: T;
+  occurrenceDate?: T;
+  dueDate?: T;
+  message?: T;
+  outcomeNotes?: T;
+  status?: T;
+  channel?: T;
+  assignedTo?: T;
+  lead?: T;
+  sentAt?: T;
+  sentBy?: T;
+  contact?: T;
+  occasionType?: T;
+  occasionId?: T;
+  occurrenceYear?: T;
+  nthYear?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -2276,6 +2514,65 @@ export interface SiteSetting {
   createdAt?: string | null;
 }
 /**
+ * How early reminders are created, the WhatsApp message text and the daily email.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reminder-settings".
+ */
+export interface ReminderSetting {
+  id: number;
+  leadDays?: {
+    birthday?: number | null;
+    kid_birthday?: number | null;
+    wedding_anniversary?: number | null;
+    engagement_anniversary?: number | null;
+    housewarming_anniversary?: number | null;
+    corporate_annual?: number | null;
+    other?: number | null;
+  };
+  /**
+   * Placeholders: {name} {whose} {milestone} {date} {days} (and {whose_cap} to start a sentence). {whose} is "your" or e.g. "Aarav's". Changing these affects new reminders only.
+   */
+  messages?: {
+    /**
+     * Blank = the default shown.
+     */
+    client?: string | null;
+    /**
+     * Blank = the default shown.
+     */
+    lead?: string | null;
+    overrides?:
+      | {
+          occasionType:
+            | 'birthday'
+            | 'kid_birthday'
+            | 'wedding_anniversary'
+            | 'engagement_anniversary'
+            | 'housewarming_anniversary'
+            | 'corporate_annual'
+            | 'other';
+          audience: 'any' | 'client' | 'lead';
+          message: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  digest?: {
+    enabled?: boolean | null;
+    /**
+     * Comma-separated emails. Blank = LEAD_NOTIFICATION_EMAIL.
+     */
+    recipients?: string | null;
+  };
+  /**
+   * When on, every new website enquiry (event date) and sign-up (birthday) becomes an unverified contact. Leave off until the site has real customers.
+   */
+  ingestWebsite?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
@@ -2318,6 +2615,47 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         facebook?: T;
         youtube?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reminder-settings_select".
+ */
+export interface ReminderSettingsSelect<T extends boolean = true> {
+  leadDays?:
+    | T
+    | {
+        birthday?: T;
+        kid_birthday?: T;
+        wedding_anniversary?: T;
+        engagement_anniversary?: T;
+        housewarming_anniversary?: T;
+        corporate_annual?: T;
+        other?: T;
+      };
+  messages?:
+    | T
+    | {
+        client?: T;
+        lead?: T;
+        overrides?:
+          | T
+          | {
+              occasionType?: T;
+              audience?: T;
+              message?: T;
+              id?: T;
+            };
+      };
+  digest?:
+    | T
+    | {
+        enabled?: T;
+        recipients?: T;
+      };
+  ingestWebsite?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

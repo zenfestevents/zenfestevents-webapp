@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { getPayloadClient } from '../../../lib/payload'
 import { Reveal } from '../../../components/Reveal'
 import { aiAvailable } from '../../../lib/ai/status'
+import { FEATURES } from '../../../lib/features'
 import { getSiteSettings } from '../../../lib/getSettings'
 
 export const dynamic = 'force-dynamic'
@@ -88,7 +89,7 @@ export default async function PackagesPage() {
               <li className="pkg-soon__way pkg-soon__way--main">
                 <h2>Get a custom quote</h2>
                 <p>Tell us the date, guests and what you need. Our team calls back with a plan and a price.</p>
-                <Link className="btn btn--primary" href="/contact">
+                <Link className="btn btn--primary" href="/enquire">
                   Get a custom quote
                 </Link>
               </li>
@@ -101,6 +102,7 @@ export default async function PackagesPage() {
                   </Link>
                 </li>
               )}
+              {FEATURES.marketplace && (
               <li className="pkg-soon__way">
                 <h2>Book vendors yourself</h2>
                 <p>Compare listed vendors with prices upfront and request quotes directly.</p>
@@ -108,6 +110,7 @@ export default async function PackagesPage() {
                   Browse the marketplace →
                 </Link>
               </li>
+              )}
             </ul>
           </div>
         )}

@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Contact & Enquiry',
   description:
-    'Request a callback from Zenfest Events, or reach us on phone and WhatsApp. Two branches near Chennai — Guduvancheri and Thiruverkadu.',
+    'Request a callback from Zenfest Events, or reach us on phone and WhatsApp. Events in major cities across Tamil Nadu; branches at Guduvancheri and Thiruverkadu.',
 }
 
 export default async function ContactPage() {

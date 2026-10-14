@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import React, { useEffect, useRef } from 'react'
 
+import { FEATURES } from '../lib/features'
 import { SITE_FALLBACK } from '../lib/site'
 import { AiLink } from './ai/ChatLauncher'
 import { KolamDivider, KolamRosette } from './Kolam'
@@ -429,7 +430,7 @@ export function ScrubHero({
 
         <div className="container scrubhero__content">
           <p className="eyebrow">
-            <span className="scrubhero__hl">Chennai · Event Management Company</span>
+            <span className="scrubhero__hl">Tamil Nadu · Event Management Company</span>
           </p>
           <h1 className="scrubhero__title display-xl">{renderHeadline(headline)}</h1>
           <p className="scrubhero__lede lede">
@@ -438,12 +439,14 @@ export function ScrubHero({
             </span>
           </p>
           <div className="btn-row scrubhero__cta">
-            <AiLink className="btn btn--primary" fallback="Get a callback">
+            <AiLink className="btn btn--primary" fallback="Plan your event">
               ✦ Plan with Zenfest AI
             </AiLink>
-            <Link className="btn btn--gold" href="/earn">
-              Earn from events
-            </Link>
+            {FEATURES.earn && (
+              <Link className="btn btn--gold" href="/earn">
+                Earn from events
+              </Link>
+            )}
             <Link className="btn btn--gold" href="/gallery">
               See our work
             </Link>
@@ -471,12 +474,18 @@ export function ScrubHero({
             )}
           </p>
           <div className="btn-row scrubhero__outro-cta">
-            <AiLink className="btn btn--primary" fallback="Get a callback">
+            <AiLink className="btn btn--primary" fallback="Plan your event">
               ✦ Plan with Zenfest AI
             </AiLink>
-            <Link className="btn btn--gold" href="/earn">
-              Earn from events
-            </Link>
+            {FEATURES.earn ? (
+              <Link className="btn btn--gold" href="/earn">
+                Earn from events
+              </Link>
+            ) : (
+              <Link className="btn btn--gold" href="/gallery">
+                See our work
+              </Link>
+            )}
           </div>
         </div>
 

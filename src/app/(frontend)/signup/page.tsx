@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Sign Up — ₹100 off',
   description:
-    'Sign up with Zenfest Events and get ₹100 off your total bill. Weddings, birthdays, corporate functions and more across Chennai.',
+    'Sign up with Zenfest Events and get ₹100 off your total bill. Weddings, birthdays, corporate functions and more across Tamil Nadu.',
 }
 
 const PERKS = [

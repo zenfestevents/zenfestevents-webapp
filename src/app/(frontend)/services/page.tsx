@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Services',
   description:
-    'Decoration, catering, photography, DJ and complete event coordination from Zenfest Events, Chennai.',
+    'Decoration, catering, photography, DJ and complete event coordination from Zenfest Events, across Tamil Nadu.',
 }
 
 const FALLBACK = [

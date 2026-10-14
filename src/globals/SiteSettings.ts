@@ -26,7 +26,7 @@ export const SiteSettings: GlobalConfig = {
           name: 'subheadline',
           type: 'textarea',
           defaultValue:
-            'Weddings, birthdays, corporate functions and more across Chennai — décor, catering, photography, DJ and complete packages.',
+            "Weddings, birthdays, corporate functions and more across Tamil Nadu's major cities — décor, catering, photography, DJ and complete packages.",
         },
       ],
     },

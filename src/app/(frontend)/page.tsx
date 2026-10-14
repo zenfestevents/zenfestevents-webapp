@@ -18,6 +18,7 @@ import { VendorCard } from '../../components/market/VendorCard'
 import { listVendors, type PublicVendor } from '../../lib/marketplace'
 import { MARKET_CATEGORIES } from '../../lib/marketplaceOptions'
 import { getCustomer } from '../../lib/session'
+import { COMING_SOON, FEATURES } from '../../lib/features'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,10 +65,12 @@ export default async function HomePage() {
   const [data, settings, homePoll, agents, market] = await Promise.all([
     getHomeData(),
     getSiteSettings(),
-    getHomePoll(),
+    FEATURES.polls ? getHomePoll() : null,
     getAgentProfiles(),
-    getHomeMarket(),
+    FEATURES.marketplace ? getHomeMarket() : { vendors: [], saved: new Set<number>() },
   ])
+  // Switched-off features (lib/features.ts) get one "Coming soon" band instead of their own.
+  const soon = COMING_SOON.filter((f) => !FEATURES[f.key])
   const hero = { ...SITE_FALLBACK.hero, ...(settings?.hero || {}) }
   const wa = whatsappLink(settings?.contact?.whatsapp, DEFAULT_WA_MESSAGE)
 
@@ -85,6 +88,7 @@ export default async function HomePage() {
       )}
 
       {/* ---------- MARKETPLACE: the DIY lane — book vendors directly ---------- */}
+      {FEATURES.marketplace && (
       <section className="section band-soft home-market">
         <div className="container home-market__inner">
           <Reveal className="home-market__intro">
@@ -94,7 +98,7 @@ export default async function HomePage() {
             </h2>
             <p className="lede">
               Doing it yourself? Compare photographers, makeup artists, decorators, caterers and halls across
-              Chennai — real prices upfront, dates you can trust, every listing checked by our team.
+              Tamil Nadu — real prices upfront, dates you can trust, every listing checked by our team.
             </p>
             <ul className="home-market__cats">
               {MARKET_CATEGORIES.filter(([v]) => v !== 'other').map(([v, label]) => (
@@ -107,7 +111,7 @@ export default async function HomePage() {
               <Link className="btn btn--primary" href="/marketplace">
                 Browse the marketplace
               </Link>
-              <Link className="home-market__vendor-link" href="/vendors">
+              <Link className="home-market__vendor-link" href="/vendors/marketplace">
                 Are you a vendor? List free →
               </Link>
             </div>
@@ -123,6 +127,7 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+      )}
 
       {/* ---------- FEATURED WORK ---------- */}
       <section className="section">
@@ -185,7 +190,32 @@ export default async function HomePage() {
 
       <KolamDivider />
 
+      {/* ---------- COMING SOON: AI / marketplace / earn while switched off ---------- */}
+      {soon.length > 0 && (
+        <section className="section band-ink home-soon">
+          <KolamRosette size={300} className="home-earn__kolam" />
+          <div className="container">
+            <p className="eyebrow">Coming soon to Zenfest</p>
+            <h2 className="display-l">
+              More ways to <span className="italic accent">celebrate</span>
+            </h2>
+            <ul className="home-soon__grid">
+              {soon.map((f, i) => (
+                <Reveal key={f.key} as="li" className="home-soon__card" delay={i * 70}>
+                  <Link href={f.href}>
+                    <span className="pill pill--soon">Soon</span>
+                    <strong>{f.label}</strong>
+                    <span className="muted">{f.body}</span>
+                  </Link>
+                </Reveal>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
       {/* ---------- EARN FROM EVENTS (hosts programme, /earn) ---------- */}
+      {FEATURES.earn && (
       <section className="section band-ink home-earn">
         <KolamRosette size={300} className="home-earn__kolam" />
         <div className="container home-earn__inner">
@@ -204,6 +234,7 @@ export default async function HomePage() {
           </Link>
         </div>
       </section>
+      )}
 
       {/* ---------- GIFT REGISTRY (/registry) ---------- */}
       <section className="section--tight home-registry">
@@ -298,8 +329,8 @@ export default async function HomePage() {
             clients reach us fastest on WhatsApp.
           </p>
           <div className="btn-row cta-band__cta">
-            <Link className="btn btn--primary" href="/contact">
-              Request a callback
+            <Link className="btn btn--primary" href="/enquire">
+              Plan your event
             </Link>
             {settings?.contact?.whatsapp && (
               <a className="btn btn--whatsapp" href={wa} target="_blank" rel="noopener">

@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'About',
   description:
-    'Zenfest Events is a full-service event management company near Chennai with branches in Guduvancheri and Thiruverkadu.',
+    'Zenfest Events is a full-service event management company in Tamil Nadu, planning weddings and celebrations in major cities across the state.',
 }
 
 const REASONS = [
@@ -36,7 +36,7 @@ export default async function AboutPage() {
               Calm planning, <span className="italic accent">joyful</span> celebrations
             </h1>
             <p className="lede">
-              Zenfest Events is a full-service event management company near Chennai. From
+              Zenfest Events is a full-service event management company in Tamil Nadu. From
               the first idea to the last guest leaving, we plan, style and run events across
               Tamil Nadu — so you can enjoy the day instead of managing it.
             </p>

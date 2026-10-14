@@ -99,7 +99,7 @@ export default async function ShopPoliciesPage() {
         <p>
           Event businesses can list products for free. Listings go live after our team reviews them. Zenfest charges
           sellers a commission on delivered orders, agreed before the first listing goes live. Sellers are responsible
-          for their own GST, invoices, delivery and returns. <Link href="/vendors">Become a seller</Link>
+          for their own GST, invoices, delivery and returns. <Link href="/vendors/marketplace">Become a seller</Link>
         </p>
       </div>
     </section>

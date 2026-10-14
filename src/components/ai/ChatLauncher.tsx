@@ -61,12 +61,12 @@ export function ChatLauncher() {
 
 /**
  * A link that opens the Zenfest AI chat in place (panel or full-screen) and falls
- * back to a normal link: /plan without JavaScript, /contact when the AI is off.
+ * back to a normal link: /plan without JavaScript, /enquire when the AI is off.
  */
 export function AiLink(props: {
   className?: string
   children: React.ReactNode
-  /** Shown instead (linking to /contact) when Zenfest AI is switched off; `false` hides the link. */
+  /** Shown instead (linking to /enquire) when Zenfest AI is switched off; `false` hides the link. */
   fallback?: React.ReactNode
   prefill?: string
   /** Runs before the chat opens, e.g. to close the phone menu. */
@@ -76,7 +76,7 @@ export function AiLink(props: {
   if (!ai?.enabled) {
     if (props.fallback === false) return null
     return (
-      <Link className={props.className} href="/contact">
+      <Link className={props.className} href="/enquire">
         {props.fallback ?? props.children}
       </Link>
     )

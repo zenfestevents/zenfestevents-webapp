@@ -7,8 +7,9 @@ import type { CollectionAfterChangeHook } from 'payload'
  */
 export const notifySubmission =
   (label: string, fields: string[]): CollectionAfterChangeHook =>
-  async ({ doc, operation, req }) => {
-    if (operation !== 'create') return doc
+  async ({ doc, operation, req, context }) => {
+    // skipNotify: created by staff tooling (e.g. a lead from an occasion reminder), not the website.
+    if (operation !== 'create' || context?.skipNotify) return doc
 
     const to = process.env.LEAD_NOTIFICATION_EMAIL || 'zenfestevents@gmail.com'
     // Dotted paths reach into groups (e.g. `photography.services`). Blank nested

@@ -25,12 +25,29 @@ export type SiteSettings = {
   ai?: { enabled?: boolean | null; greeting?: string | null; bandHeadline?: string | null }
 }
 
+/**
+ * Zenfest is an event management company in Tamil Nadu (not just Chennai): the major
+ * cities named in the footer and page copy. Branch addresses stay where they are.
+ */
+export const MAJOR_CITIES = [
+  'Chennai',
+  'Coimbatore',
+  'Madurai',
+  'Tiruchirappalli',
+  'Salem',
+  'Tirunelveli',
+  'Vellore',
+  'Erode',
+  'Tiruppur',
+  'Thanjavur',
+] as const
+
 /** Sensible fallbacks so the site looks complete before settings are filled in. */
 export const SITE_FALLBACK: Required<SiteSettings> = {
   hero: {
     headline: 'Every celebration, beautifully managed',
     subheadline:
-      'Weddings, birthdays, corporate functions and more across Chennai — décor, catering, photography, DJ and complete packages, handled end to end.',
+      "Weddings, birthdays, corporate functions and more across Tamil Nadu's major cities — décor, catering, photography, DJ and complete packages, handled end to end.",
   },
   contact: {
     phonePrimary: '+91 90800 89530',

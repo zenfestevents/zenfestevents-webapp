@@ -6,6 +6,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { claimItem, undoClaim } from '../../app/(frontend)/registry/actions'
 import type { EventPollView, PublicEvent, PublicItem } from '../../lib/registry'
 import { VoteCard } from '../polls/VoteCard'
+import { FEATURES } from '../../lib/features'
 import { GIFT_AMOUNTS, formatINR } from '../../lib/registryOptions'
 import { QrCode } from './QrCode'
 import { useLocalStorage, useNow, writeLocalStorage } from './useClient'
@@ -43,7 +44,7 @@ export function GuestRegistry({
   const tabs = [
     ['gifts', 'Gift wishlist', true],
     ['shagun', 'Shagun', showShagun],
-    ['polls', 'Polls', polls.length > 0],
+    ['polls', 'Polls', FEATURES.polls && polls.length > 0],
   ] as const
   const visibleTabs = tabs.filter(([, , show]) => show)
   const [onlyAvailable, setOnlyAvailable] = useState(false)

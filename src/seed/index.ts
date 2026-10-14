@@ -56,7 +56,7 @@ async function run() {
       hero: {
         headline: 'Every celebration, beautifully managed',
         subheadline:
-          'Weddings, birthdays, corporate functions and more across Chennai — décor, catering, photography, DJ and complete packages, handled end to end.',
+          "Weddings, birthdays, corporate functions and more across Tamil Nadu's major cities — décor, catering, photography, DJ and complete packages, handled end to end.",
       },
       contact: {
         phonePrimary: '+91 90800 89530',

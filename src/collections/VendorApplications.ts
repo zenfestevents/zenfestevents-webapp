@@ -280,7 +280,7 @@ export const VendorApplications: CollectionConfig = {
     { name: 'phoneVerification', type: 'json', virtual: true, admin: { hidden: true } },
     // No longer asked on the form; kept for older applications.
     { name: 'email', type: 'email' },
-    // Holds the Chennai area picked on the form (column name kept to avoid a migration).
+    // Holds the area / Tamil Nadu town picked on the form (column name kept to avoid a migration).
     { name: 'city', type: 'text', label: 'Area' },
     {
       name: 'portfolioUrl',

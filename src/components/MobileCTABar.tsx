@@ -4,30 +4,34 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React from 'react'
 
-import type { SiteSettings } from '../lib/site'
-import { AiLink, hidesChatLauncher } from './ai/ChatLauncher'
+import { DEFAULT_WA_MESSAGE, SITE_FALLBACK, whatsappLink, type SiteSettings } from '../lib/site'
+import { hidesChatLauncher } from './ai/ChatLauncher'
 
 /**
- * Sticky bottom bar on mobile: Earn from events / Ask Zenfest AI / Enroll as a vendor.
- * The gold middle button is the phone's Zenfest AI entry (no floating bubble on phones);
- * it falls back to "Enquire" (/contact) when the AI is off.
+ * Sticky bottom bar on phones: WhatsApp / Plan your event / For vendors.
+ * The gold middle button opens the event-requirements form (/enquire); the AI
+ * entry used to live there and comes back via the header and homepage when
+ * FEATURES.ai is switched on.
  */
-// `settings` is unused since WhatsApp left the bar; kept so layout.tsx needn't change.
-export function MobileCTABar(_props: { settings: SiteSettings }) {
+export function MobileCTABar({ settings }: { settings: SiteSettings }) {
   const pathname = usePathname()
   // Registry pages have their own sticky bar (guest "Plan with Zenfest" banner) or none.
-  // Also hidden on /plan, where the chat's own composer sits at the bottom.
-  if (hidesChatLauncher(pathname)) return null
+  // Also hidden on /plan (the chat's composer) and /enquire (the form's own buttons).
+  if (hidesChatLauncher(pathname) || pathname === '/enquire') return null
+  const wa = whatsappLink(settings?.contact?.whatsapp || SITE_FALLBACK.contact.whatsapp, DEFAULT_WA_MESSAGE)
   return (
     <div className="mobilebar" role="region" aria-label="Quick actions">
-      <Link className="mobilebar__btn mobilebar__btn--earn" href="/earn">
-        Earn from events
+      <a className="mobilebar__btn mobilebar__btn--wa" href={wa} target="_blank" rel="noopener">
+        <svg className="mobilebar__icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.3Z" />
+        </svg>
+        WhatsApp
+      </a>
+      <Link className="mobilebar__btn mobilebar__btn--enq" href="/enquire">
+        Plan your event
       </Link>
-      <AiLink className="mobilebar__btn mobilebar__btn--enq" fallback="Enquire">
-        <span aria-hidden="true">✦</span> Ask Zenfest AI
-      </AiLink>
       <Link className="mobilebar__btn mobilebar__btn--vendor" href="/vendors">
-        Enroll as a vendor
+        For vendors
       </Link>
     </div>
   )

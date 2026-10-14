@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import React from 'react'
+import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 
 import { KolamRosette } from '../../../components/Kolam'
@@ -9,6 +10,7 @@ import { getPollView, listPublicPolls, type PollListItem } from '../../../lib/po
 import { POLL_CATEGORIES, type PollCategory } from '../../../lib/pollOptions'
 import { labelFor } from '../../../lib/registryOptions'
 import { pollVerifyMode } from '../../../lib/voterVerification'
+import { FEATURES } from '../../../lib/features'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,6 +38,7 @@ function sortPolls(list: PollListItem[], sort: string) {
 }
 
 export default async function PollsPage({ searchParams }: Props) {
+  if (!FEATURES.polls) notFound()
   const { cat, sort = 'latest' } = await searchParams
   const all = await listPublicPolls('open')
   const featured = all.find((p) => p.featured) ?? all[0] ?? null

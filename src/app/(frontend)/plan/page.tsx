@@ -2,8 +2,10 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import React from 'react'
 
+import { ComingSoon } from '../../../components/ComingSoon'
 import { ZenfestChat } from '../../../components/ai/ZenfestChat'
 import { aiAvailable } from '../../../lib/ai/status'
+import { FEATURES } from '../../../lib/features'
 import { getSiteSettings } from '../../../lib/getSettings'
 
 export const dynamic = 'force-dynamic'
@@ -16,6 +18,7 @@ export const metadata: Metadata = {
 
 /** The full-screen Zenfest AI chat — the shareable link for promotions. */
 export default async function PlanPage() {
+  if (!FEATURES.ai) return <ComingSoon feature="ai" />
   const settings = await getSiteSettings()
   if (!aiAvailable(settings)) {
     return (
@@ -25,8 +28,8 @@ export default async function PlanPage() {
           <h1 className="display-l">Our AI planner is taking a break</h1>
           <p className="lede">Our team is here though — tell us about your event and we&apos;ll call you back.</p>
           <div className="btn-row">
-            <Link className="btn btn--primary" href="/contact">
-              Get a callback
+            <Link className="btn btn--primary" href="/enquire">
+              Plan your event
             </Link>
           </div>
         </div>

@@ -9,6 +9,8 @@ import { VendorCard } from '../../../../components/market/VendorCard'
 import { listVendors, type VendorFilters } from '../../../../lib/marketplace'
 import { MARKET_AREAS, MARKET_CATEGORIES, categoryLabel, isCategory, rupees } from '../../../../lib/marketplaceOptions'
 import { getCustomer } from '../../../../lib/session'
+import { FEATURES } from '../../../../lib/features'
+import { ComingSoon } from '../../../../components/ComingSoon'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,14 +22,15 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   if (!isCategory(category)) return {}
   const blurb = MARKET_CATEGORIES.find(([v]) => v === category)?.[2] ?? ''
   return {
-    title: `${categoryLabel(category)} in Chennai — prices & availability`,
-    description: `${blurb}. Compare ${categoryLabel(category).toLowerCase()} vendors in Chennai with prices upfront, checked by Zenfest Events.`,
+    title: `${categoryLabel(category)} in Tamil Nadu — prices & availability`,
+    description: `${blurb}. Compare ${categoryLabel(category).toLowerCase()} vendors in Tamil Nadu with prices upfront, checked by Zenfest Events.`,
   }
 }
 
 const SORTS = ['recommended', 'price-low', 'price-high', 'new'] as const
 
 export default async function CategoryPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
+  if (!FEATURES.marketplace) return <ComingSoon feature="marketplace" />
   const { category } = await params
   const sp = await searchParams
   const cat = param(sp.cat)
@@ -103,7 +106,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
           <div className="mk-empty card">
             <h2 className="display-s">No vendors match yet</h2>
             <p className="muted">
-              We&apos;re adding vendors across Chennai every week. Try another area or date — or tell our team what you
+              We&apos;re adding vendors across Tamil Nadu every week. Try another area or date — or tell our team what you
               need and we&apos;ll find someone for you.
             </p>
             <div className="btn-row">

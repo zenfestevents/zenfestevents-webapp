@@ -22,7 +22,9 @@
     "seed:ai": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/seed/aiDemo.ts",
     "seed:marketplace": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/seed/marketplaceDemo.ts",
     "seed:shop": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/seed/shopDemo.ts",
-    "create:admin": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/scripts/createAdmin.ts"
+    "create:admin": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/scripts/createAdmin.ts",
+    "reset:admin-password": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/scripts/resetAdminPassword.ts",
+    "import:occasions": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/scripts/importOccasions.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.88.0",

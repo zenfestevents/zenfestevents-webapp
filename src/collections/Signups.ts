@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { anyone, authenticated } from '../access'
 import { notifySubmission } from '../hooks/notifySubmission'
+import { syncSignupToContacts } from '../hooks/syncOccasionFromWebsite'
 
 /**
  * Sign-ups from the ₹100-off offer. Public can create; only admin can read.
@@ -37,6 +38,7 @@ export const Signups: CollectionConfig = {
         'guestCount',
         'message',
       ]),
+      syncSignupToContacts,
     ],
   },
   fields: [

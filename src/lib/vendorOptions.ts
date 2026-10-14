@@ -70,7 +70,7 @@ export const MIN_ORDERS = [
 export const MIN_FLAVOURS = 3
 
 /**
- * Major Chennai areas, alphabetical. The vendor form saves the chosen one in
+ * Major Chennai areas, alphabetical (TN_TOWNS below covers the rest of the state). The vendor form saves the chosen one in
  * `vendor-applications.city`; marketplace vendors pick the areas they serve.
  */
 export const CHENNAI_AREAS = [
@@ -86,7 +86,20 @@ export const CHENNAI_AREAS = [
   'West Mambalam',
 ]
 
-export const toOptions = (list: readonly (readonly [string, string])[]) =>
+/**
+ * Zenfest plans events all over Tamil Nadu, so partner vendors outside Chennai can
+ * apply too: the major towns (+ "Other", which asks for the name).
+ */
+export const ALL_TAMIL_NADU = 'All over Tamil Nadu'
+export const TN_TOWNS = [
+  'Coimbatore', 'Cuddalore', 'Dindigul', 'Erode', 'Hosur', 'Kanchipuram',
+  'Karur', 'Kanyakumari / Nagercoil', 'Kumbakonam', 'Madurai', 'Nagapattinam',
+  'Namakkal', 'Puducherry', 'Pudukkottai', 'Ramanathapuram', 'Salem',
+  'Thanjavur', 'Thoothukudi', 'Tiruchirappalli', 'Tirunelveli', 'Tiruppur',
+  'Tiruvannamalai', 'Vellore', 'Villupuram', 'Virudhunagar',
+]
+
+export const toOptions =(list: readonly (readonly [string, string])[]) =>
   list.map(([value, label]) => ({ value, label }))
 
 export function optionLabel(list: readonly (readonly [string, string])[], value: unknown) {

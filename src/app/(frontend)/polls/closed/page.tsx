@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import React from 'react'
+import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 
 import { PollCard } from '../../../../components/polls/PollCard'
 import { listPublicPolls } from '../../../../lib/polls'
 import { POLL_CATEGORIES, type PollCategory } from '../../../../lib/pollOptions'
+import { FEATURES } from '../../../../lib/features'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,6 +18,7 @@ export const metadata: Metadata = {
 type Props = { searchParams: Promise<{ cat?: string }> }
 
 export default async function ClosedPollsPage({ searchParams }: Props) {
+  if (!FEATURES.polls) notFound()
   const { cat } = await searchParams
   const category = POLL_CATEGORIES.some(([v]) => v === cat) ? (cat as PollCategory) : null
   const polls = (await listPublicPolls('closed')).filter((p) => !category || p.category === category)

@@ -180,6 +180,35 @@
 .mobile-menu__cta {
   margin-top: 1.2rem;
 }
+/* Group headings: Explore / Coming soon / For vendors. */
+.mobile-menu__group {
+  margin: 1.3rem 0 0.1rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--marigold);
+}
+.mobile-menu__group:first-child {
+  margin-top: 0;
+}
+/* Switched-off features (lib/features.ts): still tappable, to their teaser page. */
+.mobile-menu__link--soon {
+  color: rgba(255, 255, 255, 0.55);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.mobile-menu__soon {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(217, 178, 76, 0.5);
+  color: var(--marigold);
+}
 
 /* 1200, not 900: the bar carries nine nav links (Marketplace added) plus the
    vendor, AI and account buttons. Below this the menu collapses to the hamburger. */
@@ -195,6 +224,24 @@
     display: none;
   }
   .site-nav__link {
+    white-space: nowrap;
+  }
+}
+/* With the optional features switched off (lib/features.ts) the bar holds five
+   links + "Plan your event" + "For Vendors", which fit from 1000px. */
+@media (min-width: 1000px) {
+  .site-header--compact .site-nav {
+    display: flex;
+    gap: 1.4rem;
+  }
+  .site-header--compact .site-header__cta {
+    display: flex;
+  }
+  .site-header--compact .nav-toggle {
+    display: none;
+  }
+  .site-header--compact .site-nav__link,
+  .site-header--compact .site-header__cta .btn {
     white-space: nowrap;
   }
 }
@@ -247,6 +294,9 @@
 .section:has(> .container > .page-head) {
   position: relative;
   overflow: hidden;
+  /* clip, not just hidden: a hidden box can still be scrolled sideways (focusing a
+     form field did it), sliding the page under the watermark that pokes out right. */
+  overflow: clip;
 }
 @media (min-width: 900px) {
   .section:has(> .container > .page-head)::before {
@@ -321,6 +371,250 @@
 .coming-soon .btn-row {
   justify-content: center;
   margin-top: 0.5rem;
+}
+/* A whole page for a switched-off feature (components/ComingSoon.tsx). */
+.coming-soon--page {
+  min-height: min(70svh, 640px);
+  align-content: center;
+}
+.coming-soon--page h1 {
+  max-width: 22ch;
+}
+
+/* ---------- homepage "Coming soon to Zenfest" band (lib/features.ts) ---------- */
+.home-soon {
+  position: relative;
+  overflow: hidden;
+}
+.home-soon .container {
+  position: relative;
+}
+.home-soon h2 {
+  margin: 0.5rem 0 clamp(1.6rem, 1rem + 2vw, 2.4rem);
+}
+.home-soon__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 760px) {
+  .home-soon__grid {
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  }
+}
+.home-soon__card a {
+  height: 100%;
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 0.55rem;
+  padding: 1.4rem 1.4rem 1.6rem;
+  border: 1px solid rgba(217, 178, 76, 0.32);
+  border-radius: var(--radius-l);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--jasmine);
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.home-soon__card a:hover {
+  border-color: var(--marigold);
+  background: rgba(217, 178, 76, 0.08);
+}
+.home-soon__card strong {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.35rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+.home-soon__card .muted {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ---------- "Plan your event" form (/enquire, EventRequirementsForm) ---------- */
+.evq-layout {
+  max-width: 820px;
+}
+.evq-card {
+  padding: clamp(1.2rem, 0.8rem + 2vw, 2.2rem);
+}
+.evq-other {
+  margin-top: 1.4rem;
+  text-align: center;
+}
+.evq-other a {
+  color: var(--marigold-deep);
+  text-decoration: underline;
+}
+.evq__steps {
+  list-style: none;
+  margin: 0 0 0.4rem;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem;
+}
+.evq__steps li {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--muted, #6b6259);
+}
+.evq__dot {
+  width: 1.9rem;
+  height: 1.9rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--clay-line);
+  font-weight: 700;
+  background: var(--jasmine);
+}
+.evq__steps .is-done .evq__dot {
+  background: var(--marigold);
+  border-color: var(--marigold);
+  color: var(--ink);
+}
+.evq__steps .is-current .evq__dot {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--marigold-bright);
+}
+.evq__steps .is-current {
+  color: var(--ink);
+  font-weight: 600;
+}
+@media (max-width: 560px) {
+  /* Phones: numbers only, except the current step's name. */
+  .evq__steps li:not(.is-current) .evq__label {
+    display: none;
+  }
+}
+.evq__step:not([hidden]) {
+  display: grid;
+  gap: 1.1rem;
+}
+.evq__events {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 0.5rem;
+}
+@media (min-width: 560px) {
+  .evq__events {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.evq__event {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+  padding: 1.2rem 0.8rem;
+  border: 1px solid var(--clay-line);
+  border-radius: var(--radius-m, 14px);
+  background: var(--jasmine);
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.evq__event input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.evq__event:has(input:focus-visible) {
+  outline: 2px solid var(--marigold);
+  outline-offset: 2px;
+}
+.evq__event.is-active {
+  border-color: var(--marigold);
+  box-shadow: inset 0 0 0 1px var(--marigold);
+  background: rgba(217, 178, 76, 0.12);
+}
+.evq__event-icon {
+  font-size: 1.8rem;
+}
+@media (max-width: 559px) {
+  /* Phones: compact rows (icon + name) instead of three tall cards. */
+  .evq__event {
+    grid-template-columns: auto 1fr;
+    justify-items: start;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.8rem 1rem;
+    text-align: left;
+  }
+  .evq__event-icon {
+    font-size: 1.5rem;
+  }
+}
+.evq__tick {
+  font-weight: 600;
+}
+.evq__nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-top: 0.4rem;
+}
+.evq__nav .btn--primary {
+  margin-left: auto;
+}
+
+/* ---------- /vendors: the two vendor lanes ---------- */
+.vendor-paths {
+  display: grid;
+  gap: 1.2rem;
+}
+@media (min-width: 820px) {
+  .vendor-paths {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.vendor-path {
+  display: grid;
+  align-content: start;
+  gap: 0.8rem;
+  padding: clamp(1.4rem, 1rem + 2vw, 2.2rem);
+}
+.vendor-path h2 {
+  margin: 0;
+}
+.vendor-path__points {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.4rem;
+}
+.vendor-path .btn-row {
+  margin-top: 0.4rem;
+}
+.vendor-path--soon {
+  background: linear-gradient(180deg, var(--jasmine), var(--blush-200));
+}
+.pill--soon,
+.pill.pill--soon {
+  display: inline-block;
+  padding: 0.18rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(217, 178, 76, 0.22);
+  color: #6b4b0f;
+}
+.band-ink .pill.pill--soon {
+  background: rgba(217, 178, 76, 0.18);
+  color: var(--marigold-bright);
+}
+
+/* Vendor dashboard: the optional "also apply as a partner" line. */
+.dash__partner {
+  margin: 0.4rem 0 1rem;
 }
 
 /* ---------- hero tag row (shared by the scrub hero) ---------- */
@@ -1368,6 +1662,19 @@
 .site-footer__col a:hover {
   color: var(--marigold);
 }
+/* The major Tamil Nadu cities we work in (MAJOR_CITIES in lib/site.ts). */
+.site-footer__cities {
+  margin-top: 0.8rem;
+  font-size: 0.88rem;
+  letter-spacing: 0.02em;
+  color: var(--marigold);
+  opacity: 0.85;
+}
+.site-footer__soon {
+  color: var(--marigold);
+  font-size: 0.85em;
+  opacity: 0.8;
+}
 .site-footer__heading {
   font-family: var(--font-body), sans-serif;
   font-weight: 600;
@@ -1412,8 +1719,8 @@
 }
 
 /* ---------- mobile CTA bar ---------- */
-/* Bottom action bar on phones: WhatsApp / Enquire / Enroll as a vendor.
-   Enquire is the signature — gold like a silk saree's zari border, with a slow
+/* Bottom action bar on phones: WhatsApp / Plan your event / For vendors.
+   Plan your event is the signature — gold like a silk saree's zari border, with a slow
    sheen crossing it as if the thread catches the light. */
 .mobilebar {
   position: fixed;
@@ -1422,7 +1729,7 @@
   right: 0;
   z-index: 90;
   display: grid;
-  grid-template-columns: 1fr 1fr 1.25fr;
+  grid-template-columns: 1fr 1.3fr 1fr;
   gap: 0.45rem;
   padding: 0.5rem 0.55rem max(0.5rem, env(safe-area-inset-bottom));
   background: var(--ink);
@@ -1461,8 +1768,13 @@
   flex: none;
   fill: currentColor;
 }
-/* Families earning from their event: warm ivory, so it reads apart from the gold
-   Enquire and the outlined vendor button. */
+/* WhatsApp green, so it reads apart from the gold Plan button and the outlined vendor one. */
+.mobilebar__btn--wa {
+  color: #fff;
+  background: #1eae5a;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+/* Earn from events (warm ivory) — unused while FEATURES.earn is off. */
 .mobilebar__btn--earn {
   color: var(--ink);
   background: linear-gradient(180deg, var(--jasmine) 0%, var(--blush-200) 100%);

@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Our Work',
   description:
-    'Browse past weddings, birthdays, corporate functions, housewarmings and sports events managed by Zenfest Events across Chennai.',
+    'Browse past weddings, birthdays, corporate functions, housewarmings and sports events managed by Zenfest Events across Tamil Nadu.',
 }
 
 async function getProjects(): Promise<GalleryItem[]> {
@@ -74,7 +74,7 @@ export default async function GalleryPage() {
             <h2 className="display-m">The gallery is being put together</h2>
             <p className="lede">
               We&apos;re selecting the best photographs from hundreds of weddings,
-              birthdays, housewarmings and corporate events across Chennai. They&apos;ll
+              birthdays, housewarmings and corporate events across Tamil Nadu. They&apos;ll
               be here shortly — in the meantime, tell us what you&apos;re planning and
               we&apos;ll send you photos from events just like it.
             </p>

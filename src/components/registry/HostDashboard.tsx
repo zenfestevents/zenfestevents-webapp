@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useTransition } from 'react'
 
 import { updateEventSettings } from '../../app/(frontend)/registry/actions'
+import { FEATURES } from '../../lib/features'
 import type { HostRegistry } from '../../lib/registry'
 import { whatsappLink } from '../../lib/site'
 import { HostGifts } from './HostGifts'
@@ -16,7 +17,8 @@ type Tab = 'gifts' | 'guests' | 'polls' | 'share' | 'settings' | 'return-gifts'
 const TABS: [Tab, string][] = [
   ['gifts', 'Gifts'],
   ['guests', 'Guests & RSVP'],
-  ['polls', 'Polls'],
+  // Family polls are switched off with the public ones (FEATURES.polls).
+  ...(FEATURES.polls ? ([['polls', 'Polls']] as [Tab, string][]) : []),
   ['share', 'Share'],
   ['settings', 'Details'],
   ['return-gifts', 'Return gifts'],

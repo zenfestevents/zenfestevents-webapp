@@ -9,6 +9,7 @@ import { getPollView, getPublicPoll, listPublicPolls } from '../../../../lib/pol
 import { POLL_CATEGORIES } from '../../../../lib/pollOptions'
 import { labelFor } from '../../../../lib/registryOptions'
 import { pollVerifyMode } from '../../../../lib/voterVerification'
+import { FEATURES } from '../../../../lib/features'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,6 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PollPage({ params }: Props) {
+  if (!FEATURES.polls) notFound()
   const { slug } = await params
   const poll = await getPublicPoll(slug)
   if (!poll) notFound()

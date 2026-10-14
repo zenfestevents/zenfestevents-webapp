@@ -10,6 +10,7 @@ const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000).to
  * in payload.config.ts). Server component: Payload passes it the Local API.
  * "Gifts claimed (value)" is the sum of listed prices of claimed gifts — a
  * stand-in for GMV, since purchases happen on the stores' sites.
+ * Uses the `zf-stat` tiles from app/(payload)/custom.scss.
  */
 export async function RegistryStats({ payload }: { payload: Payload }) {
   const since = daysAgo(30)
@@ -45,31 +46,19 @@ export async function RegistryStats({ payload }: { payload: Payload }) {
   ]
 
   return (
-    <section style={{ marginBottom: '2rem' }}>
-      <h2 style={{ fontSize: '1.1rem', margin: '0 0 0.8rem' }}>Gift Registry & Polls</h2>
-      <div
-        style={{
-          display: 'grid',
-          gap: '0.8rem',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))',
-        }}
-      >
+    <section className="zf-section" aria-labelledby="zf-registry-title">
+      <h2 id="zf-registry-title" className="zf-section__title">
+        Gift registry &amp; polls
+      </h2>
+      <dl className="zf-stats zf-stats--compact">
         {cards.map(([label, value, sub]) => (
-          <div
-            key={label}
-            style={{
-              border: '1px solid var(--theme-elevation-150)',
-              borderRadius: 8,
-              padding: '0.9rem 1rem',
-              background: 'var(--theme-elevation-50)',
-            }}
-          >
-            <div style={{ fontSize: '0.8rem', opacity: 0.75 }}>{label}</div>
-            <div style={{ fontSize: '1.7rem', fontWeight: 600, lineHeight: 1.2 }}>{value}</div>
-            {sub && <div style={{ fontSize: '0.78rem', opacity: 0.7 }}>{sub}</div>}
+          <div key={label} className="zf-stat">
+            <dt>{label}</dt>
+            <dd className="zf-stat__value">{value}</dd>
+            {sub && <dd className="zf-stat__sub">{sub}</dd>}
           </div>
         ))}
-      </div>
+      </dl>
     </section>
   )
 }

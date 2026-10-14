@@ -17,7 +17,7 @@ import {
   submitForReview,
 } from '../../app/(frontend)/vendors/actions'
 import { logOut } from '../../lib/authActions'
-import { listingGapList, needsQuestionnaire } from '../../lib/listing'
+import { listingGapList } from '../../lib/listing'
 import type { PublicPhoto, VendorEnquiry } from '../../lib/marketplace'
 import {
   LANGUAGES,
@@ -27,8 +27,6 @@ import {
   PRICE_UNITS,
   type ListingStatus,
 } from '../../lib/marketplaceOptions'
-import type { VerifyMode } from '../PhoneVerify'
-import { VendorForm } from '../VendorForm'
 import { EnquiryFacts, EnquiryThread, StatusPill, formatDay } from './EnquiryThread'
 import { MonthCalendar } from './MonthCalendar'
 import { statusText, useSave } from './useSave'
@@ -57,31 +55,27 @@ export type DashboardVendor = {
   hasApplication: boolean
 }
 
-type Tab = 'enquiries' | 'listing' | 'prices' | 'photos' | 'availability' | 'questions'
+type Tab = 'enquiries' | 'listing' | 'prices' | 'photos' | 'availability'
 
 const LOGIN = '/vendors/login'
 
 export function VendorDashboard({
   vendor,
   enquiries,
-  verifyMode,
   initialTab,
   welcome,
 }: {
   vendor: DashboardVendor
   enquiries: VendorEnquiry[]
-  verifyMode: VerifyMode
   initialTab: string
   welcome: boolean
 }) {
-  const questions = needsQuestionnaire(vendor.category)
   const tabs: [Tab, string][] = [
     ['enquiries', 'Enquiries'],
     ['listing', 'Listing'],
     ['prices', 'Prices'],
     ['photos', 'Photos'],
     ['availability', 'Dates'],
-    ...(questions ? ([['questions', 'Questions']] as [Tab, string][]) : []),
   ]
   const live = vendor.listingStatus === 'published'
   const fallback: Tab = live || enquiries.length ? 'enquiries' : 'listing'
@@ -128,6 +122,19 @@ export function VendorDashboard({
           </div>
         )}
         <StatusPanel vendor={vendor} onGo={go} />
+        {/* The partner application is a separate lane (/vendors/partner), optional here. */}
+        <p className="dash__partner muted">
+          {vendor.hasApplication ? (
+            <>You&apos;ve also applied as a Zenfest partner — our team has your answers.</>
+          ) : (
+            <>
+              Also want to work on events Zenfest plans?{' '}
+              <Link href="/vendors/partner" className="accent">
+                Apply as a Zenfest partner →
+              </Link>
+            </>
+          )}
+        </p>
 
         <div className="reg-tabs reg-tabs--dash" role="tablist">
           {tabs.map(([t, label]) => (
@@ -151,27 +158,6 @@ export function VendorDashboard({
           {tab === 'prices' && <PricesTab vendor={vendor} />}
           {tab === 'photos' && <PhotosTab vendor={vendor} />}
           {tab === 'availability' && <DatesTab vendor={vendor} />}
-          {tab === 'questions' && (
-            <div>
-              <h2 className="display-s">{vendor.category === 'cake' ? 'Cake questions' : 'Photography questions'}</h2>
-              <p className="muted dash__intro">
-                {vendor.hasApplication
-                  ? 'You’ve answered these. Send them again only if something changed — our team sees the latest.'
-                  : 'Our team checks these before your listing goes live. They’re the same questions every vendor answers.'}
-              </p>
-              <VendorForm
-                verifyMode={verifyMode}
-                account={{
-                  name: vendor.name,
-                  businessName: vendor.businessName,
-                  phone: vendor.phone,
-                  vendorType: vendor.category as 'photography' | 'cake',
-                  area: vendor.areas.find((a) => a !== 'All over Chennai') ?? vendor.areas[0] ?? '',
-                }}
-                onDone={() => window.setTimeout(() => window.location.reload(), 1800)}
-              />
-            </div>
-          )}
         </div>
       </div>
     </section>

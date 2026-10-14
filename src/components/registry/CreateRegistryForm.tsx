@@ -175,7 +175,7 @@ export function CreateRegistryForm() {
           </label>
           <label className="field">
             <span className="field__label">City *</span>
-            <input required maxLength={80} placeholder="e.g. Chennai" value={data.venueCity} onChange={set('venueCity')} />
+            <input required maxLength={80} placeholder="e.g. Coimbatore" value={data.venueCity} onChange={set('venueCity')} />
           </label>
           <label className="field">
             <span className="field__label">Google Maps link</span>

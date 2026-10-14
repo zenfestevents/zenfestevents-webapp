@@ -7,6 +7,9 @@ import * as migration_20261002_132939_zenfest_ai from './20261002_132939_zenfest
 import * as migration_20261003_183428_marketplace_accounts from './20261003_183428_marketplace_accounts';
 import * as migration_20261005_142133_email_verification_google from './20261005_142133_email_verification_google';
 import * as migration_20261005_173802_zenfest_shop from './20261005_173802_zenfest_shop';
+import * as migration_20261009_090152_occasion_reminders from './20261009_090152_occasion_reminders';
+import * as migration_20261014_032729_event_requirements from './20261014_032729_event_requirements';
+import * as migration_20261014_040817_tamil_nadu_copy from './20261014_040817_tamil_nadu_copy';
 
 export const migrations = [
   {
@@ -52,6 +55,21 @@ export const migrations = [
   {
     up: migration_20261005_173802_zenfest_shop.up,
     down: migration_20261005_173802_zenfest_shop.down,
-    name: '20261005_173802_zenfest_shop'
+    name: '20261005_173802_zenfest_shop',
+  },
+  {
+    up: migration_20261009_090152_occasion_reminders.up,
+    down: migration_20261009_090152_occasion_reminders.down,
+    name: '20261009_090152_occasion_reminders',
+  },
+  {
+    up: migration_20261014_032729_event_requirements.up,
+    down: migration_20261014_032729_event_requirements.down,
+    name: '20261014_032729_event_requirements',
+  },
+  {
+    up: migration_20261014_040817_tamil_nadu_copy.up,
+    down: migration_20261014_040817_tamil_nadu_copy.down,
+    name: '20261014_040817_tamil_nadu_copy'
   },
 ];

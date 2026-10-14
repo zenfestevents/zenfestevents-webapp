@@ -8,13 +8,15 @@ import { VendorCard } from '../../../components/market/VendorCard'
 import { categoryCounts, listVendors } from '../../../lib/marketplace'
 import { MARKET_CATEGORIES } from '../../../lib/marketplaceOptions'
 import { getCustomer } from '../../../lib/session'
+import { FEATURES } from '../../../lib/features'
+import { ComingSoon } from '../../../components/ComingSoon'
 
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Wedding & Event Vendor Marketplace — Chennai',
+  title: 'Wedding & Event Vendor Marketplace — Tamil Nadu',
   description:
-    'Find photographers, makeup artists, decorators, caterers, cake makers and halls in Chennai with prices upfront. Every vendor is reviewed by Zenfest.',
+    'Find photographers, makeup artists, decorators, caterers, cake makers and halls in Tamil Nadu with prices upfront. Every vendor is reviewed by Zenfest.',
 }
 
 const WHY = [
@@ -25,6 +27,7 @@ const WHY = [
 ] as const
 
 export default async function MarketplacePage() {
+  if (!FEATURES.marketplace) return <ComingSoon feature="marketplace" />
   const [counts, latest, customer] = await Promise.all([categoryCounts(), listVendors({ sort: 'new' }), getCustomer()])
   const saved = new Set((customer?.shortlist ?? []).map((s) => (typeof s === 'object' ? s.id : s)))
   const total = Object.values(counts).reduce((a, b) => a + b, 0)
@@ -38,7 +41,7 @@ export default async function MarketplacePage() {
             Book your event vendors <span className="accent">directly</span>
           </h1>
           <p className="lede">
-            Photographers, makeup artists, decorators, caterers and halls across Chennai — with real prices and dates,
+            Photographers, makeup artists, decorators, caterers and halls across Tamil Nadu — with real prices and dates,
             checked by the Zenfest team.
           </p>
           <SearchBar />
@@ -96,14 +99,14 @@ export default async function MarketplacePage() {
             <div>
               <h3>Want us to plan it instead?</h3>
               <p>Our planners handle everything — vendors, budget and the day itself.</p>
-              <Link className="btn btn--gold" href="/contact">
+              <Link className="btn btn--gold" href="/enquire">
                 Talk to a planner
               </Link>
             </div>
             <div>
               <h3>Are you a vendor?</h3>
               <p>List your business free. No packages, no lock-in.</p>
-              <Link className="btn btn--ghost" href="/vendors">
+              <Link className="btn btn--ghost" href="/vendors/marketplace">
                 List your business
               </Link>
             </div>

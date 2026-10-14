@@ -129,14 +129,14 @@ export default async function ShopPage() {
             <div>
               <h3>Sell event products?</h3>
               <p>Return gifts, decor, outfits or props — list them on Zenfest and reach families planning functions.</p>
-              <Link className="btn btn--gold" href="/vendors">
+              <Link className="btn btn--gold" href="/vendors/marketplace">
                 Become a seller
               </Link>
             </div>
             <div>
               <h3>Need the whole event planned?</h3>
               <p>Our planners handle decor, vendors and the day itself.</p>
-              <Link className="btn btn--ghost" href="/contact">
+              <Link className="btn btn--ghost" href="/enquire">
                 Talk to a planner
               </Link>
             </div>

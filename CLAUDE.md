@@ -3,7 +3,11 @@
 Guidance for working in this repository.
 
 ## Project
-Zenfest Events — an event company near Chennai growing from a marketing site into a
+Zenfest Events — an **event management company in Tamil Nadu**, aiming at every major
+city in the state (owner, 2026-10-14). Copy never positions it as a Chennai company: say
+"Tamil Nadu" / "major cities across Tamil Nadu"; Chennai appears only as one city among
+`MAJOR_CITIES` (`lib/site.ts`, footer) and in the real branch addresses. It is growing
+from a marketing site into a
 wedding/event **web app** (an ecosystem: fund → plan → book → guests → run the day → after).
 Public site + a self-service admin/back-end in one codebase. Business model has two lanes:
 **DIY couples book vendors themselves on the marketplace**; couples who want a planner hand
@@ -55,9 +59,12 @@ src/
     services/page.tsx     Services listing
     packages/page.tsx     Bundled packages (PACKAGES_READY flag)
     contact/page.tsx      Contact form (inquiry)
+    enquire/page.tsx      "Plan your event" — wedding / birthday / baby shower requirements
+                          form (EventRequirementsForm; ?event= preselects); main client CTA
     signup/page.tsx       Signup / offer form (branches on "planning an event?")
-    vendors/              /vendors landing (VENDOR_ACCOUNTS flag; old VendorForm kept),
-                          signup, login, forgot/reset-password, dashboard, actions.ts
+    vendors/              /vendors chooser (two lanes), partner/ (VendorForm application),
+                          marketplace/ (listing landing), signup, login,
+                          forgot/reset-password, dashboard, actions.ts
     account/              Couple account: /account (enquiries, shortlist, planner
                           hand-off, profile), signup, login, forgot/reset-password,
                           session/route.ts (header button), actions.ts
@@ -119,7 +126,7 @@ src/
   marked `export const dynamic = 'force-dynamic'`. Pages: home (featured work + services),
   gallery (all projects), services (all services), packages (with "Coming soon" flag),
   about, contact, signup (with event-planning branch), vendors, plan (Zenfest AI).
-- **Forms** (`InquiryForm`, `VendorForm`, `SignupForm`) POST to Payload's REST API
+- **Forms** (`InquiryForm`, `EventRequirementsForm`, `VendorForm`, `SignupForm`) POST to Payload's REST API
   (`/api/leads`, `/api/vendor-applications`, `/api/signups`). Public users **create**
   submissions; only admin can **read** them (see `src/access/index.ts`). New submissions
   trigger the `notifySubmission` hook (sends email to `LEAD_NOTIFICATION_EMAIL` when
@@ -158,6 +165,14 @@ src/
   that touches the Payload server library goes in `src/lib/getSettings.ts` or
   `src/lib/payload.ts`. A client component importing (even transitively) the Payload
   client breaks the build with `Can't resolve 'fs'` and a Turbopack manifest error.
+- **Admin look:** `/admin` is re-skinned in `app/(payload)/custom.scss` (unlayered, so it beats
+  Payload's `@layer payload-default`): Payload's grey scale `--color-base-*` is replaced by the
+  warm ivory→ink ramp and `--color-success-*` by gold, so every Payload screen follows the brand
+  in light and dark mode. The side menu and login/logout pages are ink (`zf-dark-surface` mixin
+  reuses Payload's dark mapping). Fonts: Hanken Grotesk body, Oswald headings (Google Fonts
+  import there). Logo/icon: `components/admin/BrandGraphics.tsx` (plain `<img>` — `next/image`
+  only allows `/api/media/file/**`). Custom admin components use `zf-*` classes from that file,
+  not inline styles.
 - **Styling:** plain CSS design system. Tokens live in `styles.css`; component/section
   styles in `parts.css`. Use the existing CSS variables and class prefixes; avoid
   adding a CSS framework.
@@ -198,18 +213,23 @@ src/
   pushed the hero's `100svh` stage down and cropped the film. `#main` pays back the
   offset via `--header-h` and the hero cancels it. The bar hides over the hero
   (`body.hero-immersive`) and returns as the film leaves. Phones show the emblem **and**
-  the "ZENFEST EVENTS™" wordmark (it used to be hidden below 420px). Desktop holds nine
-  links (Marketplace first) + "✦ Zenfest AI" (≥1440px) + "For Vendors" + the account
-  button (icon-only below 1440px), so the bar collapses to the hamburger **below 1200px**
-  and its inner container may run to 1400px (wider than the 1200px content column).
-  Adding a tenth link means re-measuring 1200 / 1280 / 1440.
-- **Mobile bottom bar (`MobileCTABar`, <900px, every page except the registry's `/r/*`, `/dashboard/*` and `/plan`):** Earn from events
-  (`/earn`, ivory) · **Ask Zenfest AI** (gold "zari" sheen — `zari-sheen` keyframes; opens
-  the AI chat full-screen, and falls back to "Enquire" → `/contact` when the AI is off) ·
-  Enroll as a vendor (`/vendors`). No Call button by the owner's choice; WhatsApp was
-  swapped out for Earn from events (here and in the desktop hero's buttons) — it is
-  still on the homepage's other sections and `/contact`. The sheen stops under
-  `prefers-reduced-motion`.
+  the "ZENFEST EVENTS™" wordmark (it used to be hidden below 420px). `NAV` is built from
+  `FEATURES` (see "Feature switches"): with everything optional off it is five links (Our
+  Work · Services · Shop · About · Contact) + "Plan your event" (`/enquire`) + "For
+  Vendors" — `.site-header--compact`, desktop bar from **1000px**. Packages is not in the
+  nav (Services lights up for it via `also`, and the footer links it). With every feature
+  on it is nine links (Marketplace first) + "✦ Zenfest AI" (≥1440px) + the account button
+  (icon-only below 1440px), collapsing to the hamburger **below 1200px**; the inner
+  container may run to 1400px. Adding a tenth link means re-measuring 1200 / 1280 / 1440.
+  The phone menu is grouped: **Explore** / **Coming soon** (switched-off features, muted
+  with a "Soon" pill, linking to their teaser) / **For vendors** (Partner with Zenfest,
+  Marketplace listing).
+- **Mobile bottom bar (`MobileCTABar`, <900px, every page except the registry's `/r/*`, `/dashboard/*`, `/plan` and `/enquire`):**
+  WhatsApp (green) · **Plan your event** (gold "zari" sheen — `zari-sheen` keyframes;
+  `/enquire`) · For vendors (`/vendors`), by the owner's choice on 2026-10-14 (it was Earn
+  from events · Ask Zenfest AI · Enroll as a vendor). No Call button. The desktop hero's
+  buttons are "Plan your event" (the AI link, which falls back to `/enquire` while the AI
+  is off) + "See our work". The sheen stops under `prefers-reduced-motion`.
 - **Polish rules (see DESIGN.md "Surfaces & details"):** page heads get the rosette
   watermark automatically via `.section:has(> .container > .page-head)::before` — wrap new
   light page intros in `<header className="page-head">` to get it. `.band-ink` now sets a
@@ -269,6 +289,26 @@ src/
   from the matching Payload version tag (e.g. `v3.88.0`), not `main`.
 
 ## Current state (things that are deliberate, not oversights)
+- **Feature switches (`lib/features.ts`, 2026-10-14).** The owner trimmed the site to what
+  is live: `FEATURES = { ai, marketplace, earn, polls }`, **all `false`**. Off means the code
+  stays and: AI / Marketplace / Earn pages render `<ComingSoon feature=…>` (`/plan`,
+  `/marketplace/*`, `/earn`, `/vendors/marketplace`, and the vendor + couple sign-up /
+  complete-signup pages — `signUp` / `completeGoogleSignUp` refuse server-side too); poll
+  pages `notFound()` and the registry's family-poll tabs hide (`polls.zenfestevents.in` now
+  lands on the 404); the homepage shows one "Coming soon to Zenfest" band instead of the
+  AI / marketplace / Earn bands; the header account button hides (logins, dashboards and
+  resets still work by URL). `aiAvailable()` also requires `FEATURES.ai`, so every AI entry
+  point falls back to `/enquire`. Flip a flag to `true` to bring a feature back exactly as
+  it was (checked 2026-10-14). The Shop and gift registry stay live.
+- **"Plan your event" (`/enquire`) replaces the team's three Tally forms** (Wedding &
+  Reception `w4pMpk`, Birthday `waaAMX`, Baby Shower `nPGJKx`), rebuilt natively so answers
+  land in Leads (+ team email, + occasion reminders) instead of Tally. The option lists,
+  copied from Tally (plus a name field, which Tally lacked), live in
+  `lib/eventRequirements.ts`; values are short readable names stored as-is in the Leads
+  `requirements` group (text `hasMany`, validated against the lists, so adding a service
+  needs no migration). `eventType` gained `babyshower` (an enum → migration). Steps stay
+  mounted (`hidden`) so one FormData holds every answer; `problem(step)` is the only rule
+  set. Corporate events and housewarmings still go through `/contact`.
 - **Packages aren't published yet.** `/packages` has a `PACKAGES_READY = false` flag:
   the page shows "Coming soon" with a CTA to custom quote instead of displaying
   packages. Flip the flag once packages are entered in the admin. The working listing
@@ -459,11 +499,15 @@ src/
     admin-only fields. The vendor's "Send for review" (`submitForReview`) requires
     `lib/listing.ts` gaps to be empty and emails the team; **publishing = setting
     "Listing status" to Live in /admin**. Vendors can then pause/resume themselves.
-  - **Photo & cake vendors also answer the original questionnaire** (Questions tab =
-    `VendorForm` with an `account` prefill) → a `vendor-applications` row, so the FSSAI
-    rules, team email and **Airtable sync keep working**. `requireVerifiedPhone` strips any
-    client-sent `vendor`, and for a logged-in vendor stamps `vendor` + trusts the
-    account's phone; `linkVendorApplication` links it back and seeds an empty price card.
+  - **Two kinds of vendor, kept apart (2026-10-14).** Marketplace vendors list themselves
+    for couples to contact directly; **partner** vendors apply to work on events Zenfest
+    plans (`/vendors/partner`: `VendorForm` → `vendor-applications` → team email +
+    Airtable). `/vendors` is a chooser between the two. The partner questions are **no
+    longer required** for a marketplace listing (the dashboard's Questions tab is gone; a
+    line links to `/vendors/partner` instead). A logged-in vendor who applies is still
+    linked: `requireVerifiedPhone` strips any client-sent `vendor`, stamps the session's
+    vendor + trusts its phone, and `linkVendorApplication` links it back and seeds an empty
+    price card. `VendorForm`'s `account` prefill mode is kept but currently unused.
   - Payload rejects a cookie session unless the request carries a browser
     `Origin` in `csrf` or `Sec-Fetch-Site: same-origin|same-site|none`. So **curl needs
     `-H 'Sec-Fetch-Site: same-origin'`** (or `Authorization: JWT <token>`), and on a phone
@@ -531,6 +575,34 @@ src/
   `earn/page.tsx`. Option lists (incl. `HOST_CITIES`, Tamil Nadu only for now) live in
   `lib/hostOptions.ts`; they are Postgres enums, so adding a city needs `migrate:create`.
   Reached from the homepage band ("Earn from events" button), the header nav and footer.
+- **Occasion reminders (`/admin` → Occasion Reminders; `collections/Contacts.ts`,
+  `Reminders.ts`, `globals/ReminderSettings.ts`, `lib/occasions/*`) — internal only.**
+  The owner wanted yearly birthdays/anniversaries of past clients and unconverted leads
+  pitched on WhatsApp before each date (repeat business + second chance at leads). Data
+  mostly comes from staff (WhatsApp chats, calls, the old event list via
+  `npm run import:occasions`); website leads/sign-ups feed in only when Reminder
+  Settings → `ingestWebsite` is ticked (off: site data was dummy at launch), arriving
+  `verified: false`. Easy to get wrong:
+  - **Dates are India calendar dates.** Payload stores UTC; a "9 Oct" picked in an IST
+    browser is `8 Oct 18:30Z`. All maths goes through `lib/occasions/dates.ts`
+    (`istYmd`, `nextOccurrence`) and stored dates are noon IST (`ymdToIso`). 29 Feb →
+    28 Feb in other years. With a known year only real anniversaries count, so an
+    enquiry for a wedding next month yields its 1st anniversary, never a "0th".
+  - Occasions are an **array on the contact** (one form for staff), not a collection.
+    A reminder points at the row by `occasionId`; the unique index
+    (`occasionId`, `occurrenceYear`) makes the daily run idempotent — don't replace it
+    with a read-then-write check.
+  - The daily run is `GET /api/reminders/cron` (Vercel Cron, 09:00 IST, `CRON_SECRET`
+    bearer, or a signed-in admin; `?date=YYYY-MM-DD` / `?digest=0` for testing). Saving a
+    contact also creates any reminder already inside its lead time (`syncReminders`),
+    skipped when `context.skipReminderSync` (the run's own date roll-forward).
+  - Sending is **manual and free**: the list cell / dashboard button opens a pre-filled
+    `wa.me` link and PATCHes the reminder to `sent`. Cloud API auto-send (marketing
+    templates, ≈₹1/msg in India) is a deliberate later phase.
+  - "Interested"/"Booked" creates a Lead with `context.skipNotify` (no "new enquiry"
+    email for a lead staff made) and `fromReminder` (so the website-ingest hook skips it).
+  - Phones are stored as `91XXXXXXXXXX` (`toWaNumber`), unlike the 10-digit
+    `normalizePhone` used elsewhere — contacts must allow NRI numbers.
 - **Contact details are real** (phone/WhatsApp `9080089530`, both link to maps/calls) and
   live in three places that must stay in sync: the **SiteSettings** global (what's served),
   `src/seed/index.ts` (demo seed), and `SITE_FALLBACK` in `src/lib/site.ts` (client

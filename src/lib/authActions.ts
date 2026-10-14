@@ -10,6 +10,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 import { VERIFY_SUBJECT, verifyEmailHTML } from '../collections/accountAuth'
+import { FEATURES } from './features'
 import { UserError, dayToDate, fail, isEmail, slugify, text } from './formCheck'
 import { PENDING_COOKIE, openCookie, type PendingGoogle } from './googleAuth'
 import { emailChecksOn, sendMail, siteUrl, teamInbox } from './marketplaceMail'
@@ -135,8 +136,12 @@ async function tellTeamAboutVendor(data: Record<string, unknown>, email: string,
 const afterSignUp = (kind: AccountKind, next?: string) =>
   kind === 'vendor' ? '/vendors/dashboard?welcome=1' : safeNext(next, ACCOUNT.customer.home)
 
+const MARKETPLACE_CLOSED = 'Sign-ups open with the Zenfest Marketplace, coming soon.'
+
 export async function signUp(input: SignUpInput): Promise<AuthResult> {
   try {
+    // Accounts exist for the marketplace; while it is "coming soon" nobody new signs up.
+    if (!FEATURES.marketplace) throw new UserError(MARKETPLACE_CLOSED)
     const kind = kindOf(input?.kind)
     const { collection } = ACCOUNT[kind]
     if (text(input.company, 100)) return { ok: false, error: 'Please try again.' }
@@ -186,6 +191,8 @@ export async function completeGoogleSignUp(
   input: Omit<SignUpInput, 'kind' | 'email' | 'password'>,
 ): Promise<AuthResult> {
   try {
+    // Accounts exist for the marketplace; while it is "coming soon" nobody new signs up.
+    if (!FEATURES.marketplace) throw new UserError(MARKETPLACE_CLOSED)
     const jar = await cookies()
     const pending = openCookie<PendingGoogle>(jar.get(PENDING_COOKIE)?.value)
     if (!pending) throw new UserError('Your Google sign-in timed out. Please choose “Continue with Google” again.')

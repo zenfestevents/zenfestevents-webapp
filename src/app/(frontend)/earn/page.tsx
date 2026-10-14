@@ -6,6 +6,8 @@ import { getSiteSettings } from '../../../lib/getSettings'
 import { HostForm } from '../../../components/HostForm'
 import { KolamDivider, KolamRosette } from '../../../components/Kolam'
 import { Reveal } from '../../../components/Reveal'
+import { FEATURES } from '../../../lib/features'
+import { ComingSoon } from '../../../components/ComingSoon'
 
 export const dynamic = 'force-dynamic'
 
@@ -73,6 +75,7 @@ const FAQ = [
 ]
 
 export default async function EarnPage() {
+  if (!FEATURES.earn) return <ComingSoon feature="earn" />
   const settings = await getSiteSettings()
   const contact = { ...SITE_FALLBACK.contact, ...(settings?.contact || {}) }
   const wa = whatsappLink(

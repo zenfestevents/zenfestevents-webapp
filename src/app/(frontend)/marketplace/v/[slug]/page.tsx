@@ -9,6 +9,8 @@ import { ShortlistButton } from '../../../../../components/market/ShortlistButto
 import { dayKey, getPublicVendor } from '../../../../../lib/marketplace'
 import { ALL_CHENNAI, rupees, unitLabel } from '../../../../../lib/marketplaceOptions'
 import { getCustomer } from '../../../../../lib/session'
+import { FEATURES } from '../../../../../lib/features'
+import { ComingSoon } from '../../../../../components/ComingSoon'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,13 +21,14 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   if (!vendor) return { title: 'Vendor not found' }
   const from = vendor.startingPrice ? ` From ${rupees(vendor.startingPrice)}.` : ''
   return {
-    title: `${vendor.businessName} — ${vendor.service} in Chennai`,
+    title: `${vendor.businessName} — ${vendor.service} in Tamil Nadu`,
     description: `${vendor.about.slice(0, 140)}${from}`,
     openGraph: vendor.cover ? { images: [{ url: vendor.cover.url }] } : undefined,
   }
 }
 
 export default async function VendorPage({ params }: { params: Params }) {
+  if (!FEATURES.marketplace) return <ComingSoon feature="marketplace" />
   const { slug } = await params
   const [vendor, customer] = await Promise.all([getPublicVendor(slug), getCustomer()])
   if (!vendor) notFound()

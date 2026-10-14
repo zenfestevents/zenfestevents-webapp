@@ -7,6 +7,8 @@ import { AuthShell, param, type SearchParams } from '../../../../components/mark
 import { googleEnabled, googleNotice } from '../../../../lib/googleAuth'
 import { verifyMode } from '../../../../lib/phoneVerification'
 import { getCustomer, safeNext } from '../../../../lib/session'
+import { FEATURES } from '../../../../lib/features'
+import { ComingSoon } from '../../../../components/ComingSoon'
 
 // Reads the session and the WhatsApp verification env at request time.
 export const dynamic = 'force-dynamic'
@@ -23,6 +25,7 @@ const POINTS = [
 ] as const
 
 export default async function CustomerSignupPage({ searchParams }: { searchParams: SearchParams }) {
+  if (!FEATURES.marketplace) return <ComingSoon feature="marketplace" title="Couple accounts open soon" body="Accounts for shortlisting and booking vendors open with the Zenfest Marketplace." />
   const sp = await searchParams
   const next = param(sp.next)
   if (await getCustomer()) redirect(safeNext(next, '/account'))

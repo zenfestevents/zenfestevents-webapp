@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import React from 'react'
 
-import { SITE_FALLBACK, telLink, whatsappLink, DEFAULT_WA_MESSAGE, type SiteSettings } from '../lib/site'
+import { FEATURES } from '../lib/features'
+import { MAJOR_CITIES, SITE_FALLBACK, telLink, whatsappLink, DEFAULT_WA_MESSAGE, type SiteSettings } from '../lib/site'
 import { KolamDivider } from './Kolam'
 
 export function Footer({ settings }: { settings: SiteSettings }) {
@@ -21,9 +22,10 @@ export function Footer({ settings }: { settings: SiteSettings }) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/brand/logo-full.png" alt="Zenfest Events" className="footer-logo" width={190} height={190} />
             <p className="muted">
-              Full-service event management across Chennai. We plan, style and run
+              Full-service event management across Tamil Nadu. We plan, style and run
               weddings, birthdays, corporate functions, housewarmings and sports events.
             </p>
+            <p className="site-footer__cities">{MAJOR_CITIES.join(' · ')} — and towns across the state.</p>
             <div className="btn-row">
               {contact.phonePrimary && (
                 <a className="btn btn--ghost" href={telLink(contact.phonePrimary)}>
@@ -38,13 +40,15 @@ export function Footer({ settings }: { settings: SiteSettings }) {
 
           <div className="site-footer__col">
             <h4 className="site-footer__heading">Plan your event</h4>
-            <Link href="/plan">Zenfest AI planner</Link>
-            <Link href="/marketplace">Vendor marketplace</Link>
+            <Link href="/enquire">Plan your event</Link>
             <Link href="/shop">Zenfest Shop</Link>
             <Link href="/registry">Gift registry</Link>
-            <Link href="/polls">Polls</Link>
-            <Link href="/earn">Earn from events</Link>
-            <Link href="/account">My account</Link>
+            {/* Switched-off features (lib/features.ts) stay listed, marked "soon"; polls are hidden. */}
+            <Link href="/plan">Zenfest AI planner{!FEATURES.ai && <Soon />}</Link>
+            <Link href="/marketplace">Vendor marketplace{!FEATURES.marketplace && <Soon />}</Link>
+            <Link href="/earn">Earn from events{!FEATURES.earn && <Soon />}</Link>
+            {FEATURES.polls && <Link href="/polls">Polls</Link>}
+            {FEATURES.marketplace && <Link href="/account">My account</Link>}
           </div>
 
           <div className="site-footer__col">
@@ -54,6 +58,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
             <Link href="/packages">Packages</Link>
             <Link href="/about">About</Link>
             <Link href="/contact">Contact</Link>
+            <Link href="/vendors/partner">Partner with Zenfest</Link>
             <Link href="/vendors">For vendors</Link>
           </div>
 
@@ -102,3 +107,5 @@ export function Footer({ settings }: { settings: SiteSettings }) {
     </footer>
   )
 }
+
+const Soon = () => <span className="site-footer__soon"> · soon</span>

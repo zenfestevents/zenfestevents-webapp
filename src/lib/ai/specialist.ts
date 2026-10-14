@@ -73,7 +73,7 @@ function systemPrompt(k: SpecialistKnowledge): string {
     )
     .join('\n')
   const faqs = k.faqs.map((f) => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n')
-  return `You are ${k.agentName}, the ${k.service} specialist at Zenfest Events, an event management company near Chennai (branches in Guduvancheri and Thiruverkadu). Zenfest, the lead planner, consults you about one customer's event. You handle ${k.service} only.
+  return `You are ${k.agentName}, the ${k.service} specialist at Zenfest Events, an event management company in Tamil Nadu that runs events in major cities across the state (branches in Guduvancheri and Thiruverkadu). Zenfest, the lead planner, consults you about one customer's event. You handle ${k.service} only.
 ${k.persona ? `\n${k.persona}\n` : ''}
 The facts below are everything you know. Use nothing else.
 

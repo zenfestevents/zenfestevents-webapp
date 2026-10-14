@@ -1,0 +1,859 @@
+// Zenfest look for the Payload admin (/admin). Imported by (payload)/layout.tsx.
+//
+// Payload builds every admin colour from one grey scale (--color-base-*) and
+// one accent scale (--color-success-*), inside `@layer payload-default`. These
+// rules are unlayered, so they win without !important. The grey scale becomes
+// the brand's warm ivory → ink ramp and the accent becomes gold, which re-tints
+// the whole admin in light and dark mode alike. Brand tokens mirror
+// (frontend)/styles.css — see DESIGN.md.
+
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Oswald:wght@500;600&display=swap');
+
+:root {
+  --zf-ink: #0d0d0d;
+  --zf-gold: #d9b24c;
+  --zf-gold-bright: #f3de8e;
+  --zf-gold-deep: #a9791f;
+  --zf-gold-text: #8a6414;
+  --zf-jasmine: #fbf7ee;
+  --zf-clay: #6f6455;
+  --zf-font-display: 'Oswald', 'Hanken Grotesk', sans-serif;
+  --zf-grain-ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 0.9  0 0 0 0 0.7  0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --zf-band-ink: var(--zf-grain-ink), radial-gradient(120% 90% at 85% 0%, #1f180e 0%, var(--zf-ink) 62%);
+  --zf-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --font-body: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --style-radius-s: 6px;
+  --style-radius-m: 10px;
+
+  // Warm ivory → ink (replaces Payload's neutral greys).
+  --color-base-0: #fdfaf3;
+  --color-base-50: #f6f1e7;
+  --color-base-100: #eee6d7;
+  --color-base-150: #e3d9c6;
+  --color-base-200: #d6cbb5;
+  --color-base-250: #c8bca4;
+  --color-base-300: #b9ad95;
+  --color-base-350: #a99d86;
+  --color-base-400: #998d78;
+  --color-base-450: #897e6a;
+  --color-base-500: #7a705f;
+  --color-base-550: #6f6455;
+  --color-base-600: #5f5649;
+  --color-base-650: #51493e;
+  --color-base-700: #433c33;
+  --color-base-750: #363029;
+  --color-base-800: #2a2520;
+  --color-base-850: #1f1b17;
+  --color-base-900: #161310;
+  --color-base-950: #100e0c;
+  --color-base-1000: #0d0d0d;
+
+  // Gold (replaces Payload's blue accent: toasts, focus, "success").
+  --color-success-50: #fdf8ea;
+  --color-success-100: #faf0d2;
+  --color-success-150: #f6e6b8;
+  --color-success-200: #f1db9d;
+  --color-success-250: #ebcf84;
+  --color-success-300: #e4c46f;
+  --color-success-350: #ddba5d;
+  --color-success-400: #d9b24c;
+  --color-success-450: #c9a03d;
+  --color-success-500: #b98e2f;
+  --color-success-550: #a9791f;
+  --color-success-600: #946a1b;
+  --color-success-650: #805b17;
+  --color-success-700: #6c4d14;
+  --color-success-750: #5a4011;
+  --color-success-800: #48330e;
+  --color-success-850: #38280b;
+  --color-success-900: #291d08;
+  --color-success-950: #1a1205;
+}
+
+// Payload's own dark-mode mapping, reused to make a surface dark in light mode
+// (the side menu and the login screens sit on brand ink, like the site header).
+@mixin zf-dark-surface {
+  --theme-bg: var(--color-base-950);
+  --theme-text: var(--zf-jasmine);
+  --theme-input-bg: var(--color-base-850);
+  --theme-elevation-0: var(--color-base-900);
+  --theme-elevation-50: var(--color-base-850);
+  --theme-elevation-100: var(--color-base-800);
+  --theme-elevation-150: var(--color-base-750);
+  --theme-elevation-200: var(--color-base-700);
+  --theme-elevation-250: var(--color-base-650);
+  --theme-elevation-300: var(--color-base-600);
+  --theme-elevation-350: var(--color-base-550);
+  --theme-elevation-400: var(--color-base-450);
+  --theme-elevation-450: var(--color-base-400);
+  --theme-elevation-500: var(--color-base-500);
+  --theme-elevation-550: var(--color-base-350);
+  --theme-elevation-600: var(--color-base-300);
+  --theme-elevation-650: var(--color-base-250);
+  --theme-elevation-700: var(--color-base-200);
+  --theme-elevation-750: var(--color-base-150);
+  --theme-elevation-800: var(--color-base-100);
+  --theme-elevation-850: var(--color-base-50);
+  --theme-elevation-900: var(--color-base-0);
+  --theme-elevation-950: var(--color-base-0);
+  --theme-elevation-1000: var(--color-base-0);
+  --theme-border-color: var(--color-base-750);
+  color: var(--theme-text);
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'ss01';
+}
+
+h1,
+.collections__label,
+.dashboard h2 {
+  font-family: var(--zf-font-display);
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  text-wrap: balance;
+}
+
+::selection {
+  background: var(--zf-gold-bright);
+  color: var(--zf-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--zf-gold-deep);
+  outline-offset: 2px;
+}
+
+/* ---------- Brand marks (components/admin/BrandGraphics.tsx) ---------- */
+
+.zf-admin-logo {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+
+  img {
+    height: auto;
+  }
+}
+
+.zf-admin-logo__tag {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--zf-gold);
+  opacity: 0.85;
+}
+
+.zf-admin-icon {
+  border-radius: 50%;
+  display: block;
+}
+
+/* ---------- Side menu: ink with gold, like the site header ---------- */
+
+.nav {
+  @include zf-dark-surface;
+  background: var(--zf-band-ink);
+  border-right-color: rgba(217, 178, 76, 0.16);
+}
+
+.nav-group__toggle,
+.nav-group__label {
+  color: rgba(217, 178, 76, 0.78);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.nav__link {
+  color: rgba(251, 247, 238, 0.78);
+  border-radius: var(--style-radius-s);
+  transition:
+    color 180ms var(--zf-ease),
+    background-color 180ms var(--zf-ease);
+
+  &:hover,
+  &:focus-visible {
+    color: var(--zf-gold-bright);
+    background-color: rgba(217, 178, 76, 0.07);
+  }
+}
+
+.nav__link-indicator {
+  background: var(--zf-gold);
+}
+
+// The menu's open/close button sits on the ink menu while it is open.
+.nav-toggler--is-open .hamburger {
+  background: rgba(217, 178, 76, 0.12);
+  color: var(--zf-gold);
+  box-shadow: inset 0 0 0 1px rgba(217, 178, 76, 0.35);
+}
+
+/* ---------- Login, logout, "unauthorized": a black welcome band ---------- */
+
+.template-minimal {
+  @include zf-dark-surface;
+  background: var(--zf-band-ink);
+  min-height: 100dvh;
+
+  .btn--style-primary {
+    background-color: var(--zf-gold);
+    color: var(--zf-ink);
+
+    &:hover:not(:disabled) {
+      background-color: var(--zf-gold-bright);
+    }
+  }
+
+  a {
+    color: var(--zf-gold);
+  }
+}
+
+.login__brand {
+  margin-bottom: 2rem;
+}
+
+/* ---------- Buttons & cards ---------- */
+
+.btn {
+  transition:
+    background-color 180ms var(--zf-ease),
+    color 180ms var(--zf-ease),
+    box-shadow 180ms var(--zf-ease),
+    transform 120ms var(--zf-ease);
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+}
+
+.btn--style-primary:hover:not(:disabled) {
+  box-shadow: 0 8px 22px -12px rgba(169, 121, 31, 0.75);
+}
+
+.card {
+  transition:
+    box-shadow 200ms var(--zf-ease),
+    transform 200ms var(--zf-ease);
+
+  &.card--has-onclick:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 0 0 1px var(--zf-gold-deep),
+      0 10px 24px -18px rgba(90, 64, 17, 0.55);
+  }
+}
+
+/* ---------- Occasion reminders board (components/admin/OccasionsBoard.tsx) ---------- */
+
+.zf-occ {
+  margin: 0 0 2.5rem;
+  display: grid;
+  gap: 14px;
+}
+
+.zf-eyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--zf-gold);
+}
+
+.zf-occ__hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px 32px;
+  padding: 28px 32px 30px;
+  border-radius: 14px;
+  background: var(--zf-band-ink);
+  color: var(--zf-jasmine);
+  box-shadow: 0 18px 40px -28px rgba(31, 24, 14, 0.9);
+}
+
+.zf-occ__title {
+  margin: 0;
+  font-family: var(--zf-font-display);
+  font-size: clamp(26px, 3vw, 36px);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: 0;
+  color: var(--zf-jasmine);
+}
+
+.zf-occ__count {
+  color: var(--zf-gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.zf-occ__lede {
+  margin: 10px 0 0;
+  max-width: 62ch;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: rgba(251, 247, 238, 0.74);
+  text-wrap: pretty;
+}
+
+.zf-occ__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.zf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  font: 600 14px/1 var(--font-body);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 180ms var(--zf-ease),
+    color 180ms var(--zf-ease),
+    box-shadow 180ms var(--zf-ease),
+    transform 120ms var(--zf-ease);
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+}
+
+.zf-btn--gold {
+  background: var(--zf-gold);
+  color: var(--zf-ink);
+
+  &:hover {
+    background: var(--zf-gold-bright);
+    box-shadow: 0 8px 22px -10px rgba(217, 178, 76, 0.6);
+  }
+}
+
+.zf-btn--ghost {
+  background: transparent;
+  color: var(--zf-jasmine);
+  box-shadow: inset 0 0 0 1px rgba(217, 178, 76, 0.45);
+
+  &:hover:not(:disabled) {
+    box-shadow: inset 0 0 0 1px var(--zf-gold);
+    color: var(--zf-gold-bright);
+  }
+}
+
+.zf-btn--quiet {
+  background: var(--theme-elevation-50);
+  color: var(--theme-elevation-800);
+  min-height: 34px;
+  font-size: 13px;
+
+  &:hover {
+    background: var(--theme-elevation-100);
+  }
+}
+
+.zf-run {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.zf-run__note {
+  font-size: 13px;
+  color: rgba(251, 247, 238, 0.7);
+}
+
+/* Stats */
+
+.zf-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.zf-stat {
+  padding: 14px 18px 16px;
+  border-radius: 10px;
+  background: var(--theme-elevation-50);
+
+  dt {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--theme-elevation-550);
+
+    a {
+      color: inherit;
+      text-decoration: none;
+
+      &:hover {
+        color: var(--theme-elevation-900);
+        text-decoration: underline;
+      }
+    }
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+.zf-stat__value {
+  margin-top: 4px;
+  font-family: var(--zf-font-display);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--theme-elevation-900);
+}
+
+.zf-stat__sub {
+  font-size: 12.5px;
+  color: var(--theme-elevation-500);
+}
+
+.zf-stat__flag {
+  color: var(--zf-gold-text);
+  font-weight: 600;
+}
+
+.zf-stat--gold {
+  box-shadow: inset 3px 0 0 var(--zf-gold);
+}
+
+/* Other dashboard sections (RegistryStats) */
+
+.zf-section {
+  margin: 0 0 2.5rem;
+}
+
+.zf-section__title {
+  margin: 0 0 12px;
+  font-family: var(--zf-font-display);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--theme-elevation-900);
+}
+
+.zf-stats--compact .zf-stat__value {
+  font-size: 26px;
+}
+
+/* Queue with tabs */
+
+.zf-queue {
+  border-radius: 12px;
+  background: var(--theme-elevation-0);
+  box-shadow: inset 0 0 0 1px var(--theme-elevation-100);
+  padding: 4px 20px 12px;
+}
+
+.zf-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid var(--theme-elevation-100);
+}
+
+.zf-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 12px 13px;
+  border: 0;
+  background: none;
+  font: 600 14px/1 var(--font-body);
+  color: var(--theme-elevation-500);
+  cursor: pointer;
+  transition: color 180ms var(--zf-ease);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: auto 8px -1px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--zf-gold-deep);
+    transform: scaleX(0);
+    transition: transform 220ms var(--zf-ease);
+  }
+
+  &:hover {
+    color: var(--theme-elevation-800);
+  }
+
+  &[aria-selected='true'] {
+    color: var(--theme-elevation-1000);
+
+    &::after {
+      transform: scaleX(1);
+    }
+  }
+}
+
+.zf-tab__count {
+  min-width: 22px;
+  padding: 3px 6px;
+  border-radius: 5px;
+  background: var(--theme-elevation-100);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.zf-tab[aria-selected='true'] .zf-tab__count {
+  background: var(--zf-gold);
+  color: var(--zf-ink);
+}
+
+.zf-tabs__all {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--theme-elevation-550);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--theme-elevation-900);
+  }
+}
+
+.zf-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.zf-row {
+  display: grid;
+  grid-template-columns: 48px 40px minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--theme-elevation-50);
+  animation: zf-rise 360ms var(--zf-ease) both;
+  transition: opacity 240ms var(--zf-ease);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  @for $i from 1 through 8 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{($i - 1) * 35}ms;
+    }
+  }
+}
+
+.zf-row--done {
+  opacity: 0.55;
+}
+
+@keyframes zf-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zf-row {
+    animation: none;
+  }
+}
+
+.zf-date {
+  display: grid;
+  justify-items: center;
+  padding: 6px 0 5px;
+  border-radius: 8px;
+  background: var(--theme-elevation-50);
+  line-height: 1;
+}
+
+.zf-date__day {
+  font-family: var(--zf-font-display);
+  font-size: 21px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--theme-elevation-900);
+}
+
+.zf-date__month {
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--theme-elevation-500);
+}
+
+.zf-glyph {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(217, 178, 76, 0.14);
+  color: var(--zf-gold-text);
+}
+
+html[data-theme='dark'] .zf-glyph {
+  color: var(--zf-gold);
+}
+
+.zf-row__main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.zf-row__name {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--theme-elevation-1000);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+.zf-row__what {
+  font-size: 13.5px;
+  color: var(--theme-elevation-550);
+}
+
+.zf-tag {
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: var(--theme-elevation-50);
+  color: var(--theme-elevation-600);
+}
+
+.zf-tag--client {
+  background: rgba(217, 178, 76, 0.16);
+  color: var(--zf-gold-text);
+}
+
+html[data-theme='dark'] .zf-tag--client {
+  color: var(--zf-gold);
+}
+
+.zf-when {
+  min-width: 82px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--theme-elevation-500);
+}
+
+.zf-when--soon {
+  color: var(--zf-gold-text);
+  font-weight: 600;
+}
+
+.zf-when--today {
+  justify-self: end;
+  min-width: 0;
+  padding: 4px 9px;
+  border-radius: 5px;
+  background: var(--zf-gold);
+  color: var(--zf-ink);
+  font-weight: 700;
+}
+
+/* WhatsApp send (dashboard button + reminders list cell) */
+
+.zf-wa {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 180ms var(--zf-ease),
+    box-shadow 180ms var(--zf-ease),
+    transform 120ms var(--zf-ease),
+    color 180ms var(--zf-ease);
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.zf-wa--button {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  background: var(--zf-ink);
+  color: var(--zf-jasmine);
+  font-weight: 600;
+  font-size: 13.5px;
+
+  .zf-wa__glyph {
+    color: var(--zf-gold);
+  }
+
+  &:hover {
+    background: var(--zf-gold);
+    color: var(--zf-ink);
+    box-shadow: 0 8px 20px -10px rgba(169, 121, 31, 0.7);
+
+    .zf-wa__glyph {
+      color: var(--zf-ink);
+    }
+  }
+}
+
+html[data-theme='dark'] .zf-wa--button {
+  background: var(--zf-gold);
+  color: var(--zf-ink);
+
+  .zf-wa__glyph {
+    color: var(--zf-ink);
+  }
+}
+
+.zf-wa--button.zf-wa--sent {
+  background: var(--theme-elevation-50);
+  color: var(--theme-elevation-600);
+  box-shadow: none;
+
+  .zf-wa__glyph {
+    color: var(--theme-elevation-500);
+  }
+}
+
+.zf-wa--link {
+  font-weight: 600;
+  color: var(--zf-gold-text);
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+html[data-theme='dark'] .zf-wa--link {
+  color: var(--zf-gold);
+}
+
+.zf-wa__tick {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--theme-elevation-100);
+  color: var(--theme-elevation-600);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Empty states */
+
+.zf-empty {
+  display: grid;
+  justify-items: start;
+  gap: 18px;
+  padding: 22px 4px 14px;
+}
+
+.zf-empty--quiet {
+  color: var(--theme-elevation-550);
+  font-size: 14px;
+}
+
+.zf-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: zf-step;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  width: 100%;
+
+  li {
+    counter-increment: zf-step;
+    padding: 16px 18px;
+    border-radius: 10px;
+    background: var(--theme-elevation-50);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--theme-elevation-650);
+
+    &::before {
+      content: counter(zf-step);
+      display: block;
+      margin-bottom: 6px;
+      font-family: var(--zf-font-display);
+      font-size: 22px;
+      color: var(--zf-gold-deep);
+    }
+
+    strong {
+      color: var(--theme-elevation-1000);
+    }
+  }
+}
+
+.zf-queue__note {
+  margin: 10px 0 2px;
+  font-size: 12.5px;
+  color: var(--theme-elevation-500);
+}
+
+@media (max-width: 760px) {
+  .zf-occ__hero {
+    padding: 22px 20px 24px;
+  }
+
+  .zf-queue {
+    padding: 4px 14px 10px;
+  }
+
+  .zf-row {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    gap: 10px 12px;
+  }
+
+  .zf-glyph,
+  .zf-tag {
+    display: none;
+  }
+
+  .zf-row__action {
+    grid-column: 2 / -1;
+  }
+
+  .zf-tabs__all {
+    display: none;
+  }
+}

@@ -9,6 +9,8 @@ import {
   PHOTO_SERVICES_SUMMARY,
   photoServiceLabel,
   CHENNAI_AREAS,
+  ALL_TAMIL_NADU,
+  TN_TOWNS,
   type PhotoService,
 } from '../lib/vendorOptions'
 import { CakeFields, cakePayload, uploadVendorFiles } from './CakeFields'
@@ -352,19 +354,29 @@ export function VendorForm({
           <span className="field__label">Area</span>
           <select name="area" value={area} onChange={(e) => setArea(e.target.value)}>
             <option value="">Choose your area</option>
-            <option value="All over Chennai">All over Chennai</option>
-            {CHENNAI_AREAS.map((a) => (
-              <option key={a} value={a}>
-                {a}
-              </option>
-            ))}
-            <option value="other">Other</option>
+            <option value={ALL_TAMIL_NADU}>{ALL_TAMIL_NADU}</option>
+            <optgroup label="Cities across Tamil Nadu">
+              {TN_TOWNS.map((a) => (
+                <option key={a} value={a}>
+                  {a}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Chennai areas">
+              <option value="All over Chennai">All over Chennai</option>
+              {CHENNAI_AREAS.map((a) => (
+                <option key={a} value={a}>
+                  {a}
+                </option>
+              ))}
+            </optgroup>
+            <option value="other">Other town</option>
           </select>
         </label>
         {area === 'other' && (
           <label className="field">
-            <span className="field__label">Which area? *</span>
-            <input name="otherArea" required placeholder="e.g. Kanchipuram" />
+            <span className="field__label">Which town or area? *</span>
+            <input name="otherArea" required placeholder="e.g. Karaikudi" />
           </label>
         )}
       </div>
