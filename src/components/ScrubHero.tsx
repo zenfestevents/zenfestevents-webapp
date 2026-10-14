@@ -395,13 +395,25 @@ export function ScrubHero({
       <div className="scrubhero__pin">
         <div className="scrubhero__media" aria-hidden="true">
           <picture>
-            {/* phones: the whole team welcoming the visitor, shown uncropped */}
+            {/* phones: the whole team welcoming the visitor, shown uncropped. The size
+                reserves its height before it loads (phones size the hero by the image, so
+                without it the page jumped); files from build-hero-mobile.cjs. */}
             <source
               media={MOBILE_QUERY}
-              srcSet="/hero/poster-mobile-860.webp 860w, /hero/poster-mobile-1290.webp 1290w"
+              srcSet="/hero/poster-mobile-720.webp 720w, /hero/poster-mobile-860.webp 860w, /hero/poster-mobile-1080.webp 1080w, /hero/poster-mobile-1290.webp 1290w"
               sizes="100vw"
+              width={860}
+              height={1290}
             />
-            <img className="scrubhero__poster" src="/hero/poster.jpg" alt="" />
+            {/* The poster is the first thing anyone sees, so it outranks the logos and scripts. */}
+            <img
+              className="scrubhero__poster"
+              src="/hero/poster.jpg"
+              alt=""
+              width={1920}
+              height={1080}
+              fetchPriority="high"
+            />
           </picture>
           <video
             className="scrubhero__video"

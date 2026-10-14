@@ -20,7 +20,15 @@ export function Footer({ settings }: { settings: SiteSettings }) {
         <div className="site-footer__grid">
           <div className="site-footer__brand">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/logo-full.png" alt="Zenfest Events" className="footer-logo" width={190} height={190} />
+            <img
+              src="/brand/logo-footer.webp"
+              alt="Zenfest Events"
+              className="footer-logo"
+              width={190}
+              height={190}
+              loading="lazy"
+              decoding="async"
+            />
             <p className="muted">
               Full-service event management across Tamil Nadu. We plan, style and run
               weddings, birthdays, corporate functions, housewarmings and sports events.

@@ -231,17 +231,20 @@ src/
   scrubbed by scroll, with the gold heart halves meeting as it ends. **Phones
   (≤720px, `MOBILE_QUERY`) get a still instead** — touch-scrubbing a film was laggy and
   cost a 20 MB download — reusing the reduced-motion layout. The still is a ChatGPT team
-  image with its speech bubble baked in (`public/hero/poster-mobile-860.webp` / `-1290.webp`,
+  image with its speech bubble baked in (`public/hero/poster-mobile-{720,860,1080,1290}.webp`,
   from the untracked master `hero-mobile-source.png.png`), shown **whole, full width, just
   under the header** — cropping it to fill the screen cut people off and hid the bubble
   under the header. Heart/kolam-rosette/glow/outro/scrim are hidden. Under the image, a
   dark band holds (in order) the eyebrow, headline, lede and a `KolamDivider`
   (`.scrubhero__divider`, phones only); the desktop buttons and tags are hidden there —
   **phone actions live in `MobileCTABar`, never in the hero**. All of it is the last
-  `@media (max-width: 720px)` block in `parts.css`. Regenerate the image with
-  `ffmpeg -i hero-mobile-source.png.png -vf scale=1290:-2:flags=lanczos -c:v libwebp -quality 78 public/hero/poster-mobile-1290.webp`
-  (and 860). WebP, not JPEG: the busy petals/sparks made the JPEGs twice the size.
+  `@media (max-width: 720px)` block in `parts.css`. Regenerate the images with
+  `node build-hero-mobile.cjs` (sharp, WebP quality 66; keep its `WIDTHS` in step with the
+  `srcSet`). WebP, not JPEG: the busy petals/sparks made the JPEGs twice the size.
   Things that are easy to get wrong here:
+  - **The phone `<source>` carries `width`/`height` (860×1290)** and the poster has
+    `fetchPriority="high"`. Phones size the hero by the image, so without the size the
+    page jumped when it loaded — PageSpeed's layout shift was 0.68 (2026-10-14).
   - `--p` **reaches 1 while the stage is still pinned** and filling the screen. To act on
     "the film has actually left", test `section.getBoundingClientRect().bottom`, not `--p`.
   - The hero is pulled up under the fixed header with a negative margin, so **`--p` is
@@ -322,6 +325,13 @@ src/
   `public/brand/wordmark.png` (the gold "ZENFEST EVENTS" lockup used in the header, with
   a transparent background) is **not** produced by that script — it was extracted from
   `logo-full.png` and will not be rebuilt if the source logo changes.
+  **Public pages use small WebP copies** made by the same script — `emblem.webp` (header),
+  `wordmark.webp` (from `wordmark.png`), `logo-footer.webp` (footer) — sized ~3x their CSS
+  size; the PNGs stay for the admin, the AI chat and the polls' social-card fallback. The
+  favicon is 192px (the old 512px one was 360 KB, downloaded on every page).
+  **PageSpeed:** `PAGESPEED_API_KEY` in `.env.local` (local only) works with
+  `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=…&strategy=mobile&key=…`;
+  keyless calls get quota 0.
 - **Signature motif:** kolam line-art (`components/Kolam.tsx`) rendered in gold — keep
   it restrained.
 - **Editing content model:** after changing a collection/global, run

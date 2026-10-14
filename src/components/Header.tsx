@@ -63,14 +63,14 @@ export function Header({ settings }: { settings: SiteSettings }) {
       <div className="container site-header__inner">
         <Link href="/" className="wordmark" aria-label="Zenfest Events home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/emblem.png" alt="" className="wordmark__mark" width={44} height={44} />
+          <img src="/brand/emblem.webp" alt="" className="wordmark__mark" width={44} height={44} />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/brand/wordmark.png"
+            src="/brand/wordmark.webp"
             alt="Zenfest Events"
             className="wordmark__lockup"
-            width={525}
-            height={170}
+            width={278}
+            height={90}
           />
         </Link>
 
