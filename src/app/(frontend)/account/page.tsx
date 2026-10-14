@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { AccountDashboard } from '../../../components/market/AccountDashboard'
 import { param, type SearchParams } from '../../../components/market/AuthShell'
 import { dayKey, enquiriesForCustomer, shortlistFor } from '../../../lib/marketplace'
+import { verifyMode } from '../../../lib/phoneVerification'
 import { requireCustomer } from '../../../lib/session'
 
 export const dynamic = 'force-dynamic'
@@ -28,6 +29,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
       shortlist={shortlist}
       initialTab={param(sp.tab)}
       sentTo={param(sp.sent)}
+      verifyMode={verifyMode()}
     />
   )
 }

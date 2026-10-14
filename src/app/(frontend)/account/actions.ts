@@ -11,6 +11,7 @@ import { dayKey } from '../../../lib/marketplace'
 import { sendMail, siteUrl, teamInbox } from '../../../lib/marketplaceMail'
 import { EVENT_TYPES, MARKET_AREAS, eventTypeLabel, rupees } from '../../../lib/marketplaceOptions'
 import { getPayloadClient } from '../../../lib/payload'
+import { EMAIL_LOGIN } from '../../../lib/accountOptions'
 import { normalizePhone } from '../../../lib/phoneVerification'
 import { rateLimited } from '../../../lib/rateLimit'
 import { getCustomer } from '../../../lib/session'
@@ -54,7 +55,8 @@ export async function updateProfile(input: { name: string; phone: string; city: 
   try {
     const customer = await me()
     const name = text(input.name, 120)
-    const phone = normalizePhone(input.phone)
+    // With WhatsApp-only accounts the number is the login; it changes only through changeMyPhone.
+    const phone = EMAIL_LOGIN ? normalizePhone(input.phone) : customer.phone
     if (name.length < 2) throw new UserError('Enter your name.')
     if (!phone) throw new UserError('Enter a valid 10-digit mobile number.')
     const eventDate = input.eventDate ? dayToDate(input.eventDate) : null

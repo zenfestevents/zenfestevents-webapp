@@ -1,16 +1,19 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
+import { EMAIL_LOGIN } from '../../lib/accountOptions'
 import {
   completeGoogleSignUp,
   forgotPassword,
   logIn,
+  logInWithWhatsApp,
   resendVerification,
   resetPassword,
   signUp,
+  signUpWithWhatsApp,
 } from '../../lib/authActions'
 import { MARKET_AREAS, MARKET_CATEGORIES, PASSWORD_MIN } from '../../lib/marketplaceOptions'
 import { PhoneVerify, type PhoneProof, type VerifyMode } from '../PhoneVerify'
@@ -38,7 +41,11 @@ type Props = {
   prefill?: { name: string; email: string }
 }
 
-/** Sign-up / log-in / forgot / reset for vendor and couple accounts. */
+/**
+ * Sign-up / log-in / forgot / reset for vendor and couple accounts. With
+ * EMAIL_LOGIN off (lib/accountOptions.ts) only sign-up and login exist, and both
+ * are the WhatsApp check: no email, no password.
+ */
 export function AuthForm({ kind, mode, verifyMode = 'off', next, token, google, notice, prefill }: Props) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
@@ -46,11 +53,16 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token, google, 
   const [sent, setSent] = useState(false)
   const [proof, setProof] = useState<PhoneProof>(null)
   const [category, setCategory] = useState('')
+  // Vendors: business name first; "Same as business name" copies it into "Your name".
+  const [businessName, setBusinessName] = useState('')
+  const [sameName, setSameName] = useState(false)
   const [showPw, setShowPw] = useState(false)
   // After sign-up: "check your inbox" for this address. After a login refused for
   // an unconfirmed email: offer to resend to the address they typed.
   const [checkEmail, setCheckEmail] = useState('')
   const [unconfirmed, setUnconfirmed] = useState('')
+  const formRef = useRef<HTMLFormElement>(null)
+  const waOnly = !EMAIL_LOGIN && (mode === 'signup' || mode === 'login')
   const paths = PATHS[kind]
   const withNext = (p: string) => (next ? `${p}?next=${encodeURIComponent(next)}` : p)
 
@@ -63,11 +75,15 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token, google, 
     }
     const fd = new FormData(form)
     const s = (k: string) => String(fd.get(k) ?? '')
-    if ((mode === 'signup' || mode === 'google') && verifyMode !== 'off' && !proof) {
+    if (waOnly && verifyMode === 'off') {
+      setError(WHATSAPP_DOWN)
+      return
+    }
+    if ((waOnly || ((mode === 'signup' || mode === 'google') && verifyMode !== 'off')) && !proof) {
       setError('Verify your phone number on WhatsApp first.')
       return
     }
-    if ((mode === 'signup' || mode === 'reset') && s('password') !== s('confirm')) {
+    if (!waOnly && (mode === 'signup' || mode === 'reset') && s('password') !== s('confirm')) {
       setError('The two passwords don’t match.')
       return
     }
@@ -95,7 +111,11 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token, google, 
         company: s('company'),
       }
       const res =
-        mode === 'google'
+        waOnly && mode === 'signup'
+          ? await signUpWithWhatsApp({ kind, ...details })
+          : waOnly && mode === 'login'
+            ? await logInWithWhatsApp({ kind, phone: s('phone'), phoneProof: proof, next })
+            : mode === 'google'
           ? await completeGoogleSignUp(details)
           : mode === 'signup'
           ? await signUp({ kind, email: s('email'), password: s('password'), ...details })
@@ -119,6 +139,11 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token, google, 
       setBusy(false)
     }
   }
+
+  // Logging in needs nothing but the WhatsApp check, so go as soon as it's done.
+  useEffect(() => {
+    if (waOnly && mode === 'login' && proof) formRef.current?.requestSubmit()
+  }, [waOnly, mode, proof])
 
   if (checkEmail) {
     return (
@@ -175,7 +200,13 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token, google, 
   )
 
   return (
-    <form className="form auth" onSubmit={onSubmit} noValidate>
+    <form className="form auth" onSubmit={onSubmit} noValidate ref={formRef}>
+      {waOnly && verifyMode === 'off' && (
+        <p className="form__error" role="alert">
+          {WHATSAPP_DOWN}
+        </p>
+      )}
+
       {google && (mode === 'signup' || mode === 'login') && (
         <>
           <a
@@ -208,16 +239,33 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token, google, 
 
       {(mode === 'signup' || mode === 'google') && (
         <>
-          <label className="field">
-            <span className="field__label">Your name *</span>
-            <input name="name" required autoComplete="name" minLength={2} defaultValue={prefill?.name} />
-          </label>
-          {kind === 'vendor' && (
+          {kind === 'vendor' ? (
             <>
               <label className="field">
                 <span className="field__label">Business name *</span>
-                <input name="businessName" required autoComplete="organization" minLength={2} />
+                <input
+                  name="businessName"
+                  required
+                  autoComplete="organization"
+                  minLength={2}
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                />
               </label>
+              <div className="field">
+                <label className="field__label" htmlFor="auth-name">
+                  Your name *
+                </label>
+                {sameName ? (
+                  <input key="same" id="auth-name" name="name" required minLength={2} value={businessName} readOnly />
+                ) : (
+                  <input key="own" id="auth-name" name="name" required autoComplete="name" minLength={2} defaultValue={prefill?.name} />
+                )}
+                <label className="choice__option field__hint">
+                  <input type="checkbox" checked={sameName} onChange={(e) => setSameName(e.target.checked)} />
+                  <span>Same as business name</span>
+                </label>
+              </div>
               <label className="field">
                 <span className="field__label">What you offer *</span>
                 <select name="category" required value={category} onChange={(e) => setCategory(e.target.value)}>
@@ -238,22 +286,36 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token, google, 
                 </label>
               )}
             </>
+          ) : (
+            <label className="field">
+              <span className="field__label">Your name *</span>
+              <input name="name" required autoComplete="name" minLength={2} defaultValue={prefill?.name} />
+            </label>
           )}
           <PhoneVerify mode={verifyMode} purpose={kind === 'vendor' ? 'vendor-account' : 'customer-account'} onVerified={setProof} />
         </>
       )}
 
-      {mode !== 'reset' && mode !== 'google' && (
+      {waOnly && mode === 'login' && (
+        <>
+          <p className="field__hint">
+            Enter the WhatsApp number on your account, then send us the code on WhatsApp. That&apos;s your login, no password needed.
+          </p>
+          <PhoneVerify mode={verifyMode} purpose={`${kind}-login`} onVerified={setProof} />
+        </>
+      )}
+
+      {!waOnly && mode !== 'reset' && mode !== 'google' && (
         <label className="field">
           <span className="field__label">Email {mode === 'signup' ? '*' : ''}</span>
           <input name="email" type="email" required autoComplete="email" spellCheck={false} />
         </label>
       )}
 
-      {mode === 'signup' && password('Create a password *', 'new-password')}
-      {mode === 'login' && password('Password', 'current-password')}
+      {!waOnly && mode === 'signup' && password('Create a password *', 'new-password')}
+      {!waOnly && mode === 'login' && password('Password', 'current-password')}
       {mode === 'reset' && password('New password *', 'new-password')}
-      {(mode === 'signup' || mode === 'reset') && (
+      {!waOnly && (mode === 'signup' || mode === 'reset') && (
         <label className="field">
           <span className="field__label">Type it again *</span>
           <input name="confirm" type={showPw ? 'text' : 'password'} required autoComplete="new-password" />
@@ -279,12 +341,12 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token, google, 
           </div>
           <label className="choice__option field__hint">
             <input type="checkbox" name="consent" />
-            <span>Send me offers and planning tips on WhatsApp / email (optional)</span>
+            <span>Send me offers and planning tips on WhatsApp{waOnly ? '' : ' / email'} (optional)</span>
           </label>
         </>
       )}
 
-      {mode === 'login' && (
+      {!waOnly && mode === 'login' && (
         <p className="auth__aside">
           <Link href={paths.forgot}>Forgot password?</Link>
         </p>
@@ -299,7 +361,7 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token, google, 
       )}
       {unconfirmed && <ResendLink kind={kind} email={unconfirmed} />}
 
-      <button className="btn btn--primary form__submit" type="submit" disabled={busy}>
+      <button className="btn btn--primary form__submit" type="submit" disabled={busy || (waOnly && verifyMode === 'off')}>
         {busy
           ? 'Please wait…'
           : mode === 'signup' || mode === 'google'
@@ -329,6 +391,9 @@ export function AuthForm({ kind, mode, verifyMode = 'off', next, token, google, 
     </form>
   )
 }
+
+const WHATSAPP_DOWN =
+  'WhatsApp verification is not available right now. Please WhatsApp us and we will set up your account.'
 
 /** "Resend the confirmation email" — always says sent, so it can't reveal who has an account. */
 function ResendLink({ kind, email }: { kind: Kind; email: string }) {

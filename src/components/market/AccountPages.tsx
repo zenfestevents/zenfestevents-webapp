@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-import { PENDING_COOKIE, openCookie, type PendingGoogle } from '../../lib/googleAuth'
+import { EMAIL_LOGIN } from '../../lib/accountOptions'
+import { PENDING_COOKIE, googleEnabled, openCookie, type PendingGoogle } from '../../lib/googleAuth'
 import { getPayloadClient } from '../../lib/payload'
 import { verifyMode } from '../../lib/phoneVerification'
 import { ACCOUNT, type AccountKind } from '../../lib/session'
@@ -15,6 +16,7 @@ import { AuthShell } from './AuthShell'
 /** /account/verify-email and /vendors/verify-email — the link in the confirm-your-email message. */
 export async function VerifyEmailPage({ kind, token }: { kind: AccountKind; token: string }) {
   const { collection, login } = ACCOUNT[kind]
+  if (!EMAIL_LOGIN) redirect(login)
   let ok = false
   if (token) {
     try {
@@ -51,6 +53,7 @@ export async function VerifyEmailPage({ kind, token }: { kind: AccountKind; toke
 
 /** /account/complete-signup and /vendors/complete-signup — after a new "Continue with Google". */
 export async function CompleteGoogleSignupPage({ kind }: { kind: AccountKind }) {
+  if (!googleEnabled()) redirect(ACCOUNT[kind].login)
   const pending = openCookie<PendingGoogle>((await cookies()).get(PENDING_COOKIE)?.value)
   const signup = kind === 'vendor' ? '/vendors/signup' : '/account/signup'
   if (!pending) redirect(`${signup}?google=expired`)

@@ -5,11 +5,14 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import { closeEnquiry, handToZenfest, markRead, replyAsCustomer, updateProfile } from '../../app/(frontend)/account/actions'
+import { EMAIL_LOGIN } from '../../lib/accountOptions'
 import { logOut } from '../../lib/authActions'
 import type { CustomerEnquiry, PublicVendor } from '../../lib/marketplace'
 import { MARKET_AREAS } from '../../lib/marketplaceOptions'
 import { EnquiryFacts, EnquiryThread, StatusPill, formatDay } from './EnquiryThread'
 import { VendorCard } from './VendorCard'
+import type { VerifyMode } from '../PhoneVerify'
+import { ChangePhone } from './ChangePhone'
 import { statusText, useSave } from './useSave'
 
 type Profile = {
@@ -29,8 +32,10 @@ export function AccountDashboard({
   shortlist,
   initialTab,
   sentTo,
+  verifyMode,
 }: {
   profile: Profile
+  verifyMode: VerifyMode
   enquiries: CustomerEnquiry[]
   shortlist: PublicVendor[]
   initialTab: string
@@ -61,7 +66,7 @@ export function AccountDashboard({
           <div>
             <p className="eyebrow">My account</p>
             <h1 className="display-m">Hi, {profile.name.split(' ')[0]}</h1>
-            <p className="muted dash__meta">{profile.email}</p>
+            {EMAIL_LOGIN && <p className="muted dash__meta">{profile.email}</p>}
           </div>
           <div className="dash__head-actions">
             <Link className="btn btn--gold" href="/marketplace">
@@ -96,7 +101,7 @@ export function AccountDashboard({
           {tab === 'enquiries' && <EnquiriesTab enquiries={enquiries} />}
           {tab === 'shortlist' && <ShortlistTab shortlist={shortlist} />}
           {tab === 'planner' && <PlannerTab shortlistCount={shortlist.length} enquiryCount={enquiries.length} />}
-          {tab === 'profile' && <ProfileTab profile={profile} />}
+          {tab === 'profile' && <ProfileTab profile={profile} verifyMode={verifyMode} />}
         </div>
       </div>
     </section>
@@ -247,7 +252,7 @@ function PlannerTab({ shortlistCount, enquiryCount }: { shortlistCount: number; 
   )
 }
 
-function ProfileTab({ profile }: { profile: Profile }) {
+function ProfileTab({ profile, verifyMode }: { profile: Profile; verifyMode: VerifyMode }) {
   const s = useSave()
   return (
     <form
@@ -271,13 +276,23 @@ function ProfileTab({ profile }: { profile: Profile }) {
           <span className="field__label">Name *</span>
           <input name="name" defaultValue={profile.name} required />
         </label>
-        <label className="field">
-          <span className="field__label">Phone *</span>
-          <input name="phone" defaultValue={profile.phone} required inputMode="tel" />
-          <span className="field__hint">
-            {profile.phoneVerified ? '✓ Verified on WhatsApp. ' : ''}Shared with a vendor only when you send them an enquiry.
-          </span>
-        </label>
+        {EMAIL_LOGIN ? (
+          <label className="field">
+            <span className="field__label">Phone *</span>
+            <input name="phone" defaultValue={profile.phone} required inputMode="tel" />
+            <span className="field__hint">
+              {profile.phoneVerified ? '✓ Verified on WhatsApp. ' : ''}Shared with a vendor only when you send them an enquiry.
+            </span>
+          </label>
+        ) : (
+          <ChangePhone
+            kind="customer"
+            phone={profile.phone}
+            verified={profile.phoneVerified}
+            verifyMode={verifyMode}
+            hint="Shared with a vendor only when you send them an enquiry."
+          />
+        )}
       </div>
       <div className="form__row">
         <label className="field">
@@ -294,9 +309,11 @@ function ProfileTab({ profile }: { profile: Profile }) {
           <input name="eventDate" type="date" defaultValue={profile.eventDate} />
         </label>
       </div>
-      <p className="field__hint">
-        Email: {profile.email}. To change your password, <Link href="/account/forgot-password">reset it by email</Link>.
-      </p>
+      {EMAIL_LOGIN && (
+        <p className="field__hint">
+          Email: {profile.email}. To change your password, <Link href="/account/forgot-password">reset it by email</Link>.
+        </p>
+      )}
       <div className="dash__save">
         <button className="btn btn--primary" type="submit" disabled={s.busy}>
           {s.busy ? 'Saving…' : 'Save profile'}

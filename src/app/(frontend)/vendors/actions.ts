@@ -19,6 +19,7 @@ import {
   rupees,
 } from '../../../lib/marketplaceOptions'
 import { getPayloadClient } from '../../../lib/payload'
+import { EMAIL_LOGIN } from '../../../lib/accountOptions'
 import { normalizePhone } from '../../../lib/phoneVerification'
 import { getVendor } from '../../../lib/session'
 
@@ -56,7 +57,8 @@ export async function saveListing(input: ListingInput): Promise<Result> {
     const vendor = await me()
     const name = text(input.name, 120)
     const businessName = text(input.businessName, 120)
-    const phone = normalizePhone(input.phone)
+    // With WhatsApp-only accounts the number is the login; it changes only through changeMyPhone.
+    const phone = EMAIL_LOGIN ? normalizePhone(input.phone) : vendor.phone
     if (name.length < 2) throw new UserError('Enter your name.')
     if (businessName.length < 2) throw new UserError('Enter your business name.')
     if (!phone) throw new UserError('Enter a valid 10-digit mobile number.')

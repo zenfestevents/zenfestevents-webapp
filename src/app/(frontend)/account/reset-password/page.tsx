@@ -1,8 +1,10 @@
 import React from 'react'
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 
 import { AuthForm } from '../../../../components/market/AuthForm'
 import { AuthShell, param, type SearchParams } from '../../../../components/market/AuthShell'
+import { EMAIL_LOGIN } from '../../../../lib/accountOptions'
 
 export const metadata: Metadata = {
   title: 'Set a new password',
@@ -12,6 +14,7 @@ export const metadata: Metadata = {
 }
 
 export default async function CustomerResetPage({ searchParams }: { searchParams: SearchParams }) {
+  if (!EMAIL_LOGIN) redirect('/account/login')
   const token = param((await searchParams).token)
   return (
     <AuthShell

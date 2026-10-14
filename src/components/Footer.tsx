@@ -84,7 +84,9 @@ export function Footer({ settings }: { settings: SiteSettings }) {
         </div>
 
         <div className="site-footer__bar">
-          <span className="muted">© {year} Zenfest Events. All rights reserved.</span>
+          <span className="muted">
+            © {year} Zenfest Events. All rights reserved. · <Link href="/privacy">Privacy policy</Link>
+          </span>
           <div className="site-footer__social">
             {social.instagram && (
               <a href={social.instagram} target="_blank" rel="noopener">

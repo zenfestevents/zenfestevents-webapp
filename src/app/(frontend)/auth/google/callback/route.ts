@@ -12,6 +12,7 @@ import {
   PENDING_COOKIE,
   PENDING_MAX_AGE,
   STATE_COOKIE,
+  googleEnabled,
   googleProfile,
   openCookie,
   sealCookie,
@@ -32,6 +33,7 @@ export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams
   const kind = state?.k === 'vendor' ? 'vendor' : 'customer'
   const failed = (reason: string) => `${ACCOUNT[kind].login}?google=${reason}`
+  if (!googleEnabled()) redirect(ACCOUNT[kind].login)
   const code = params.get('code')
 
   // Cancelled on Google's screen, an old/forged state, or a missing code.
