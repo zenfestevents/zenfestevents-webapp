@@ -2,7 +2,9 @@ import { createHmac, timingSafeEqual } from 'crypto'
 import type { CollectionConfig, PayloadRequest } from 'payload'
 
 import { authenticated } from '../access'
-import { SITE_FALLBACK } from '../lib/site'
+import { cloudConfigured, sendText } from '../lib/whatsapp/cloud'
+import type { WebhookBody } from '../lib/whatsapp/events'
+import { findOrCreateContact, recordWebhook } from '../lib/whatsapp/inbox'
 import {
   VERIFY_PREFIX,
   VERIFY_TTL_MS,
@@ -20,6 +22,10 @@ import {
  * the same sender number the visitor typed. The form polls `/status`, then passes
  * `{ id, token }` with its submission, which consumes the record (see
  * VendorApplications). Nothing here is publicly readable.
+ *
+ * `/webhook` is the **only** webhook of the Meta app, so it also feeds the WhatsApp
+ * inbox: every message and delivery status is saved by `recordWebhook`
+ * (lib/whatsapp/inbox.ts) before the verification codes are checked.
  */
 export const PhoneVerifications: CollectionConfig = {
   slug: 'phone-verifications',
@@ -159,9 +165,7 @@ async function webhookSubscribe(req: PayloadRequest) {
   return new Response('Forbidden', { status: 403 })
 }
 
-type WaMessage = { from?: string; type?: string; text?: { body?: string } }
-
-/** POST /webhook — incoming WhatsApp messages from Meta. */
+/** POST /webhook — incoming WhatsApp messages and delivery statuses from Meta. */
 async function webhookReceive(req: PayloadRequest) {
   const raw = (await req.text?.()) ?? ''
   const secret = process.env.WHATSAPP_APP_SECRET
@@ -171,12 +175,14 @@ async function webhookReceive(req: PayloadRequest) {
     return new Response('Invalid signature', { status: 401 })
   }
 
-  let body: { entry?: { changes?: { value?: { messages?: WaMessage[] } }[] }[] } = {}
+  let body: WebhookBody = {}
   try {
     body = JSON.parse(raw)
   } catch {
     return new Response('OK', { status: 200 })
   }
+
+  await recordWebhook(req.payload, body)
 
   const pattern = new RegExp(`${VERIFY_PREFIX}\\s*(\\d{6})`, 'i')
   for (const entry of body.entry ?? []) {
@@ -227,48 +233,19 @@ async function markVerified(req: PayloadRequest, phone: string, code: string) {
   return true
 }
 
-/** The main WhatsApp line from Site Settings (falls back like the rest of the site), as "+91 90800 89530". */
-async function mainWhatsApp(req: PayloadRequest) {
-  let number = SITE_FALLBACK.contact.whatsapp
-  try {
-    const settings = await req.payload.findGlobal({ slug: 'site-settings', depth: 0, req })
-    number = settings.contact?.whatsapp || number
-  } catch {
-    // Keep the fallback.
-  }
-  const d = String(number).replace(/\D/g, '').slice(-10)
-  return `+91 ${d.slice(0, 5)} ${d.slice(5)}`
-}
-
 /** Free reply inside the chat the visitor just opened (optional: needs a token). */
 async function replyVerified(req: PayloadRequest, to: string) {
-  const token = process.env.WHATSAPP_ACCESS_TOKEN
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID
-  if (!token || !phoneNumberId) return
-  try {
-    // v26.0 (Jul 2026); Meta retires each version ~2 years after release.
-    const version = process.env.WHATSAPP_GRAPH_VERSION || 'v26.0'
-    const res = await fetch(`https://graph.facebook.com/${version}/${phoneNumberId}/messages`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messaging_product: 'whatsapp',
-        to,
-        type: 'text',
-        // This number only verifies; conversations happen on the main line.
-        text: {
-          body:
-            'Thanks! Your number is verified ✓ You can go back to the form.\n\n' +
-            `This number is only for verification. To talk to us, WhatsApp Zenfest Events on ${await mainWhatsApp(req)}.`,
-        },
-      }),
-    })
-    if (!res.ok) throw new Error(`${res.status} ${await res.text()}`)
-  } catch (err) {
-    req.payload.logger.warn(
-      `[phone-verifications] Verified, but the WhatsApp reply failed: ${
-        err instanceof Error ? err.message : String(err)
-      }`,
-    )
+  if (!cloudConfigured()) return
+  const text = 'Thanks! Your number is verified ✓ You can go back to the form.'
+  const sent = await sendText(to, text)
+  if (!sent.ok) {
+    req.payload.logger.warn(`[phone-verifications] Verified, but the WhatsApp reply failed: ${sent.error}`)
+    return
   }
+  const contact = await findOrCreateContact(req.payload, to)
+  await req.payload.create({
+    collection: 'whatsapp-messages',
+    data: { direction: 'out', phone: to, contact: contact.id, type: 'text', text, waMessageId: sent.id, status: 'sent', at: new Date().toISOString() },
+    overrideAccess: true,
+  })
 }

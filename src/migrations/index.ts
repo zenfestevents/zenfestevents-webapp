@@ -10,6 +10,7 @@ import * as migration_20261005_173802_zenfest_shop from './20261005_173802_zenfe
 import * as migration_20261009_090152_occasion_reminders from './20261009_090152_occasion_reminders';
 import * as migration_20261014_032729_event_requirements from './20261014_032729_event_requirements';
 import * as migration_20261014_040817_tamil_nadu_copy from './20261014_040817_tamil_nadu_copy';
+import * as migration_20261014_124216_whatsapp_cloud from './20261014_124216_whatsapp_cloud';
 
 export const migrations = [
   {
@@ -70,6 +71,11 @@ export const migrations = [
   {
     up: migration_20261014_040817_tamil_nadu_copy.up,
     down: migration_20261014_040817_tamil_nadu_copy.down,
-    name: '20261014_040817_tamil_nadu_copy'
+    name: '20261014_040817_tamil_nadu_copy',
+  },
+  {
+    up: migration_20261014_124216_whatsapp_cloud.up,
+    down: migration_20261014_124216_whatsapp_cloud.down,
+    name: '20261014_124216_whatsapp_cloud'
   },
 ];

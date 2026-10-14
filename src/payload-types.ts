@@ -98,6 +98,9 @@ export interface Config {
     products: Product;
     contacts: Contact;
     reminders: Reminder;
+    'whatsapp-contacts': WhatsappContact;
+    'whatsapp-messages': WhatsappMessage;
+    'whatsapp-campaigns': WhatsappCampaign;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -138,6 +141,9 @@ export interface Config {
     products: ProductsSelect<false> | ProductsSelect<true>;
     contacts: ContactsSelect<false> | ContactsSelect<true>;
     reminders: RemindersSelect<false> | RemindersSelect<true>;
+    'whatsapp-contacts': WhatsappContactsSelect<false> | WhatsappContactsSelect<true>;
+    'whatsapp-messages': WhatsappMessagesSelect<false> | WhatsappMessagesSelect<true>;
+    'whatsapp-campaigns': WhatsappCampaignsSelect<false> | WhatsappCampaignsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -1400,6 +1406,100 @@ export interface Reminder {
   createdAt: string;
 }
 /**
+ * People on the WhatsApp Cloud API number. Promotions go only to "Opted in"; anyone who replies STOP is switched to "Opted out" automatically.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "whatsapp-contacts".
+ */
+export interface WhatsappContact {
+  id: number;
+  name?: string | null;
+  /**
+   * Country code + number, e.g. 919840012345. A 10-digit Indian number gets 91 added.
+   */
+  phone: string;
+  optIn: 'yes' | 'unknown' | 'no';
+  optInSource?: string | null;
+  optInAt?: string | null;
+  optedOutAt?: string | null;
+  /**
+   * Free replies are allowed for 24 hours after this.
+   */
+  lastInboundAt?: string | null;
+  /**
+   * Comma-separated, e.g. "wedding, chennai". A campaign can target one tag.
+   */
+  tags?: string | null;
+  source?: string | null;
+  lead?: (number | null) | Lead;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Messages to and from the WhatsApp Cloud API number. Open a WhatsApp Contact to read a whole chat and reply.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "whatsapp-messages".
+ */
+export interface WhatsappMessage {
+  id: number;
+  direction: 'in' | 'out';
+  phone: string;
+  contact?: (number | null) | WhatsappContact;
+  type?: string | null;
+  text?: string | null;
+  waMessageId?: string | null;
+  status?: ('received' | 'sent' | 'delivered' | 'read' | 'failed') | null;
+  error?: string | null;
+  campaign?: (number | null) | WhatsappCampaign;
+  sentBy?: (number | null) | User;
+  at: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Send an approved WhatsApp template to opted-in contacts. Each template message is charged by Meta (about ₹1 in India); replies are free.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "whatsapp-campaigns".
+ */
+export interface WhatsappCampaign {
+  id: number;
+  /**
+   * For you, e.g. "Diwali Night Fest – early bird".
+   */
+  name: string;
+  /**
+   * Exactly as approved in WhatsApp Manager, e.g. event_promo_v1.
+   */
+  template: string;
+  /**
+   * The template language: en, en_US, ta, hi …
+   */
+  language: string;
+  /**
+   * Only if the template has an image header.
+   */
+  headerImage?: (number | null) | Media;
+  /**
+   * One row per {{1}}, {{2}} … in the template, in order. Write {name} to put in each person's name (or "there" if we don't know it).
+   */
+  params?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Leave blank to send to every opted-in contact.
+   */
+  audienceTag?: string | null;
+  status?: ('draft' | 'sending' | 'done') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -1530,6 +1630,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'reminders';
         value: number | Reminder;
+      } | null)
+    | ({
+        relationTo: 'whatsapp-contacts';
+        value: number | WhatsappContact;
+      } | null)
+    | ({
+        relationTo: 'whatsapp-messages';
+        value: number | WhatsappMessage;
+      } | null)
+    | ({
+        relationTo: 'whatsapp-campaigns';
+        value: number | WhatsappCampaign;
       } | null);
   globalSlug?: string | null;
   user:
@@ -2414,6 +2526,64 @@ export interface RemindersSelect<T extends boolean = true> {
   occasionId?: T;
   occurrenceYear?: T;
   nthYear?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "whatsapp-contacts_select".
+ */
+export interface WhatsappContactsSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
+  optIn?: T;
+  optInSource?: T;
+  optInAt?: T;
+  optedOutAt?: T;
+  lastInboundAt?: T;
+  tags?: T;
+  source?: T;
+  lead?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "whatsapp-messages_select".
+ */
+export interface WhatsappMessagesSelect<T extends boolean = true> {
+  direction?: T;
+  phone?: T;
+  contact?: T;
+  type?: T;
+  text?: T;
+  waMessageId?: T;
+  status?: T;
+  error?: T;
+  campaign?: T;
+  sentBy?: T;
+  at?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "whatsapp-campaigns_select".
+ */
+export interface WhatsappCampaignsSelect<T extends boolean = true> {
+  name?: T;
+  template?: T;
+  language?: T;
+  headerImage?: T;
+  params?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  audienceTag?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

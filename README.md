@@ -243,21 +243,43 @@ One-time Meta setup (free):
    and add the **WhatsApp** product. This also creates a Meta Business account if you
    don't have one.
 2. In **WhatsApp → API setup**, add the business phone number and verify it by SMS or
-   call. The number must be on the Cloud API: use 9080089530 if Meta offers to connect
-   it alongside the WhatsApp Business app, otherwise use a spare number that isn't on
-   WhatsApp.
+   call. The number must be on the Cloud API and can't also be in a WhatsApp app. Ours is
+   **+91 73975 55188** (WABA `4489772861336046`, phone number ID `1424189764102540`);
+   the main line 9080089530 stays on the WhatsApp Business app for the team.
 3. In **WhatsApp → Configuration → Webhook**, set the callback URL to
    `https://www.zenfestevents.in/api/phone-verifications/webhook`, enter your
    `WHATSAPP_VERIFY_TOKEN` (any long random string), click **Verify and save**, then
    subscribe to the **messages** field. (The site must already be deployed with that
    token set, or the handshake fails.)
-4. In Vercel, set `WHATSAPP_BUSINESS_NUMBER` (e.g. `919080089530`),
+4. In Vercel, set `WHATSAPP_BUSINESS_NUMBER` (`917397555188`),
    `WHATSAPP_APP_SECRET` (**App settings → Basic**) and `WHATSAPP_VERIFY_TOKEN`.
-   Optionally set `WHATSAPP_ACCESS_TOKEN` (a permanent system-user token) and
-   `WHATSAPP_PHONE_NUMBER_ID` (shown on API setup) to send a free "Verified ✓" reply.
-   Redeploy.
+   Also set `WHATSAPP_ACCESS_TOKEN` (a permanent system-user token) and
+   `WHATSAPP_PHONE_NUMBER_ID` (shown on API setup): they send the "Verified ✓" reply,
+   campaigns and staff replies (see "WhatsApp inbox & campaigns"). Redeploy.
 5. Publish the app (switch it from Development to **Live**) so messages from any
    number reach the webhook, then test from a phone.
+
+### WhatsApp inbox & campaigns (`/admin` → WhatsApp)
+The same webhook saves **every** message to and from the Cloud API number, so the team
+can work it from the admin instead of a phone:
+- **WhatsApp Contacts**: everyone who messaged the number (added automatically) plus
+  lists staff import with **Import from Excel / Google Sheets** (paste "name, phone"
+  rows; tick the box only if they agreed to WhatsApp offers). Open a contact to read the
+  chat and **reply**. WhatsApp allows free-form replies only within 24 hours of their last
+  message; after that only an approved template.
+- **WhatsApp Campaigns**: pick an approved template (name + language, optional image
+  header, values for `{{1}}`, `{{2}}` … with `{name}` for the person's name), optionally a
+  tag, save, then **Send now**. It goes only to contacts marked **Opted in**, each person
+  at most once per campaign, in batches of 20 while the page stays open. Delivery/read
+  ticks fill in as Meta reports them. Templates cost about ₹1 each (Meta, India);
+  replies are free.
+- **Opt-outs are automatic**: replying STOP (or tapping a "Stop promotions" button)
+  switches the contact to Opted out and sends a confirmation; START opts back in.
+- **WhatsApp Messages**: the full log, both directions, with any delivery error.
+
+Templates are created and approved in Meta's WhatsApp Manager, not here. Until Meta
+verifies the business, the number can start conversations with 250 people a day
+(then 2,000).
 
 ### Occasion reminders (internal)
 Staff-only, in `/admin` under **Occasion Reminders**. Turns every known yearly date of a

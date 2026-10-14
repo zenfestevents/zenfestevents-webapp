@@ -154,6 +154,33 @@ src/
   set, **test** in dev (a Simulate button), **off** in production otherwise (no
   verification, so deploying without Meta set up doesn't break the form). Pages that
   use it must be `force-dynamic` so the mode is read at request time.
+- **WhatsApp inbox & campaigns (`/admin` → WhatsApp; `collections/WhatsApp*.ts`,
+  `lib/whatsapp/*`, `components/admin/whatsapp/*`), 2026-10-14.** The owner chose the
+  Cloud API **directly with Meta, no BSP** (only Meta's per-message fees), on a second,
+  API-only number **+91 73975 55188** (`WHATSAPP_BUSINESS_NUMBER=917397555188`, phone
+  number ID `1424189764102540`, WABA `4489772861336046`). The main line 9080089530 stays
+  on the WhatsApp Business app (Coexistence needs a BSP) and is still the site's
+  "WhatsApp us" number. Easy to get wrong:
+  - **Meta allows one webhook per app**, so `/api/phone-verifications/webhook` is it:
+    `webhookReceive` checks the signature, calls `recordWebhook()` (saves every message +
+    delivery status, creates the WhatsApp Contact on first message, links a Lead by phone,
+    handles STOP/START) and then does the verification codes. Don't add a second webhook.
+  - `whatsapp-contacts` (inbox + campaign audience) is separate from the occasion-reminders
+    `contacts` (staff-entered birthdays/anniversaries); both store phones as `91XXXXXXXXXX`
+    (`toWaNumber`). Linking or merging them is a possible later step.
+    Campaigns go only to `optIn = 'yes'`; imported rows are `unknown` unless staff tick
+    the consent box. Never auto-opt-in someone because they messaged us.
+  - Campaign sends run in **browser-driven batches of 20** (`/:id/send-batch`), so no
+    request hits Vercel's time limit; a person gets a campaign at most once, **failures
+    included** (no retry loops). Errors that mean the campaign itself is wrong (template,
+    token, payment, rate limits — `CAMPAIGN_ERRORS`) stop the batch without marking anyone.
+  - Free-form replies only within 24 h of the person's last message (`lastInboundAt`);
+    outside it the reply endpoint refuses and staff must use a template.
+  - Status ticks only move forward (`STATUS_RANK`): Meta can send "delivered" after "read".
+  - AI auto-replies on WhatsApp are a later phase (owner to choose Zenfest AI vs Claude).
+  - Tests: `npm run test:whatsapp` (local SQLite only, fake Meta API — accounts, inbox,
+    import, campaigns, replies); `npm run check:whatsapp [url]` is a read-only health check
+    of the live setup (handshake, number, subscription, templates; needs the WHATSAPP_* env).
 - **Vendor and couple accounts are WhatsApp-number only (owner, 2026-10-14).** Switches in
   `lib/accountOptions.ts`: `EMAIL_LOGIN = false` (email + password sign-up/login, forgot/
   reset, confirm-email — code kept, pages redirect to login, actions refuse) and

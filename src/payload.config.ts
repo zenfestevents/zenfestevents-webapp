@@ -38,6 +38,9 @@ import { Enquiries } from './collections/Enquiries'
 import { Products } from './collections/Products'
 import { Contacts } from './collections/Contacts'
 import { Reminders } from './collections/Reminders'
+import { WhatsAppContacts } from './collections/WhatsAppContacts'
+import { WhatsAppMessages } from './collections/WhatsAppMessages'
+import { WhatsAppCampaigns } from './collections/WhatsAppCampaigns'
 import { SiteSettings } from './globals/SiteSettings'
 import { ReminderSettings } from './globals/ReminderSettings'
 
@@ -99,6 +102,9 @@ export default buildConfig({
     Products,
     Contacts,
     Reminders,
+    WhatsAppContacts,
+    WhatsAppMessages,
+    WhatsAppCampaigns,
   ],
   globals: [SiteSettings, ReminderSettings],
   editor: lexicalEditor(),
