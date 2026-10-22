@@ -428,8 +428,21 @@ export function ScrubHero({
     const track = trackRef.current
     if (!track || !window.matchMedia(MOBILE_QUERY).matches) return
 
+    // Two signals for the active dot: the observer reports the slide that's mostly in
+    // view, and scroll / scrollend cover browsers that throttle observers mid-swipe.
+    const slides = Array.from(track.children) as HTMLElement[]
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) setSlide(slides.indexOf(e.target as HTMLElement))
+        }
+      },
+      { root: track, threshold: 0.6 },
+    )
+    slides.forEach((s) => observer.observe(s))
     const onScroll = () => setSlide(Math.round(track.scrollLeft / track.clientWidth))
     track.addEventListener('scroll', onScroll, { passive: true })
+    track.addEventListener('scrollend', onScroll)
 
     let timer = 0
     const stop = () => window.clearInterval(timer)
@@ -445,7 +458,9 @@ export function ScrubHero({
     }
     return () => {
       stop()
+      observer.disconnect()
       track.removeEventListener('scroll', onScroll)
+      track.removeEventListener('scrollend', onScroll)
       track.removeEventListener('pointerdown', stop)
       track.removeEventListener('touchstart', stop)
     }

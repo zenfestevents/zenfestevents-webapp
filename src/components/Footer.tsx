@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 
-import { FEATURES } from '../lib/features'
+import { ANNOUNCE_COMING_SOON, FEATURES } from '../lib/features'
 import { MAJOR_CITIES, SITE_FALLBACK, telLink, whatsappLink, DEFAULT_WA_MESSAGE, type SiteSettings } from '../lib/site'
 import { KolamDivider } from './Kolam'
 
@@ -51,10 +51,13 @@ export function Footer({ settings }: { settings: SiteSettings }) {
             <Link href="/enquire">Plan your event</Link>
             {FEATURES.shop && <Link href="/shop">Zenfest Shop</Link>}
             <Link href="/registry">Gift registry</Link>
-            {/* Switched-off features (lib/features.ts) stay listed, marked "soon"; polls are hidden. */}
-            <Link href="/plan">Zenfest AI planner{!FEATURES.ai && <Soon />}</Link>
-            <Link href="/marketplace">Vendor marketplace{!FEATURES.marketplace && <Soon />}</Link>
-            <Link href="/earn">Earn from events{!FEATURES.earn && <Soon />}</Link>
+            {/* Switched-off features (lib/features.ts) are listed, marked "soon", only with
+                ANNOUNCE_COMING_SOON; polls are hidden either way. */}
+            {(FEATURES.ai || ANNOUNCE_COMING_SOON) && <Link href="/plan">Zenfest AI planner{!FEATURES.ai && <Soon />}</Link>}
+            {(FEATURES.marketplace || ANNOUNCE_COMING_SOON) && (
+              <Link href="/marketplace">Vendor marketplace{!FEATURES.marketplace && <Soon />}</Link>
+            )}
+            {(FEATURES.earn || ANNOUNCE_COMING_SOON) && <Link href="/earn">Earn from events{!FEATURES.earn && <Soon />}</Link>}
             {FEATURES.polls && <Link href="/polls">Polls</Link>}
             {FEATURES.marketplace && <Link href="/account">My account</Link>}
           </div>

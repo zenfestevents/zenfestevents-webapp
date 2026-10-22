@@ -279,8 +279,8 @@ src/
   (icon-only below 1440px), collapsing to the hamburger **below 1200px**; the inner
   container may run to 1400px. Adding a tenth link means re-measuring 1200 / 1280 / 1440.
   The phone menu is grouped: **Explore** / **Coming soon** (switched-off features, muted
-  with a "Soon" pill, linking to their teaser) / **For vendors** (Partner with Zenfest,
-  Marketplace listing).
+  with a "Soon" pill, linking to their teaser — only with `ANNOUNCE_COMING_SOON`) / **For
+  vendors** (Partner with Zenfest, Marketplace listing).
 - **Mobile bottom bar (`MobileCTABar`, <900px, every page except the registry's `/r/*`, `/dashboard/*`, `/plan` and `/enquire`):**
   WhatsApp (green) · **Plan your event** (gold "zari" sheen — `zari-sheen` keyframes;
   `/enquire`) · For vendors (`/vendors`), by the owner's choice on 2026-10-14 (it was Earn
@@ -359,8 +359,10 @@ src/
   `/marketplace/*`, `/earn`, `/vendors/marketplace`, and the vendor + couple sign-up /
   complete-signup pages — `signUp` / `completeGoogleSignUp` refuse server-side too); poll
   pages `notFound()` and the registry's family-poll tabs hide (`polls.zenfestevents.in` now
-  lands on the 404); the homepage shows one "Coming soon to Zenfest" band instead of the
-  AI / marketplace / Earn bands; the header account button hides (logins, dashboards and
+  lands on the 404); the homepage's AI / marketplace / Earn bands disappear (a "More ways to
+  celebrate" band, the footer's "· soon" links and the phone menu's "Coming soon" group
+  return only with `ANNOUNCE_COMING_SOON` — off since 2026-10-22: the owner doesn't want to
+  show what's still being built); the header account button hides (logins, dashboards and
   resets still work by URL). `aiAvailable()` also requires `FEATURES.ai`, so every AI entry
   point falls back to `/enquire`. Flip a flag to `true` to bring a feature back exactly as
   it was (checked 2026-10-14). The gift registry stays live. **`FEATURES.shop` (2026-10-22,

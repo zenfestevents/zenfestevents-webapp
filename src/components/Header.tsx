@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
-import { COMING_SOON, FEATURES } from '../lib/features'
+import { ANNOUNCE_COMING_SOON, COMING_SOON, FEATURES } from '../lib/features'
 import { DEFAULT_WA_MESSAGE, SITE_FALLBACK, whatsappLink, type SiteSettings } from '../lib/site'
 import { AiLink } from './ai/ChatLauncher'
 import { AccountButton } from './market/AccountButton'
@@ -14,8 +14,8 @@ const SIGNUP_ENABLED = false
 type NavItem = { href: string; label: string; also?: string[]; soon?: boolean }
 
 /**
- * The live links, in order. Switched-off features (lib/features.ts) drop out here
- * and appear in the phone menu's "Coming soon" group instead (the Shop is just hidden).
+ * The live links, in order. Switched-off features (lib/features.ts) drop out here;
+ * with ANNOUNCE_COMING_SOON they reappear in the phone menu's "Coming soon" group.
  */
 const NAV: NavItem[] = [
   ...(FEATURES.marketplace ? [{ href: '/marketplace', label: 'Marketplace' }] : []),
@@ -30,7 +30,7 @@ const NAV: NavItem[] = [
   { href: '/contact', label: 'Contact' },
 ]
 
-const SOON = COMING_SOON.filter((f) => !FEATURES[f.key])
+const SOON = ANNOUNCE_COMING_SOON ? COMING_SOON.filter((f) => !FEATURES[f.key]) : []
 
 /** A short bar (everything optional switched off) fits on a small laptop. */
 const COMPACT = NAV.length <= 6

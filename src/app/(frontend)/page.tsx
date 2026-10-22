@@ -19,7 +19,7 @@ import { VendorCard } from '../../components/market/VendorCard'
 import { listVendors, type PublicVendor } from '../../lib/marketplace'
 import { MARKET_CATEGORIES } from '../../lib/marketplaceOptions'
 import { getCustomer } from '../../lib/session'
-import { COMING_SOON, FEATURES } from '../../lib/features'
+import { ANNOUNCE_COMING_SOON, COMING_SOON, FEATURES } from '../../lib/features'
 
 export const dynamic = 'force-dynamic'
 
@@ -70,8 +70,9 @@ export default async function HomePage() {
     getAgentProfiles(),
     FEATURES.marketplace ? getHomeMarket() : { vendors: [], saved: new Set<number>() },
   ])
-  // Switched-off features (lib/features.ts) get one "Coming soon" band instead of their own.
-  const soon = COMING_SOON.filter((f) => !FEATURES[f.key])
+  // Switched-off features (lib/features.ts) get one "Coming soon" band instead of their own,
+  // and only while ANNOUNCE_COMING_SOON is on.
+  const soon = ANNOUNCE_COMING_SOON ? COMING_SOON.filter((f) => !FEATURES[f.key]) : []
   const hero = { ...SITE_FALLBACK.hero, ...(settings?.hero || {}) }
   const wa = whatsappLink(settings?.contact?.whatsapp, DEFAULT_WA_MESSAGE)
 

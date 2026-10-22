@@ -18,6 +18,14 @@ export const FEATURES = {
   packages: false,
 } as const
 
+/**
+ * Whether the public sees what's still being built: the phone menu's "Coming soon" group,
+ * the footer's "· soon" links and the homepage's "More ways to celebrate" band. Off by the
+ * owner's choice (2026-10-22) — announce features when they launch. The features' own
+ * pages still show "Coming soon" if someone has the URL.
+ */
+export const ANNOUNCE_COMING_SOON = false
+
 /** The features shown as "Coming soon" while switched off, in menu order. */
 export const COMING_SOON = [
   {
