@@ -2,6 +2,7 @@ import React from 'react'
 import type { Metadata } from 'next'
 
 import { VendorForm } from '../../../../components/VendorForm'
+import { getSiteSettings } from '../../../../lib/getSettings'
 import { verifyMode } from '../../../../lib/phoneVerification'
 
 // Read the WhatsApp verification env at request time, not at build time.
@@ -10,7 +11,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Partner with Zenfest — join our vendor team',
   description:
-    'Photographers, videographers, cake makers and other event professionals: join the Zenfest Events vendor team and work on the weddings and celebrations we plan across Tamil Nadu.',
+    'Photographers, videographers and bakers: join the Zenfest Events vendor team and work on the weddings and celebrations we plan across Tamil Nadu.',
 }
 
 const PERKS = [
@@ -25,7 +26,8 @@ const PERKS = [
  * couples contact vendors directly. Saves a vendor-applications row → team email,
  * and Airtable for photo / cake (see VendorApplications + its hooks).
  */
-export default function VendorPartnerPage() {
+export default async function VendorPartnerPage() {
+  const settings = await getSiteSettings()
   return (
     <section className="section">
       <div className="container contact-layout">
@@ -35,8 +37,8 @@ export default function VendorPartnerPage() {
             Partner with <span className="italic accent">Zenfest</span>
           </h1>
           <p className="lede">
-            Are you a photographer, videographer, cake maker or another event professional? Join our vendor team
-            and we&apos;ll bring you into the right events.
+            Are you a photographer, videographer or baker? Join our vendor team and we&apos;ll bring you into the
+            right events.
           </p>
 
           <div className="vendor-perks">
@@ -52,7 +54,7 @@ export default function VendorPartnerPage() {
         <div className="contact-form-wrap card">
           <h2 className="display-m">Vendor application</h2>
           <p className="muted">Tell us about your work. Fields marked * are required.</p>
-          <VendorForm verifyMode={verifyMode()} />
+          <VendorForm verifyMode={verifyMode()} contact={settings.contact} />
         </div>
       </div>
     </section>

@@ -19,9 +19,9 @@ export const metadata: Metadata = {
 /**
  * The real packages aren't finalised yet, so the page shows a "coming soon"
  * panel instead of the demo data. The listing below is kept and working — flip
- * this to true once the packages are entered in the admin.
+ * FEATURES.packages to true once the packages are entered in the admin.
  */
-const PACKAGES_READY = false
+const PACKAGES_READY = FEATURES.packages
 
 export default async function PackagesPage() {
   const ai = aiAvailable(await getSiteSettings())

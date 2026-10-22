@@ -111,6 +111,19 @@
 .site-nav__link.is-active {
   border-bottom-color: var(--marigold);
 }
+/* A live link to a page that is still "Coming soon" (Packages). */
+.site-nav__soon {
+  margin-left: 0.35rem;
+  padding: 0.08rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid rgba(217, 178, 76, 0.5);
+  color: var(--marigold);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: 0.15em;
+}
 .site-header__cta {
   display: none;
   align-items: center;
@@ -243,6 +256,20 @@
   .site-header--compact .site-nav__link,
   .site-header--compact .site-header__cta .btn {
     white-space: nowrap;
+  }
+  /* The lockup overflows a squeezed .wordmark, under the first nav link. */
+  .site-header--compact .wordmark {
+    flex-shrink: 0;
+  }
+}
+/* "Packages · Soon" is the widest link; under 1100px the pill gives way (the page
+   itself says "Coming soon"). */
+@media (min-width: 1000px) and (max-width: 1099px) {
+  .site-header--compact .site-nav {
+    gap: 1.1rem;
+  }
+  .site-header--compact .site-nav__soon {
+    display: none;
   }
 }
 /* Nine nav links + the CTAs only just fit on a small laptop: tighten them there

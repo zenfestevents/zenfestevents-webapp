@@ -11,7 +11,7 @@ import { AccountButton } from './market/AccountButton'
 
 const SIGNUP_ENABLED = false
 
-type NavItem = { href: string; label: string; also?: string[] }
+type NavItem = { href: string; label: string; also?: string[]; soon?: boolean }
 
 /**
  * The live links, in order. Switched-off features (lib/features.ts) drop out here
@@ -21,7 +21,7 @@ const NAV: NavItem[] = [
   ...(FEATURES.marketplace ? [{ href: '/marketplace', label: 'Marketplace' }] : []),
   { href: '/gallery', label: 'Our Work' },
   { href: '/services', label: 'Services' },
-  { href: '/packages', label: 'Packages' },
+  { href: '/packages', label: 'Packages', soon: !FEATURES.packages },
   ...(FEATURES.earn ? [{ href: '/earn', label: 'Earn from events' }] : []),
   // The gift registry is part of the shop now; its pages light up "Shop".
   ...(FEATURES.shop ? [{ href: '/shop', label: 'Shop', also: ['/registry'] }] : []),
@@ -82,6 +82,7 @@ export function Header({ settings }: { settings: SiteSettings }) {
               className={`site-nav__link ${isActive(pathname, item) ? 'is-active' : ''}`}
             >
               {item.label}
+              {item.soon && <span className="site-nav__soon">Soon</span>}
             </Link>
           ))}
         </nav>
@@ -128,8 +129,12 @@ export function Header({ settings }: { settings: SiteSettings }) {
               ✦ Plan with Zenfest AI
             </AiLink>
             {NAV.map((item) => (
-              <Link key={item.href} href={item.href} className="mobile-menu__link">
-                {item.label}
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`mobile-menu__link ${item.soon ? 'mobile-menu__link--soon' : ''}`}
+              >
+                {item.label} {item.soon && <span className="mobile-menu__soon">Soon</span>}
               </Link>
             ))}
 

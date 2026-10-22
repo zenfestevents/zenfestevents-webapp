@@ -377,9 +377,11 @@ src/
   needs no migration). `eventType` gained `babyshower` (an enum → migration). Steps stay
   mounted (`hidden`) so one FormData holds every answer; `problem(step)` is the only rule
   set. Corporate events and housewarmings still go through `/contact`.
-- **Packages aren't published yet.** `/packages` has a `PACKAGES_READY = false` flag:
-  the page shows "Coming soon" with a CTA to custom quote instead of displaying
-  packages. Flip the flag once packages are entered in the admin. The working listing
+- **Packages aren't published yet.** `FEATURES.packages = false` (it was a local
+  `PACKAGES_READY` until 2026-10-22): the page shows "Coming soon" with a CTA to custom quote
+  instead of displaying packages, and the nav / phone menu / footer link carries a "Soon"
+  tag (the nav's tag hides at 1000–1099px, where the compact bar is too tight). Flip the
+  flag once packages are entered in the admin. The working listing
   logic below is kept intact for when they're ready.
 - **`/admin/create-first-user` is broken** on Payload 3.88 + Next 16.3.3 — it renders
   a blank page (the view is in the RSC stream but never reaches the DOM; reproduced
@@ -576,6 +578,15 @@ src/
     linked: `requireVerifiedPhone` strips any client-sent `vendor`, stamps the session's
     vendor + trusts its phone, and `linkVendorApplication` links it back and seeds an empty
     price card. `VendorForm`'s `account` prefill mode is kept but currently unused.
+  - **Service catalogue (`lib/serviceCatalog.ts`, owner's list 2026-10-14):** 42 services in 10
+    groups (Main Services, Bride & Groom, Traditions & Rituals, Cakes/Gifts/Invites, Entries &
+    Effects, Entertainment, Photo Fun, Guest Stations, Kids' Zone, Event Staff). The partner form's
+    "What you offer" lists every service grouped (`servicesByGroup()`); only `vendor: 'on'` ones are
+    selectable — Photography & Videography and Home Cake (Bakers) so far — the rest show greyed
+    "(coming soon)", with a "WhatsApp us / call us" note for them and anything not listed.
+    Services are switched on one at a time — steps in the file's header (enum option + migration +
+    questions; the first non-photo/cake one needs the common "services & prices" section). The
+    marketplace categories should move onto this catalogue at launch.
   - Payload rejects a cookie session unless the request carries a browser
     `Origin` in `csrf` or `Sec-Fetch-Site: same-origin|same-site|none`. So **curl needs
     `-H 'Sec-Fetch-Site: same-origin'`** (or `Authorization: JWT <token>`), and on a phone

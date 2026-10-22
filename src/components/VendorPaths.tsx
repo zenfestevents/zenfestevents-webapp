@@ -29,7 +29,7 @@ export function VendorPaths({
         <ul className="vendor-path__points">
           <li>Steady work from events we plan</li>
           <li>One point of contact for every event</li>
-          <li>Photographers, videographers, cake makers and more</li>
+          <li>Photographers, videographers and bakers</li>
         </ul>
         <div className="btn-row">
           <Link className="btn btn--primary" href="/vendors/partner">

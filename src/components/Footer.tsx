@@ -63,7 +63,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
             <h4 className="site-footer__heading">Zenfest</h4>
             <Link href="/gallery">Our Work</Link>
             <Link href="/services">Services</Link>
-            <Link href="/packages">Packages</Link>
+            <Link href="/packages">Packages{!FEATURES.packages && <Soon />}</Link>
             <Link href="/about">About</Link>
             <Link href="/contact">Contact</Link>
             <Link href="/vendors/partner">Partner with Zenfest</Link>

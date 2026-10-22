@@ -13,6 +13,9 @@ export const FEATURES = {
   /** Zenfest Shop (/shop, /shop/[occasion]): hidden from the nav, footer and registry.
    *  Product pages and /shop/policies stay up, since registry gifts link to them. */
   shop: false,
+  /** Packages (/packages): "Coming soon" with a custom-quote CTA until the real packages
+   *  are entered in the admin; nav and footer mark it "Soon". */
+  packages: false,
 } as const
 
 /** The features shown as "Coming soon" while switched off, in menu order. */

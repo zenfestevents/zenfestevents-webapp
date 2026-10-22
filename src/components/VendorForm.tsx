@@ -13,17 +13,16 @@ import {
   TN_TOWNS,
   type PhotoService,
 } from '../lib/vendorOptions'
+import { servicesByGroup } from '../lib/serviceCatalog'
+import { SITE_FALLBACK, telLink, whatsappLink } from '../lib/site'
 import { CakeFields, cakePayload, uploadVendorFiles } from './CakeFields'
 import { Checkboxes, Radios, num, str } from './FormChoices'
 import { PhoneVerify, type PhoneProof, type VerifyMode } from './PhoneVerify'
 
-// Decoration / Catering / DJ still exist in the collection for older
-// applications; the form only offers the services we're enrolling right now.
-const VENDOR_TYPES = [
-  ['photography', 'Photography'],
-  ['cake', 'Cakes'],
-  ['other', 'Other'],
-]
+// Decoration / Catering / DJ / Other still exist in the collection for older
+// applications. The form lists the whole catalogue; services not switched on yet in
+// lib/serviceCatalog.ts show greyed out.
+const VENDOR_GROUPS = servicesByGroup()
 
 /**
  * A logged-in marketplace vendor answering these questions from their dashboard:
@@ -42,10 +41,13 @@ export function VendorForm({
   verifyMode,
   account,
   onDone,
+  contact = SITE_FALLBACK.contact,
 }: {
   verifyMode: VerifyMode
   account?: VendorAccountPrefill
   onDone?: () => void
+  /** Where vendors of services we don't take yet should reach us. */
+  contact?: { whatsapp?: string | null; phonePrimary?: string | null }
 }) {
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
@@ -247,12 +249,36 @@ export function VendorForm({
               <option value="" disabled>
                 Choose one
               </option>
-              {VENDOR_TYPES.map(([v, l]) => (
-                <option key={v} value={v}>
-                  {l}
-                </option>
+              {VENDOR_GROUPS.map((g) => (
+                <optgroup key={g.label} label={g.label}>
+                  {g.services.map((s) => (
+                    <option key={s.id} value={s.id} disabled={s.vendor !== 'on'}>
+                      {s.vendor === 'on' ? s.name : `${s.name} (coming soon)`}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
+            <span className="field__hint">
+              Services marked &ldquo;coming soon&rdquo; open one by one. Offer one of those, or something not listed? For now,{' '}
+              <a
+                href={whatsappLink(
+                  contact.whatsapp || SITE_FALLBACK.contact.whatsapp,
+                  "Hi Zenfest Events, I'd like to partner with you as a vendor. My service is: ",
+                )}
+                target="_blank"
+                rel="noopener"
+                className="accent"
+              >
+                WhatsApp us
+              </a>{' '}
+              or{' '}
+              <a className="accent" href={telLink(contact.phonePrimary || SITE_FALLBACK.contact.phonePrimary)}>
+                call us
+              </a>{' '}
+              and
+              we&apos;ll talk.
+            </span>
           </label>
         </div>
       )}
