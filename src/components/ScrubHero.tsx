@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { FEATURES } from '../lib/features'
 import { SITE_FALLBACK } from '../lib/site'
@@ -16,6 +16,36 @@ const FRAME_COUNT = 90
 /* Phones get a still hero, not the scrub: scrubbing a film by touch-scroll is laggy on
    a phone decoder and costs a 20 MB download. Same breakpoint as parts.css. */
 const MOBILE_QUERY = '(max-width: 720px)'
+
+/* Phones only: the hero is a swipeable slider — the team image first, then the two
+   vendor lanes (the same ones as components/VendorPaths.tsx). Laptops keep the film. */
+const VENDOR_SLIDES = [
+  {
+    key: 'partner',
+    poster: ['Partner', 'with Zenfest'],
+    tag: 'Open now',
+    chips: ['Photographers', 'Videographers', 'Home bakers'],
+    eyebrow: 'For vendors',
+    title: 'Work on the events we plan',
+    body: 'Join our vendor team across Tamil Nadu. We bring you the clients and coordinate the day; you focus on your craft.',
+    href: '/vendors/partner',
+    cta: 'Apply as a partner',
+  },
+  {
+    key: 'marketplace',
+    poster: ['Vendor', 'Marketplace'],
+    tag: FEATURES.marketplace ? 'Free listing' : 'Coming soon',
+    chips: ['Photography', 'Makeup', 'Decor', 'Catering', 'Halls'],
+    eyebrow: 'For vendors',
+    title: 'List your business free',
+    body: 'Your own page with photos and real prices. Couples who plan it themselves find you and contact you directly.',
+    href: FEATURES.marketplace ? '/vendors/marketplace' : '/vendors',
+    cta: FEATURES.marketplace ? 'List your business' : 'See both ways to join',
+  },
+] as const
+const SLIDE_COUNT = 1 + VENDOR_SLIDES.length
+/** Auto-advance until the visitor touches the slider; never with reduced motion. */
+const SLIDE_MS = 6000
 
 const framePath = (i: number) => `/hero/frames/frame_${String(i + 1).padStart(3, '0')}.webp`
 
@@ -86,6 +116,9 @@ export function ScrubHero({
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const barRef = useRef<HTMLSpanElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const stopAutoRef = useRef(() => {})
+  const [slide, setSlide] = useState(0)
 
   useEffect(() => {
     const section = sectionRef.current
@@ -390,9 +423,48 @@ export function ScrubHero({
     return run
   }, [])
 
+  /* ---------- phones: the slider (scroll-snap does the swiping) ---------- */
+  useEffect(() => {
+    const track = trackRef.current
+    if (!track || !window.matchMedia(MOBILE_QUERY).matches) return
+
+    const onScroll = () => setSlide(Math.round(track.scrollLeft / track.clientWidth))
+    track.addEventListener('scroll', onScroll, { passive: true })
+
+    let timer = 0
+    const stop = () => window.clearInterval(timer)
+    stopAutoRef.current = stop
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      timer = window.setInterval(() => {
+        if (document.hidden) return
+        const next = (Math.round(track.scrollLeft / track.clientWidth) + 1) % SLIDE_COUNT
+        track.scrollTo({ left: next * track.clientWidth, behavior: 'smooth' })
+      }, SLIDE_MS)
+      track.addEventListener('pointerdown', stop, { once: true })
+      track.addEventListener('touchstart', stop, { once: true, passive: true })
+    }
+    return () => {
+      stop()
+      track.removeEventListener('scroll', onScroll)
+      track.removeEventListener('pointerdown', stop)
+      track.removeEventListener('touchstart', stop)
+    }
+  }, [])
+
+  const goTo = (i: number) => {
+    const track = trackRef.current
+    if (!track) return
+    stopAutoRef.current() // a tap on a dot is the visitor taking over, same as a swipe
+    track.scrollTo({ left: i * track.clientWidth, behavior: 'smooth' })
+  }
+
   return (
     <section className="scrubhero" ref={sectionRef} aria-label="Zenfest Events">
       <div className="scrubhero__pin">
+        {/* On laptops the track and the first slide are `display: contents`, so the film
+            layers below are laid out exactly as if these wrappers weren't there. */}
+        <div className="scrubhero__track" ref={trackRef}>
+        <div className="scrubhero__slide scrubhero__slide--main">
         <div className="scrubhero__media" aria-hidden="true">
           <picture>
             {/* phones: the whole team welcoming the visitor, shown uncropped. The size
@@ -499,6 +571,48 @@ export function ScrubHero({
               </Link>
             )}
           </div>
+        </div>
+        </div>
+
+        {VENDOR_SLIDES.map((s, i) => (
+          <div key={s.key} className={`scrubhero__slide hslide hslide--${s.key}`} role="group" aria-label={`${i + 2} of ${SLIDE_COUNT}`}>
+            <div className="hslide__poster" aria-hidden="true">
+              <KolamRosette size={420} className="hslide__kolam" />
+              <span className="hslide__tag">{s.tag}</span>
+              <span className="hslide__big">
+                {s.poster[0]}
+                <span className="accent">{s.poster[1]}</span>
+              </span>
+              <span className="hslide__chips">
+                {s.chips.map((c) => (
+                  <span key={c}>{c}</span>
+                ))}
+              </span>
+            </div>
+            <div className="container hslide__band">
+              <p className="eyebrow">{s.eyebrow}</p>
+              <h2 className="hslide__title">{s.title}</h2>
+              <p className="hslide__body">{s.body}</p>
+              <Link className="hslide__cta" href={s.href}>
+                {s.cta} →
+              </Link>
+              <KolamDivider className="scrubhero__divider" />
+            </div>
+          </div>
+        ))}
+        </div>
+
+        <div className="scrubhero__dots">
+          {Array.from({ length: SLIDE_COUNT }, (_, i) => (
+            <button
+              key={i}
+              type="button"
+              className="scrubhero__dot"
+              aria-label={`Slide ${i + 1} of ${SLIDE_COUNT}`}
+              aria-current={slide === i}
+              onClick={() => goTo(i)}
+            />
+          ))}
         </div>
 
         <span className="scrubhero__hint" aria-hidden="true">

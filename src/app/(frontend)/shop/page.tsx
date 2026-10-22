@@ -1,8 +1,10 @@
 import React from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 
 import { KolamDivider } from '../../../components/Kolam'
+import { FEATURES } from '../../../lib/features'
 import { ProductCard } from '../../../components/shop/ProductCard'
 import { listProducts, occasionCounts } from '../../../lib/shop'
 import { SHOP_OCCASIONS } from '../../../lib/shopOptions'
@@ -22,6 +24,7 @@ const HOW = [
 ] as const
 
 export default async function ShopPage() {
+  if (!FEATURES.shop) notFound()
   const [{ byOccasion: counts, total }, featured, latest] = await Promise.all([
     occasionCounts(),
     listProducts({ sort: 'featured', limit: 12 }),

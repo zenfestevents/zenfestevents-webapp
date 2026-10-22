@@ -49,7 +49,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
           <div className="site-footer__col">
             <h4 className="site-footer__heading">Plan your event</h4>
             <Link href="/enquire">Plan your event</Link>
-            <Link href="/shop">Zenfest Shop</Link>
+            {FEATURES.shop && <Link href="/shop">Zenfest Shop</Link>}
             <Link href="/registry">Gift registry</Link>
             {/* Switched-off features (lib/features.ts) stay listed, marked "soon"; polls are hidden. */}
             <Link href="/plan">Zenfest AI planner{!FEATURES.ai && <Soon />}</Link>

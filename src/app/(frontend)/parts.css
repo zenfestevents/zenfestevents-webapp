@@ -2352,6 +2352,179 @@
   }
 }
 
+/* ---- phone hero slider: team image, then the two vendor lanes (ScrubHero.tsx) ----
+   Laptops: the wrappers vanish (display: contents) and the vendor slides and dots are
+   hidden, so the film is untouched. */
+.scrubhero__track,
+.scrubhero__slide--main {
+  display: contents;
+}
+.hslide,
+.scrubhero__dots {
+  display: none;
+}
+@media (max-width: 720px) {
+  .scrubhero__pin,
+  .scrubhero.is-reduced .scrubhero__pin {
+    position: relative;
+  }
+  .scrubhero__track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .scrubhero__track::-webkit-scrollbar {
+    display: none;
+  }
+  .scrubhero__slide {
+    flex: 0 0 100%;
+    min-width: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  .scrubhero__slide--main {
+    display: block;
+  }
+  .hslide {
+    display: flex;
+    flex-direction: column;
+    background: var(--ink);
+    color: var(--jasmine);
+  }
+  /* Same height as the team image (860×1290 → 150vw), so the bands and dots line up. */
+  .hslide__poster {
+    position: relative;
+    overflow: hidden;
+    height: 150vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.2rem;
+    padding: 2rem 1.25rem;
+    text-align: center;
+    background:
+      radial-gradient(70% 55% at 50% 45%, rgba(217, 178, 76, 0.22), transparent 70%),
+      var(--grain-ink),
+      var(--ink-700);
+    border-bottom: 1px solid rgba(217, 178, 76, 0.28);
+  }
+  .hslide--marketplace .hslide__poster {
+    background:
+      radial-gradient(70% 55% at 50% 45%, rgba(217, 178, 76, 0.16), transparent 70%),
+      var(--grain-ink),
+      var(--ink-800);
+  }
+  .hslide__kolam {
+    position: absolute;
+    left: 50%;
+    top: 45%;
+    translate: -50% -50%;
+    opacity: 0.2;
+    pointer-events: none;
+  }
+  .hslide__poster > :not(.hslide__kolam) {
+    position: relative;
+  }
+  .hslide__tag {
+    padding: 0.3rem 0.9rem;
+    border: 1px solid var(--marigold);
+    border-radius: 999px;
+    color: var(--marigold);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .hslide__big {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font-display), 'Arial Narrow', sans-serif;
+    font-size: clamp(2.8rem, 13vw, 4.4rem);
+    font-weight: 600;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--jasmine);
+  }
+  .hslide__chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    max-width: 22rem;
+  }
+  .hslide__chips span {
+    padding: 0.32rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid rgba(217, 178, 76, 0.4);
+    background: rgba(13, 13, 13, 0.45);
+    font-size: 0.82rem;
+    color: rgba(255, 253, 249, 0.88);
+  }
+  .hslide__band {
+    padding-block: 0.9rem 1.4rem;
+  }
+  .hslide__title {
+    margin: 0.4rem 0 0;
+    font-size: clamp(1.9rem, 1.2rem + 3.4vw, 2.4rem);
+    line-height: 1.06;
+    color: var(--jasmine);
+  }
+  .hslide__body {
+    margin: 0.7rem 0 0;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: rgba(255, 253, 249, 0.82);
+  }
+  .hslide__cta {
+    display: inline-block;
+    margin-top: 0.9rem;
+    color: var(--marigold);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .hslide__cta:hover,
+  .hslide__cta:focus-visible {
+    text-decoration: underline;
+  }
+  /* Over the bottom edge of the image / poster, where they show without scrolling. */
+  .scrubhero__dots {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--header-h) + 150vw - 2.8rem);
+    translate: -50% 0;
+    display: flex;
+    padding: 0 0.3rem;
+    border-radius: 999px;
+    background: rgba(13, 13, 13, 0.55);
+    backdrop-filter: blur(6px);
+  }
+  .scrubhero__dot {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .scrubhero__dot::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 253, 249, 0.5);
+    transition: width 0.3s ease, background-color 0.3s ease;
+  }
+  .scrubhero__dot[aria-current='true']::before {
+    width: 20px;
+    background: var(--marigold);
+  }
+}
+
 /* ---------- packages: coming-soon ways to plan ---------- */
 .pkg-soon {
   display: grid;

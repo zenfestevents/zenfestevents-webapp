@@ -8,6 +8,7 @@ import { mediaUrl } from '../../lib/media'
 import { KolamRosette, KolamDivider } from '../../components/Kolam'
 import { Reveal } from '../../components/Reveal'
 import { ScrubHero } from '../../components/ScrubHero'
+import { VendorPaths } from '../../components/VendorPaths'
 import { VoteCard } from '../../components/polls/VoteCard'
 import { getFeaturedPoll, getPollView } from '../../lib/polls'
 import { pollVerifyMode } from '../../lib/voterVerification'
@@ -81,6 +82,26 @@ export default async function HomePage() {
         headline={hero.headline}
         subheadline={hero.subheadline}
       />
+
+      {/* ---------- FOR VENDORS: the two lanes (partner / marketplace), also slides 2–3 of the phone hero ---------- */}
+      <section className="section home-vendors">
+        <div className="container">
+          <div className="section-head">
+            <div>
+              <p className="eyebrow">For vendors</p>
+              <h2 className="display-l">
+                Two ways to grow with <span className="accent">Zenfest</span>
+              </h2>
+            </div>
+            <Link href="/vendors" className="section-head__link">
+              For vendors →
+            </Link>
+          </div>
+          <Reveal>
+            <VendorPaths heading="h3" />
+          </Reveal>
+        </div>
+      </section>
 
       {/* ---------- ZENFEST AI: the AI planner and its specialist team ---------- */}
       {aiAvailable(settings) && (

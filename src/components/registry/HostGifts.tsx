@@ -12,6 +12,7 @@ import {
   updateEventSettings,
   type ItemInput,
 } from '../../app/(frontend)/registry/actions'
+import { FEATURES } from '../../lib/features'
 import type { HostItem, HostRegistry } from '../../lib/registry'
 import { saveRegistryHost } from '../shop/AddToRegistry'
 import { FUND_PRESETS, formatINR } from '../../lib/registryOptions'
@@ -107,6 +108,7 @@ export function HostGifts({ auth, data }: { auth: Auth; data: HostRegistry }) {
         {mode === 'link' && <LinkAdder auth={auth} />}
         {mode === 'custom' && <ItemEditor auth={auth} initial={{ itemType: 'custom_offline', title: '' }} key="custom" />}
         {mode === 'fund' && <ItemEditor auth={auth} initial={{ itemType: 'cash_fund', title: '' }} key="fund" />}
+        {FEATURES.shop && (
         <div className="reg-shop">
           <p className="muted">
             Or pick decor, return gifts and more from the Zenfest Shop — each product gets an “Add” button for this
@@ -120,6 +122,7 @@ export function HostGifts({ auth, data }: { auth: Auth; data: HostRegistry }) {
             Pick gifts from the Zenfest Shop
           </Link>
         </div>
+        )}
       </div>
 
       <h2 className="reg-section-title">Your registry ({items.length})</h2>

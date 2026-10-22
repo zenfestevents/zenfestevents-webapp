@@ -241,6 +241,15 @@ src/
   `@media (max-width: 720px)` block in `parts.css`. Regenerate the images with
   `node build-hero-mobile.cjs` (sharp, WebP quality 66; keep its `WIDTHS` in step with the
   `srcSet`). WebP, not JPEG: the busy petals/sparks made the JPEGs twice the size.
+  **Phones swipe (owner, 2026-10-22):** the image + band is slide 1 of a scroll-snap slider;
+  slides 2–3 are the vendor lanes (`VENDOR_SLIDES` in `ScrubHero.tsx`: Partner with Zenfest,
+  Vendor Marketplace — "Coming soon" while `FEATURES.marketplace` is off), CSS posters sized
+  to the image (150vw) with a text link each — the one exception to "no actions in the
+  hero". Dots sit over the image's bottom edge; it auto-advances every 6 s until touched
+  (never under reduced motion). On laptops `.scrubhero__track` / `__slide--main` are
+  `display: contents` and the vendor slides are hidden, so the film is untouched — the
+  owner chose to keep the film there. The homepage's "For vendors" section
+  (`components/VendorPaths.tsx`, shared with `/vendors`) sits right under the hero.
   Things that are easy to get wrong here:
   - **The phone `<source>` carries `width`/`height` (860×1290)** and the poster has
     `fetchPriority="high"`. Phones size the hero by the image, so without the size the
@@ -263,9 +272,9 @@ src/
   (`body.hero-immersive`) and returns as the film leaves. Phones show the emblem **and**
   the "ZENFEST EVENTS™" wordmark (it used to be hidden below 420px). `NAV` is built from
   `FEATURES` (see "Feature switches"): with everything optional off it is five links (Our
-  Work · Services · Shop · About · Contact) + "Plan your event" (`/enquire`) + "For
-  Vendors" — `.site-header--compact`, desktop bar from **1000px**. Packages is not in the
-  nav (Services lights up for it via `also`, and the footer links it). With every feature
+  Work · Services · Packages · About · Contact) + "Plan your event" (`/enquire`) + "For
+  Vendors" — `.site-header--compact`, desktop bar from **1000px**. Packages took the
+  Shop's place on 2026-10-22 (the Shop link returns with `FEATURES.shop`). With every feature
   on it is nine links (Marketplace first) + "✦ Zenfest AI" (≥1440px) + the account button
   (icon-only below 1440px), collapsing to the hamburger **below 1200px**; the inner
   container may run to 1400px. Adding a tenth link means re-measuring 1200 / 1280 / 1440.
@@ -354,7 +363,11 @@ src/
   AI / marketplace / Earn bands; the header account button hides (logins, dashboards and
   resets still work by URL). `aiAvailable()` also requires `FEATURES.ai`, so every AI entry
   point falls back to `/enquire`. Flip a flag to `true` to bring a feature back exactly as
-  it was (checked 2026-10-14). The Shop and gift registry stay live.
+  it was (checked 2026-10-14). The gift registry stays live. **`FEATURES.shop` (2026-10-22,
+  off):** the owner is concentrating on vendors, so the Shop is hidden — no nav/footer link,
+  no "Pick gifts from the Zenfest Shop" on the registry dashboard, `/shop` and
+  `/shop/[occasion]` `notFound()`. Product pages and `/shop/policies` stay up because
+  registry gifts and the privacy page link to them.
 - **"Plan your event" (`/enquire`) replaces the team's three Tally forms** (Wedding &
   Reception `w4pMpk`, Birthday `waaAMX`, Baby Shower `nPGJKx`), rebuilt natively so answers
   land in Leads (+ team email, + occasion reminders) instead of Tally. The option lists,

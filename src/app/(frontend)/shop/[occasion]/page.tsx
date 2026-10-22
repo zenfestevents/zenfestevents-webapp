@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 
 import { param, type SearchParams } from '../../../../components/market/AuthShell'
 import { ProductCard } from '../../../../components/shop/ProductCard'
+import { FEATURES } from '../../../../lib/features'
 import { listProducts, type ProductFilters } from '../../../../lib/shop'
 import { PRODUCT_TYPES, SHOP_OCCASIONS, isOccasion, isProductType } from '../../../../lib/shopOptions'
 
@@ -23,6 +24,7 @@ const titleFor = (occasion: string) =>
   occasion === 'all' ? 'All products' : `${SHOP_OCCASIONS.find(([v]) => v === occasion)?.[1]} shopping`
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  if (!FEATURES.shop) notFound()
   const { occasion } = await params
   if (occasion !== 'all' && !isOccasion(occasion)) return {}
   const blurb = SHOP_OCCASIONS.find(([v]) => v === occasion)?.[2]

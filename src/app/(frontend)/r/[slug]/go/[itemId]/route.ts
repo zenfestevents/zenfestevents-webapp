@@ -32,7 +32,7 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ slug: stri
     const productId = typeof item.product === 'object' ? item.product.id : item.product
     const product = await findLiveProductById(productId)
     if (!product || product.source !== 'affiliate' || !product.affiliateUrl) {
-      return NextResponse.redirect(new URL(product ? `/shop/p/${product.slug}` : '/shop', _req.url))
+      return NextResponse.redirect(product ? new URL(`/shop/p/${product.slug}`, _req.url) : back)
     }
     storeUrl = product.affiliateUrl
   }

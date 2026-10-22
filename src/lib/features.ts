@@ -10,6 +10,9 @@ export const FEATURES = {
   earn: false,
   /** Public polls (/polls/*, homepage band) and the registry's family polls tabs. */
   polls: false,
+  /** Zenfest Shop (/shop, /shop/[occasion]): hidden from the nav, footer and registry.
+   *  Product pages and /shop/policies stay up, since registry gifts link to them. */
+  shop: false,
 } as const
 
 /** The features shown as "Coming soon" while switched off, in menu order. */

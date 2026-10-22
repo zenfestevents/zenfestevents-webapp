@@ -15,16 +15,16 @@ type NavItem = { href: string; label: string; also?: string[] }
 
 /**
  * The live links, in order. Switched-off features (lib/features.ts) drop out here
- * and appear in the phone menu's "Coming soon" group instead. Packages lives on the
- * Services page and in the footer (it's "coming soon" itself, see PACKAGES_READY).
+ * and appear in the phone menu's "Coming soon" group instead (the Shop is just hidden).
  */
 const NAV: NavItem[] = [
   ...(FEATURES.marketplace ? [{ href: '/marketplace', label: 'Marketplace' }] : []),
   { href: '/gallery', label: 'Our Work' },
-  { href: '/services', label: 'Services', also: ['/packages'] },
+  { href: '/services', label: 'Services' },
+  { href: '/packages', label: 'Packages' },
   ...(FEATURES.earn ? [{ href: '/earn', label: 'Earn from events' }] : []),
   // The gift registry is part of the shop now; its pages light up "Shop".
-  { href: '/shop', label: 'Shop', also: ['/registry'] },
+  ...(FEATURES.shop ? [{ href: '/shop', label: 'Shop', also: ['/registry'] }] : []),
   ...(FEATURES.polls ? [{ href: '/polls', label: 'Polls' }] : []),
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
