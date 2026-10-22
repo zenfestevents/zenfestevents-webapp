@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React from 'react'
 
+import { VENDORS_HREF } from '../lib/features'
 import { DEFAULT_WA_MESSAGE, SITE_FALLBACK, whatsappLink, type SiteSettings } from '../lib/site'
 import { hidesChatLauncher } from './ai/ChatLauncher'
 
@@ -30,7 +31,7 @@ export function MobileCTABar({ settings }: { settings: SiteSettings }) {
       <Link className="mobilebar__btn mobilebar__btn--enq" href="/enquire">
         Plan your event
       </Link>
-      <Link className="mobilebar__btn mobilebar__btn--vendor" href="/vendors">
+      <Link className="mobilebar__btn mobilebar__btn--vendor" href={VENDORS_HREF}>
         For vendors
       </Link>
     </div>

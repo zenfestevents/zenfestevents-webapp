@@ -26,6 +26,13 @@ export const FEATURES = {
  */
 export const ANNOUNCE_COMING_SOON = false
 
+/**
+ * Where "For vendors" links go. While the marketplace is closed there is only one way to
+ * join, so vendors go straight to the partner application instead of a choice whose second
+ * half is "Coming soon" (owner, 2026-10-22). With the marketplace on, /vendors offers both.
+ */
+export const VENDORS_HREF = FEATURES.marketplace ? '/vendors' : '/vendors/partner'
+
 /** The features shown as "Coming soon" while switched off, in menu order. */
 export const COMING_SOON = [
   {

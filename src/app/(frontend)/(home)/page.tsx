@@ -1,25 +1,28 @@
 import Link from 'next/link'
 import React from 'react'
 
-import { getPayloadClient } from '../../lib/payload'
-import { whatsappLink, DEFAULT_WA_MESSAGE, SITE_FALLBACK } from '../../lib/site'
-import { getSiteSettings } from '../../lib/getSettings'
-import { mediaUrl } from '../../lib/media'
-import { KolamRosette, KolamDivider } from '../../components/Kolam'
-import { Reveal } from '../../components/Reveal'
-import { ScrubHero } from '../../components/ScrubHero'
-import { VendorPaths } from '../../components/VendorPaths'
-import { VoteCard } from '../../components/polls/VoteCard'
-import { getFeaturedPoll, getPollView } from '../../lib/polls'
-import { pollVerifyMode } from '../../lib/voterVerification'
-import { MeetZenfestAI } from '../../components/ai/MeetZenfestAI'
-import { getAgentProfiles } from '../../lib/ai/knowledge'
-import { aiAvailable } from '../../lib/ai/status'
-import { VendorCard } from '../../components/market/VendorCard'
-import { listVendors, type PublicVendor } from '../../lib/marketplace'
-import { MARKET_CATEGORIES } from '../../lib/marketplaceOptions'
-import { getCustomer } from '../../lib/session'
-import { ANNOUNCE_COMING_SOON, COMING_SOON, FEATURES } from '../../lib/features'
+import { getPayloadClient } from '../../../lib/payload'
+import { CONTENT_TAGS, cachedContent } from '../../../lib/contentCache'
+import { whatsappLink, DEFAULT_WA_MESSAGE, SITE_FALLBACK } from '../../../lib/site'
+import { getSiteSettings } from '../../../lib/getSettings'
+import { mediaUrl } from '../../../lib/media'
+import { KolamRosette, KolamDivider } from '../../../components/Kolam'
+import { Reveal } from '../../../components/Reveal'
+import { ScrubHero } from '../../../components/ScrubHero'
+import { VendorPaths } from '../../../components/VendorPaths'
+import { TestimonialCard } from '../../../components/TestimonialCard'
+import { homeTestimonials } from '../../../lib/testimonials'
+import { VoteCard } from '../../../components/polls/VoteCard'
+import { getFeaturedPoll, getPollView } from '../../../lib/polls'
+import { pollVerifyMode } from '../../../lib/voterVerification'
+import { MeetZenfestAI } from '../../../components/ai/MeetZenfestAI'
+import { getAgentProfiles } from '../../../lib/ai/knowledge'
+import { aiAvailable } from '../../../lib/ai/status'
+import { VendorCard } from '../../../components/market/VendorCard'
+import { listVendors, type PublicVendor } from '../../../lib/marketplace'
+import { MARKET_CATEGORIES } from '../../../lib/marketplaceOptions'
+import { getCustomer } from '../../../lib/session'
+import { ANNOUNCE_COMING_SOON, COMING_SOON, FEATURES } from '../../../lib/features'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,19 +36,25 @@ async function getHomePoll() {
   }
 }
 
-async function getHomeData() {
-  try {
+// Cached (lib/contentCache.ts): saving a project or service in /admin clears it. The
+// "any recent project" fallback runs alongside, not after, the featured query.
+const readHomeData = cachedContent(
+  async () => {
     const payload = await getPayloadClient()
-    const [projects, services] = await Promise.all([
+    const [featured, recent, services] = await Promise.all([
       payload.find({ collection: 'projects', where: { featured: { equals: true } }, depth: 1, limit: 6, sort: '-createdAt' }),
+      payload.find({ collection: 'projects', depth: 1, limit: 6, sort: '-createdAt' }),
       payload.find({ collection: 'services', depth: 1, limit: 6, sort: 'order' }),
     ])
-    let featured = projects.docs
-    if (featured.length === 0) {
-      const any = await payload.find({ collection: 'projects', depth: 1, limit: 6, sort: '-createdAt' })
-      featured = any.docs
-    }
-    return { featured, services: services.docs }
+    return { featured: featured.docs.length ? featured.docs : recent.docs, services: services.docs }
+  },
+  'home-data',
+  [CONTENT_TAGS.projects, CONTENT_TAGS.services],
+)
+
+async function getHomeData() {
+  try {
+    return await readHomeData()
   } catch {
     return { featured: [], services: [] }
   }
@@ -63,12 +72,14 @@ async function getHomeMarket(): Promise<{ vendors: PublicVendor[]; saved: Set<nu
 }
 
 export default async function HomePage() {
-  const [data, settings, homePoll, agents, market] = await Promise.all([
+  const [data, settings, homePoll, agents, market, reviews] = await Promise.all([
     getHomeData(),
     getSiteSettings(),
     FEATURES.polls ? getHomePoll() : null,
-    getAgentProfiles(),
+    // The AI band's specialist list; skipped (one query fewer) while the AI is switched off.
+    FEATURES.ai ? getAgentProfiles() : [],
     FEATURES.marketplace ? getHomeMarket() : { vendors: [], saved: new Set<number>() },
+    homeTestimonials(),
   ])
   // Switched-off features (lib/features.ts) get one "Coming soon" band instead of their own,
   // and only while ANNOUNCE_COMING_SOON is on.
@@ -84,19 +95,22 @@ export default async function HomePage() {
         subheadline={hero.subheadline}
       />
 
-      {/* ---------- FOR VENDORS: the two lanes (partner / marketplace), also slides 2–3 of the phone hero ---------- */}
+      {/* ---------- FOR VENDORS: the vendor lanes (partner, + marketplace once open), also the phone hero's later slides ---------- */}
       <section className="section home-vendors">
         <div className="container">
           <div className="section-head">
             <div>
               <p className="eyebrow">For vendors</p>
               <h2 className="display-l">
-                Two ways to grow with <span className="accent">Zenfest</span>
+                {FEATURES.marketplace ? 'Two ways to grow with ' : 'Grow with '}
+                <span className="accent">Zenfest</span>
               </h2>
             </div>
-            <Link href="/vendors" className="section-head__link">
-              For vendors →
-            </Link>
+            {FEATURES.marketplace && (
+              <Link href="/vendors" className="section-head__link">
+                For vendors →
+              </Link>
+            )}
           </div>
           <Reveal>
             <VendorPaths heading="h3" />
@@ -334,6 +348,34 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ---------- TESTIMONIALS: three reviews (collections/Testimonials.ts), all on /testimonials ---------- */}
+      {reviews.length > 0 && (
+        <section className="section">
+          <div className="container">
+            <div className="section-head">
+              <div>
+                <p className="eyebrow">Testimonials</p>
+                <h2 className="display-l">
+                  Loved by <span className="italic accent">families</span>
+                </h2>
+              </div>
+              <Link href="/testimonials" className="section-head__link">
+                {settings.reviews?.googleRating && settings.reviews?.googleCount
+                  ? `${settings.reviews.googleRating.toFixed(1)} ★ from ${settings.reviews.googleCount} reviews →`
+                  : 'All reviews →'}
+              </Link>
+            </div>
+            <div className="testimonial-strip">
+              {reviews.map((t, i) => (
+                <Reveal key={t.id} delay={i * 70}>
+                  <TestimonialCard t={t} clamp />
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Packages section removed until the real packages are finalised — see the
           PACKAGES_READY flag in app/(frontend)/packages/page.tsx. */}

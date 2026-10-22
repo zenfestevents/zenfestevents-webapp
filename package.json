@@ -26,7 +26,8 @@
     "check:whatsapp": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/scripts/checkWhatsApp.ts",
     "create:admin": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/scripts/createAdmin.ts",
     "reset:admin-password": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/scripts/resetAdminPassword.ts",
-    "import:occasions": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/scripts/importOccasions.ts"
+    "import:occasions": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/scripts/importOccasions.ts",
+    "import:reviews": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/scripts/importReviews.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.88.0",

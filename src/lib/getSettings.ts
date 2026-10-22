@@ -1,3 +1,4 @@
+import { CONTENT_TAGS, cachedContent } from './contentCache'
 import { getPayloadClient } from './payload'
 import { SITE_FALLBACK, type SiteSettings } from './site'
 
@@ -30,6 +31,11 @@ function withFallback(data: SiteSettings): SiteSettings {
     },
     branches: data.branches?.length ? data.branches : SITE_FALLBACK.branches,
     social: data.social ?? SITE_FALLBACK.social,
+    reviews: {
+      googleUrl: pick(data.reviews?.googleUrl, SITE_FALLBACK.reviews.googleUrl),
+      googleRating: pick(data.reviews?.googleRating, SITE_FALLBACK.reviews.googleRating),
+      googleCount: pick(data.reviews?.googleCount, SITE_FALLBACK.reviews.googleCount),
+    },
     ai: {
       // Unset (a database from before this field existed) counts as on.
       enabled: data.ai?.enabled !== false,
@@ -39,12 +45,21 @@ function withFallback(data: SiteSettings): SiteSettings {
   }
 }
 
+// Every page reads this (layout, header, footer), so it's cached; saving Site Settings
+// clears it (hooks/revalidateContent.ts).
+const readSettings = cachedContent(
+  async () => {
+    const payload = await getPayloadClient()
+    return ((await payload.findGlobal({ slug: 'site-settings', depth: 0 })) as SiteSettings) || {}
+  },
+  'site-settings',
+  [CONTENT_TAGS.settings],
+)
+
 /** Server-only: load the SiteSettings global (falls back to defaults on error). */
 export async function getSiteSettings(): Promise<SiteSettings> {
   try {
-    const payload = await getPayloadClient()
-    const data = (await payload.findGlobal({ slug: 'site-settings', depth: 0 })) as SiteSettings
-    return withFallback(data || {})
+    return withFallback(await readSettings())
   } catch {
     return withFallback({})
   }

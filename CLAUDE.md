@@ -53,7 +53,9 @@ npm run payload          # run Payload CLI commands
 ```
 src/
   app/(frontend)/
-    page.tsx              Homepage: hero + featured work + services
+    (home)/page.tsx       Homepage: hero + vendors + featured work + services + testimonials
+    (home)/loading.tsx    Instant screen when Home is clicked (homepage only — see "Homepage speed")
+    testimonials/page.tsx Client reviews (most copied from Google) + Google rating/link
     about/page.tsx        About page
     gallery/page.tsx      Gallery (Our Work) — all projects
     services/page.tsx     Services listing
@@ -85,7 +87,7 @@ src/
                         Packages, Projects, Leads, Signups, VendorApplications,
                         HostApplications, registry-*, polls / poll-votes / poll-voters,
                         AiConversations (Zenfest AI chats), Vendors + Customers (auth),
-                        VendorMedia, Enquiries (marketplace)
+                        VendorMedia, Enquiries (marketplace), Testimonials
   globals/              SiteSettings
   components/
     Header.tsx, Footer.tsx, MobileCTABar.tsx
@@ -114,6 +116,8 @@ src/
                          requireVendor/requireCustomer, session cookie helpers
     authActions.ts       'use server' sign-up / log-in / log-out / forgot / reset
     marketplace.ts       Server-only privacy boundary: PublicVendor DTOs, enquiries
+    contentCache.ts      Cache for content every visit reads (settings, homepage, reviews)
+    testimonials.ts      Server-only: published reviews as PublicTestimonial (short names)
     marketplaceOptions.ts, listing.ts, formCheck.ts   Client-safe options/validators
   seed/                  Demo-content seed script (+ aiDemo.ts for Zenfest AI,
                          marketplaceDemo.ts for demo vendors/couple)
@@ -242,14 +246,15 @@ src/
   `node build-hero-mobile.cjs` (sharp, WebP quality 66; keep its `WIDTHS` in step with the
   `srcSet`). WebP, not JPEG: the busy petals/sparks made the JPEGs twice the size.
   **Phones swipe (owner, 2026-10-22):** the image + band is slide 1 of a scroll-snap slider;
-  slides 2–3 are the vendor lanes (`VENDOR_SLIDES` in `ScrubHero.tsx`: Partner with Zenfest,
-  Vendor Marketplace — "Coming soon" while `FEATURES.marketplace` is off), CSS posters sized
+  the next slides are the vendor lanes (`VENDOR_SLIDES` in `ScrubHero.tsx`: Partner with
+  Zenfest, plus Vendor Marketplace only once `FEATURES.marketplace` is on — so two slides and
+  two dots for now; see "One way to join" under vendors), CSS posters sized
   to the image (150vw) with a text link each — the one exception to "no actions in the
   hero". Dots sit over the image's bottom edge; it auto-advances every 6 s until touched
   (never under reduced motion). On laptops `.scrubhero__track` / `__slide--main` are
   `display: contents` and the vendor slides are hidden, so the film is untouched — the
   owner chose to keep the film there. The homepage's "For vendors" section
-  (`components/VendorPaths.tsx`, shared with `/vendors`) sits right under the hero.
+  (`components/VendorPaths.tsx`) sits right under the hero.
   Things that are easy to get wrong here:
   - **The phone `<source>` carries `width`/`height` (860×1290)** and the poster has
     `fetchPriority="high"`. Phones size the hero by the image, so without the size the
@@ -270,20 +275,22 @@ src/
   pushed the hero's `100svh` stage down and cropped the film. `#main` pays back the
   offset via `--header-h` and the hero cancels it. The bar hides over the hero
   (`body.hero-immersive`) and returns as the film leaves. Phones show the emblem **and**
-  the "ZENFEST EVENTS™" wordmark (it used to be hidden below 420px). `NAV` is built from
-  `FEATURES` (see "Feature switches"): with everything optional off it is five links (Our
-  Work · Services · Packages · About · Contact) + "Plan your event" (`/enquire`) + "For
-  Vendors" — `.site-header--compact`, desktop bar from **1000px**. Packages took the
-  Shop's place on 2026-10-22 (the Shop link returns with `FEATURES.shop`). With every feature
-  on it is nine links (Marketplace first) + "✦ Zenfest AI" (≥1440px) + the account button
-  (icon-only below 1440px), collapsing to the hamburger **below 1200px**; the inner
-  container may run to 1400px. Adding a tenth link means re-measuring 1200 / 1280 / 1440.
-  The phone menu is grouped: **Explore** / **Coming soon** (switched-off features, muted
-  with a "Soon" pill, linking to their teaser — only with `ANNOUNCE_COMING_SOON`) / **For
-  vendors** (Partner with Zenfest, Marketplace listing).
+  the "ZENFEST EVENTS™" wordmark (it used to be hidden below 420px). **The menu is grouped
+  (owner, 2026-10-22) so new pages join a group instead of widening the bar:**
+  `buildNav()` in `Header.tsx` → **About Zenfest ▾** (Home, Our Work, About, Testimonials
+  once a review is published, + Polls) · **Services ▾** (Services, Packages · Soon, + Shop,
+  Earn) · **Contact**, then "Plan your event" (`/enquire`) + "For Vendors"
+  (`VENDORS_HREF`). Laptop groups are `NavDropdown`s (open on hover or click; close on
+  Escape, an outside click, tabbing out or a route change; the group lights up when a child
+  page is open). `FEATURES` gating stays per item, so a feature switched on lands in its
+  group. Three entries keep `.site-header--compact` (desktop bar from **1000px**); with the
+  marketplace on, "Marketplace" is a fourth plain link. The phone menu shows the same groups
+  as headings (+ **Coming soon**, only with `ANNOUNCE_COMING_SOON`) and **For vendors**
+  (Partner with Zenfest; Marketplace listing once it's open). The footer mirrors it:
+  About Zenfest / Services / Contact (with the branches).
 - **Mobile bottom bar (`MobileCTABar`, <900px, every page except the registry's `/r/*`, `/dashboard/*`, `/plan` and `/enquire`):**
   WhatsApp (green) · **Plan your event** (gold "zari" sheen — `zari-sheen` keyframes;
-  `/enquire`) · For vendors (`/vendors`), by the owner's choice on 2026-10-14 (it was Earn
+  `/enquire`) · For vendors (`VENDORS_HREF`), by the owner's choice on 2026-10-14 (it was Earn
   from events · Ask Zenfest AI · Enroll as a vendor). No Call button. The desktop hero's
   buttons are "Plan your event" (the AI link, which falls back to `/enquire` while the AI
   is off) + "See our work". The sheen stops under `prefers-reduced-motion`.
@@ -381,10 +388,42 @@ src/
   set. Corporate events and housewarmings still go through `/contact`.
 - **Packages aren't published yet.** `FEATURES.packages = false` (it was a local
   `PACKAGES_READY` until 2026-10-22): the page shows "Coming soon" with a CTA to custom quote
-  instead of displaying packages, and the nav / phone menu / footer link carries a "Soon"
-  tag (the nav's tag hides at 1000–1099px, where the compact bar is too tight). Flip the
+  instead of displaying packages, and its link in the Services menu, phone menu and footer
+  carries a "Soon" tag. Flip the
   flag once packages are entered in the admin. The working listing
   logic below is kept intact for when they're ready.
+- **Testimonials (`/testimonials`, `collections/Testimonials.ts`, `lib/testimonials.ts`),
+  2026-10-22.** The owner asked for the Google Business reviews on the site. Google's Places
+  API gives only 5 reviews (and forbids storing them) and the Business Profile API needs
+  Google's approval, so the reviews were **read from the listing once and copied word for
+  word** into `src/seed/googleReviews.ts` (117 reviews, 97 with text; main listing,
+  Guduvancheri, place ID `ChIJZYW4DML3UjoR3k67YiIkueA`). `importGoogleReviews()` loads them:
+  locally `npm run import:reviews`, in production the data migration
+  `20261022_172311_google_reviews` (runs on deploy, skips ones already there). New reviews
+  are added by staff in `/admin` → Testimonials. Easy to get wrong:
+  - **Never change a review's words or stars.** 4–5★ are published; the 1★ and 2★ reviews
+    with text were imported **unpublished** for the owner to decide. The page also shows the
+    overall Google rating, count and "Read all reviews on Google" (Site Settings → Google
+    reviews, fallback in `SITE_FALLBACK.reviews`) — update the numbers there now and then.
+  - Names show as first name + initial (`shortName`); the admin keeps them as on Google.
+    `date` is approximate (Google only says "2 months ago"); it's for sorting, not shown.
+    `eventType` was guessed only when a review names exactly one kind of event.
+  - The public reads only `published` rows (collection access). Testimonials appears in the
+    menu, footer and homepage ("Loved by families", featured first, then newest 5★) only
+    while at least one is published; `/testimonials` 404s otherwise.
+- **Homepage speed (2026-10-22).** The live homepage took 1.3–2.6 s to start (other pages
+  ~0.6 s): it hit Neon several times per visit, partly for switched-off features. Now:
+  - `lib/contentCache.ts` caches site settings (every page), the homepage's projects +
+    services and testimonials (`unstable_cache`, 5 min safety expiry). **Saving in /admin
+    clears it at once**: `hooks/revalidateContent.ts` on Projects, Services, Testimonials
+    and Site Settings (`revalidateTag(…, { expire: 0 })`). Scripts and migrations can't clear
+    it (no Next request), so their changes show within 5 minutes. Never put anything that
+    reads cookies inside `cachedContent`.
+  - The AI band's query runs only with `FEATURES.ai`; the "any recent project" fallback runs
+    alongside the featured query instead of after it.
+  - `(home)/loading.tsx` shows a kolam screen the moment Home is clicked. It lives in the
+    `(home)` route group on purpose: a loading screen makes a page stream, and a streamed
+    `notFound()` / `redirect()` answers 200 instead of 404 / 307 — don't add a group-wide one.
 - **`/admin/create-first-user` is broken** on Payload 3.88 + Next 16.3.3 — it renders
   a blank page (the view is in the RSC stream but never reaches the DOM; reproduced
   locally against an empty DB under both Turbopack and webpack). Use
@@ -580,6 +619,13 @@ src/
     linked: `requireVerifiedPhone` strips any client-sent `vendor`, stamps the session's
     vendor + trusts its phone, and `linkVendorApplication` links it back and seeds an empty
     price card. `VendorForm`'s `account` prefill mode is kept but currently unused.
+  - **One way to join while the marketplace is closed (owner, 2026-10-22):** two choices
+    where one is "Coming soon" confused vendors. So `VENDORS_HREF` (`lib/features.ts`) sends
+    every "For vendors" link (header button, bottom bar) straight to `/vendors/partner`;
+    `/vendors` redirects there; `VendorPaths` shows only the partner card (homepage heading
+    "Grow with Zenfest") and the phone hero only the partner slide. All of it returns as
+    before when `FEATURES.marketplace` is `true`; at launch, word the two by outcome ("Zenfest
+    brings you work" / "couples book you directly").
   - **Service catalogue (`lib/serviceCatalog.ts`, owner's list 2026-10-14):** 42 services in 10
     groups (Main Services, Bride & Groom, Traditions & Rituals, Cakes/Gifts/Invites, Entries &
     Effects, Entertainment, Photo Fun, Guest Stations, Kids' Zone, Event Staff). The partner form's

@@ -2,6 +2,8 @@ import type { CollectionConfig } from 'payload'
 
 import { anyone, authenticated } from '../access'
 import { slugField } from '../fields/slug'
+import { CONTENT_TAGS } from '../lib/contentCache'
+import { revalidateCollection } from '../hooks/revalidateContent'
 
 /**
  * Past-work showcase — THE most important collection. Each project is one
@@ -9,6 +11,7 @@ import { slugField } from '../fields/slug'
  */
 export const Projects: CollectionConfig = {
   slug: 'projects',
+  hooks: revalidateCollection(CONTENT_TAGS.projects),
   labels: { singular: 'Gallery Project', plural: 'Gallery (Our Work)' },
   access: {
     read: anyone,

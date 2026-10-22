@@ -75,6 +75,7 @@ export interface Config {
     services: Service;
     packages: Package;
     projects: Project;
+    testimonials: Testimonial;
     leads: Lead;
     signups: Signup;
     'vendor-applications': VendorApplication;
@@ -118,6 +119,7 @@ export interface Config {
     services: ServicesSelect<false> | ServicesSelect<true>;
     packages: PackagesSelect<false> | PackagesSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     signups: SignupsSelect<false> | SignupsSelect<true>;
     'vendor-applications': VendorApplicationsSelect<false> | VendorApplicationsSelect<true>;
@@ -482,6 +484,47 @@ export interface Project {
   date?: string | null;
   /**
    * Show on the home page.
+   */
+  featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Client reviews shown on the website. Copy them exactly as written. Untick "Published" to hide one.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials".
+ */
+export interface Testimonial {
+  id: number;
+  /**
+   * As it appears on Google. The site shows the first name and an initial.
+   */
+  name: string;
+  rating: number;
+  text: string;
+  eventType?:
+    | (
+        | 'wedding'
+        | 'engagement'
+        | 'birthday'
+        | 'babyshower'
+        | 'puberty'
+        | 'housewarming'
+        | 'corporate'
+        | 'opening'
+        | 'sports'
+        | 'other'
+      )
+    | null;
+  /**
+   * When it was written (for imported Google reviews, worked out from "2 months ago").
+   */
+  date?: string | null;
+  source: 'google' | 'direct';
+  published?: boolean | null;
+  /**
+   * Show on the home page (the first three are used).
    */
   featured?: boolean | null;
   updatedAt: string;
@@ -1548,6 +1591,10 @@ export interface PayloadLockedDocument {
         value: number | Project;
       } | null)
     | ({
+        relationTo: 'testimonials';
+        value: number | Testimonial;
+      } | null)
+    | ({
         relationTo: 'leads';
         value: number | Lead;
       } | null)
@@ -1881,6 +1928,22 @@ export interface ProjectsSelect<T extends boolean = true> {
   branch?: T;
   location?: T;
   date?: T;
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials_select".
+ */
+export interface TestimonialsSelect<T extends boolean = true> {
+  name?: T;
+  rating?: T;
+  text?: T;
+  eventType?: T;
+  date?: T;
+  source?: T;
+  published?: T;
   featured?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2680,6 +2743,14 @@ export interface SiteSetting {
     facebook?: string | null;
     youtube?: string | null;
   };
+  /**
+   * Shown on the Testimonials page. Update the rating and count from Google now and then.
+   */
+  reviews?: {
+    googleUrl?: string | null;
+    googleRating?: number | null;
+    googleCount?: number | null;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2784,6 +2855,13 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         instagram?: T;
         facebook?: T;
         youtube?: T;
+      };
+  reviews?:
+    | T
+    | {
+        googleUrl?: T;
+        googleRating?: T;
+        googleCount?: T;
       };
   updatedAt?: T;
   createdAt?: T;

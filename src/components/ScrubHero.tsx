@@ -17,8 +17,9 @@ const FRAME_COUNT = 90
    a phone decoder and costs a 20 MB download. Same breakpoint as parts.css. */
 const MOBILE_QUERY = '(max-width: 720px)'
 
-/* Phones only: the hero is a swipeable slider — the team image first, then the two
-   vendor lanes (the same ones as components/VendorPaths.tsx). Laptops keep the film. */
+/* Phones only: the hero is a swipeable slider — the team image first, then the vendor
+   lanes (the same ones as components/VendorPaths.tsx: partner, plus the marketplace once
+   it opens). Laptops keep the film. */
 const VENDOR_SLIDES = [
   {
     key: 'partner',
@@ -31,18 +32,19 @@ const VENDOR_SLIDES = [
     href: '/vendors/partner',
     cta: 'Apply as a partner',
   },
-  {
+  // Only while the marketplace is open; until then the slider is image + partner.
+  ...(FEATURES.marketplace ? [{
     key: 'marketplace',
     poster: ['Vendor', 'Marketplace'],
-    tag: FEATURES.marketplace ? 'Free listing' : 'Coming soon',
+    tag: 'Free listing',
     chips: ['Photography', 'Makeup', 'Decor', 'Catering', 'Halls'],
     eyebrow: 'For vendors',
     title: 'List your business free',
     body: 'Your own page with photos and real prices. Couples who plan it themselves find you and contact you directly.',
-    href: FEATURES.marketplace ? '/vendors/marketplace' : '/vendors',
-    cta: FEATURES.marketplace ? 'List your business' : 'See both ways to join',
-  },
-] as const
+    href: '/vendors/marketplace',
+    cta: 'List your business',
+  }] : []),
+]
 const SLIDE_COUNT = 1 + VENDOR_SLIDES.length
 /** Auto-advance until the visitor touches the slider; never with reduced motion. */
 const SLIDE_MS = 6000

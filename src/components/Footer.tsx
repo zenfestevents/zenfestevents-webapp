@@ -5,7 +5,7 @@ import { ANNOUNCE_COMING_SOON, FEATURES } from '../lib/features'
 import { MAJOR_CITIES, SITE_FALLBACK, telLink, whatsappLink, DEFAULT_WA_MESSAGE, type SiteSettings } from '../lib/site'
 import { KolamDivider } from './Kolam'
 
-export function Footer({ settings }: { settings: SiteSettings }) {
+export function Footer({ settings, hasTestimonials = false }: { settings: SiteSettings; hasTestimonials?: boolean }) {
   const contact = { ...SITE_FALLBACK.contact, ...(settings?.contact || {}) }
   const branches = settings?.branches?.length ? settings.branches : SITE_FALLBACK.branches
   const social = settings?.social || {}
@@ -46,8 +46,19 @@ export function Footer({ settings }: { settings: SiteSettings }) {
             </div>
           </div>
 
+          {/* The same groups as the header menu: About Zenfest / Services / Contact. */}
           <div className="site-footer__col">
-            <h4 className="site-footer__heading">Plan your event</h4>
+            <h4 className="site-footer__heading">About Zenfest</h4>
+            <Link href="/gallery">Our Work</Link>
+            <Link href="/about">About</Link>
+            {hasTestimonials && <Link href="/testimonials">Testimonials</Link>}
+            <Link href="/vendors/partner">Partner with Zenfest</Link>
+          </div>
+
+          <div className="site-footer__col">
+            <h4 className="site-footer__heading">Services</h4>
+            <Link href="/services">Services</Link>
+            <Link href="/packages">Packages{!FEATURES.packages && <Soon />}</Link>
             <Link href="/enquire">Plan your event</Link>
             {FEATURES.shop && <Link href="/shop">Zenfest Shop</Link>}
             <Link href="/registry">Gift registry</Link>
@@ -63,18 +74,8 @@ export function Footer({ settings }: { settings: SiteSettings }) {
           </div>
 
           <div className="site-footer__col">
-            <h4 className="site-footer__heading">Zenfest</h4>
-            <Link href="/gallery">Our Work</Link>
-            <Link href="/services">Services</Link>
-            <Link href="/packages">Packages{!FEATURES.packages && <Soon />}</Link>
-            <Link href="/about">About</Link>
-            <Link href="/contact">Contact</Link>
-            <Link href="/vendors/partner">Partner with Zenfest</Link>
-            <Link href="/vendors">For vendors</Link>
-          </div>
-
-          <div className="site-footer__col">
-            <h4 className="site-footer__heading">Branches</h4>
+            <h4 className="site-footer__heading">Contact</h4>
+            <Link href="/contact">Contact us</Link>
             {branches.map((b, i) => (
               <div key={b.id || i} className="site-footer__branch">
                 <strong>{b.name}</strong>

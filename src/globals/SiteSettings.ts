@@ -1,10 +1,13 @@
 import type { GlobalConfig } from 'payload'
 
 import { anyone, authenticated } from '../access'
+import { CONTENT_TAGS } from '../lib/contentCache'
+import { revalidateGlobal } from '../hooks/revalidateContent'
 
 /** Business-wide details: contact numbers, branches, hero copy, social links. */
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
+  hooks: { afterChange: [revalidateGlobal(CONTENT_TAGS.settings)] },
   label: 'Site Settings',
   access: {
     read: anyone,
@@ -94,6 +97,17 @@ export const SiteSettings: GlobalConfig = {
         { name: 'instagram', type: 'text' },
         { name: 'facebook', type: 'text' },
         { name: 'youtube', type: 'text' },
+      ],
+    },
+    {
+      type: 'group',
+      name: 'reviews',
+      label: 'Google reviews',
+      admin: { description: 'Shown on the Testimonials page. Update the rating and count from Google now and then.' },
+      fields: [
+        { name: 'googleUrl', type: 'text', label: 'Link to all Google reviews' },
+        { name: 'googleRating', type: 'number', label: 'Google rating', min: 1, max: 5 },
+        { name: 'googleCount', type: 'number', label: 'Number of Google reviews', min: 0 },
       ],
     },
   ],

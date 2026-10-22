@@ -2,10 +2,13 @@ import type { CollectionConfig } from 'payload'
 
 import { anyone, authenticated } from '../access'
 import { slugField } from '../fields/slug'
+import { CONTENT_TAGS } from '../lib/contentCache'
+import { revalidateCollection } from '../hooks/revalidateContent'
 
 /** Individual services: Decoration, Catering, Photography, DJ, etc. */
 export const Services: CollectionConfig = {
   slug: 'services',
+  hooks: revalidateCollection(CONTENT_TAGS.services),
   labels: { singular: 'Service', plural: 'Services' },
   access: {
     read: anyone,

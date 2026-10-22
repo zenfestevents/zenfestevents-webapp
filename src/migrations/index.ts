@@ -11,6 +11,8 @@ import * as migration_20261009_090152_occasion_reminders from './20261009_090152
 import * as migration_20261014_032729_event_requirements from './20261014_032729_event_requirements';
 import * as migration_20261014_040817_tamil_nadu_copy from './20261014_040817_tamil_nadu_copy';
 import * as migration_20261014_124216_whatsapp_cloud from './20261014_124216_whatsapp_cloud';
+import * as migration_20261022_172310_testimonials from './20261022_172310_testimonials';
+import * as migration_20261022_172311_google_reviews from './20261022_172311_google_reviews';
 
 export const migrations = [
   {
@@ -76,6 +78,16 @@ export const migrations = [
   {
     up: migration_20261014_124216_whatsapp_cloud.up,
     down: migration_20261014_124216_whatsapp_cloud.down,
-    name: '20261014_124216_whatsapp_cloud'
+    name: '20261014_124216_whatsapp_cloud',
+  },
+  {
+    up: migration_20261022_172310_testimonials.up,
+    down: migration_20261022_172310_testimonials.down,
+    name: '20261022_172310_testimonials',
+  },
+  {
+    up: migration_20261022_172311_google_reviews.up,
+    down: migration_20261022_172311_google_reviews.down,
+    name: '20261022_172311_google_reviews',
   },
 ];

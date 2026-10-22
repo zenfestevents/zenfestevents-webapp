@@ -23,6 +23,7 @@ export type SiteSettings = {
   }[]
   social?: { instagram?: string; facebook?: string; youtube?: string }
   ai?: { enabled?: boolean | null; greeting?: string | null; bandHeadline?: string | null }
+  reviews?: { googleUrl?: string | null; googleRating?: number | null; googleCount?: number | null }
 }
 
 /**
@@ -72,6 +73,12 @@ export const SITE_FALLBACK: Required<SiteSettings> = {
     },
   ],
   social: { instagram: '', facebook: '', youtube: '' },
+  // The main Google Business listing (Guduvancheri), as of 2026-10-22.
+  reviews: {
+    googleUrl: 'https://search.google.com/local/reviews?placeid=ChIJZYW4DML3UjoR3k67YiIkueA',
+    googleRating: 4.8,
+    googleCount: 117,
+  },
   ai: {
     enabled: true,
     greeting:

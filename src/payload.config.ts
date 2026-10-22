@@ -15,6 +15,7 @@ import { Categories } from './collections/Categories'
 import { Services } from './collections/Services'
 import { Packages } from './collections/Packages'
 import { Projects } from './collections/Projects'
+import { Testimonials } from './collections/Testimonials'
 import { Leads } from './collections/Leads'
 import { Signups } from './collections/Signups'
 import { VendorApplications } from './collections/VendorApplications'
@@ -79,6 +80,7 @@ export default buildConfig({
     Services,
     Packages,
     Projects,
+    Testimonials,
     Leads,
     Signups,
     VendorApplications,

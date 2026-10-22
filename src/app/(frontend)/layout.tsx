@@ -13,6 +13,7 @@ import { Header } from '../../components/Header'
 import { Footer } from '../../components/Footer'
 import { MobileCTABar } from '../../components/MobileCTABar'
 import { getSiteSettings } from '../../lib/getSettings'
+import { hasTestimonials } from '../../lib/testimonials'
 import { aiAvailable } from '../../lib/ai/status'
 import { getAgentProfiles } from '../../lib/ai/knowledge'
 import { ZenfestAIProvider } from '../../components/ai/ZenfestAIProvider'
@@ -48,7 +49,8 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const settings = await getSiteSettings()
+  // Both cached (lib/contentCache.ts); Testimonials joins the menu once a review is published.
+  const [settings, testimonials] = await Promise.all([getSiteSettings(), hasTestimonials()])
   const ai = aiAvailable(settings)
   // The intake form offers the enabled specialists as services.
   const agents = ai ? await getAgentProfiles() : []
@@ -66,9 +68,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           whatsapp={settings.contact?.whatsapp || ''}
           phone={settings.contact?.phonePrimary || ''}
         >
-          <Header settings={settings} />
+          <Header settings={settings} hasTestimonials={testimonials} />
           <main id="main">{children}</main>
-          <Footer settings={settings} />
+          <Footer settings={settings} hasTestimonials={testimonials} />
           <MobileCTABar settings={settings} />
           <ChatLauncher />
         </ZenfestAIProvider>

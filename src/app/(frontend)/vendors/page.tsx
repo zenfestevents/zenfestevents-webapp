@@ -1,5 +1,6 @@
 import React from 'react'
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 
 import { VendorPaths } from '../../../components/VendorPaths'
 import { FEATURES } from '../../../lib/features'
@@ -16,6 +17,8 @@ export const metadata: Metadata = {
 
 /** Two different kinds of vendor, kept apart on purpose (see components/VendorPaths.tsx). */
 export default async function VendorsPage() {
+  // One way to join while the marketplace is closed (see VENDORS_HREF).
+  if (!FEATURES.marketplace) redirect('/vendors/partner')
   const vendor = FEATURES.marketplace ? await getVendor() : null
 
   return (
