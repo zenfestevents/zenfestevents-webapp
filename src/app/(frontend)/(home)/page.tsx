@@ -102,6 +102,9 @@ export default async function HomePage() {
     { value: SERVICES.length, label: 'Services in the squad' },
   ]
 
+  // Clients first, vendors after (owner, 2026-10-24): our work, services, reviews and the
+  // Runs club come before the vendor lanes and the marketplace. No gift registry band
+  // while the Shop is off (the registry itself stays live at /registry).
   return (
     <>
       {/* ---------- HERO: full-bleed scroll-scrubbed reception film ---------- */}
@@ -117,76 +120,6 @@ export default async function HomePage() {
           <Scoreboard items={score} className="home-score__board" />
         </div>
       </section>
-
-      {/* ---------- FOR VENDORS: the vendor lanes (partner, + marketplace once open), also the phone hero's later slides ---------- */}
-      <section className="section home-vendors">
-        <div className="container">
-          <div className="section-head">
-            <div>
-              <p className="eyebrow">For vendors</p>
-              <h2 className="display-l">
-                {FEATURES.marketplace ? 'Two ways to grow with ' : 'Grow with '}
-                <span className="accent">Zenfest</span>
-              </h2>
-            </div>
-            {FEATURES.marketplace && (
-              <Link href="/vendors" className="section-head__link">
-                For vendors →
-              </Link>
-            )}
-          </div>
-          <Reveal>
-            <VendorPaths heading="h3" />
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ---------- ZENFEST AI: the AI planner and its specialist team ---------- */}
-      {aiAvailable(settings) && (
-        <MeetZenfestAI headline={settings.ai?.bandHeadline || 'Plan your whole event with Zenfest AI'} agents={agents} />
-      )}
-
-      {/* ---------- MARKETPLACE: the DIY lane — book vendors directly ---------- */}
-      {FEATURES.marketplace && (
-      <section className="section band-soft home-market">
-        <div className="container home-market__inner">
-          <Reveal className="home-market__intro">
-            <p className="eyebrow">Zenfest marketplace</p>
-            <h2 className="display-l">
-              Book vendors <span className="accent">directly</span>
-            </h2>
-            <p className="lede">
-              Doing it yourself? Compare photographers, makeup artists, decorators, caterers and halls across
-              Tamil Nadu — real prices upfront, dates you can trust, every listing checked by our team.
-            </p>
-            <ul className="home-market__cats">
-              {MARKET_CATEGORIES.filter(([v]) => v !== 'other').map(([v, label]) => (
-                <li key={v}>
-                  <Link href={`/marketplace/${v}`}>{label}</Link>
-                </li>
-              ))}
-            </ul>
-            <div className="btn-row">
-              <Link className="btn btn--primary" href="/marketplace">
-                Browse the marketplace
-              </Link>
-              <Link className="home-market__vendor-link" href="/vendors/marketplace">
-                Are you a vendor? List free →
-              </Link>
-            </div>
-          </Reveal>
-          {market.vendors.length > 0 && (
-            <div className="home-market__grid">
-              {market.vendors.map((v, i) => (
-                <Reveal key={v.id} delay={i * 70}>
-                  <VendorCard vendor={v} shortlisted={market.saved.has(v.id)} />
-                </Reveal>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-      )}
 
       {/* ---------- FEATURED WORK ---------- */}
       <section className="section">
@@ -247,105 +180,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <SeamDivider />
-
-      {/* ---------- COMING SOON: AI / marketplace / earn while switched off ---------- */}
-      {soon.length > 0 && (
-        <section className="section band-ink home-soon">
-          <KolamRosette size={300} className="home-earn__kolam" />
-          <div className="container">
-            <p className="eyebrow">Coming soon to Zenfest</p>
-            <h2 className="display-l">
-              More ways to <span className="italic accent">celebrate</span>
-            </h2>
-            <ul className="home-soon__grid">
-              {soon.map((f, i) => (
-                <Reveal key={f.key} as="li" className="home-soon__card" delay={i * 70}>
-                  <Link href={f.href}>
-                    <span className="pill pill--soon">Soon</span>
-                    <strong>{f.label}</strong>
-                    <span className="muted">{f.body}</span>
-                  </Link>
-                </Reveal>
-              ))}
-            </ul>
-          </div>
-        </section>
-      )}
-
-      {/* ---------- EARN FROM EVENTS (hosts programme, /earn) ---------- */}
-      {FEATURES.earn && (
-      <section className="section band-ink home-earn">
-        <KolamRosette size={300} className="home-earn__kolam" />
-        <div className="container home-earn__inner">
-          <div>
-            <p className="eyebrow">For families</p>
-            <h2 className="display-l">
-              Earn from your <span className="italic accent">event</span>
-            </h2>
-            <p className="lede">
-              Welcome a few travellers from abroad to your wedding or family function in
-              Tamil Nadu, and earn from it. We verify every guest and look after them.
-            </p>
-          </div>
-          <Link className="btn btn--primary home-earn__btn" href="/earn">
-            Earn from events
-          </Link>
-        </div>
-      </section>
-      )}
-
-      {/* ---------- GIFT REGISTRY (/registry) ---------- */}
-      <section className="section--tight home-registry">
-        <div className="container home-earn__inner">
-          <div>
-            <p className="eyebrow">Free for families</p>
-            <h2 className="display-m">
-              Make a <span className="italic accent">gift registry</span>
-            </h2>
-            <p className="lede">
-              One link with your invitation: guests pick from your wishlist, nobody buys the same gift twice,
-              and shagun goes straight to your UPI.
-            </p>
-          </div>
-          <Link className="btn btn--primary home-earn__btn" href="/registry">
-            Create a registry
-          </Link>
-        </div>
-      </section>
-
-      {/* ---------- LIVE POLL (/polls) ---------- */}
-      {homePoll && (
-        <section className="section--tight band-soft">
-          <div className="container home-poll__inner">
-            <div>
-              <p className="eyebrow">Zenfest Polls</p>
-              <h2 className="display-m">
-                Have your <span className="italic accent">say</span>
-              </h2>
-              <p className="lede">
-                Cricket, cinema, food and everything in between — one person, one vote. See what everyone
-                thinks, then share it on WhatsApp.
-              </p>
-              <Link className="btn btn--ghost home-earn__btn" href="/polls">
-                All live polls
-              </Link>
-            </div>
-            <div className="home-poll__card card">
-              <h3 className="poll-feature__q">
-                <Link href={`/polls/${homePoll.poll.slug}`}>{homePoll.poll.question}</Link>
-              </h3>
-              <VoteCard
-                poll={homePoll.poll}
-                results={homePoll.view.results}
-                myVote={homePoll.view.myVote}
-                voter={homePoll.view.voter}
-                verifyMode={pollVerifyMode()}
-                compact
-              />
-            </div>
-          </div>
-        </section>
+      {/* ---------- ZENFEST AI: the AI planner and its specialist team ---------- */}
+      {aiAvailable(settings) && (
+        <MeetZenfestAI headline={settings.ai?.bandHeadline || 'Plan your whole event with Zenfest AI'} agents={agents} />
       )}
 
       {/* ---------- SERVICES ---------- */}
@@ -378,30 +215,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ---------- RUNS CLUB: points for couples and vendors (/rewards) ---------- */}
-      {FEATURES.marketplace && (
-        <section className="section--tight band-ink home-runs">
-          <div className="container home-runs__inner">
-            <div>
-              <p className="eyebrow">Runs club</p>
-              <h2 className="display-m">
-                Score runs, save on your <span className="accent">next event</span>
-              </h2>
-              <p className="lede">
-                Plan with us, book with us and invite friends: every one scores runs. Climb from Debut to Hall of Fame
-                and your level&apos;s discount comes off your next quote. Free to join.
-              </p>
-              <BallDots done={3} current={3} className="home-runs__balls" />
-            </div>
-            <div className="btn-row">
-              <Link className="btn btn--primary" href="/rewards">
-                Join the Runs club
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ---------- TESTIMONIALS: three reviews (collections/Testimonials.ts), all on /testimonials ---------- */}
       {reviews.length > 0 && (
@@ -438,8 +251,176 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Packages section removed until the real packages are finalised — see the
-          PACKAGES_READY flag in app/(frontend)/packages/page.tsx. */}
+      {/* ---------- LIVE POLL (/polls) ---------- */}
+      {homePoll && (
+        <section className="section--tight band-soft">
+          <div className="container home-poll__inner">
+            <div>
+              <p className="eyebrow">Zenfest Polls</p>
+              <h2 className="display-m">
+                Have your <span className="italic accent">say</span>
+              </h2>
+              <p className="lede">
+                Cricket, cinema, food and everything in between — one person, one vote. See what everyone
+                thinks, then share it on WhatsApp.
+              </p>
+              <Link className="btn btn--ghost home-earn__btn" href="/polls">
+                All live polls
+              </Link>
+            </div>
+            <div className="home-poll__card card">
+              <h3 className="poll-feature__q">
+                <Link href={`/polls/${homePoll.poll.slug}`}>{homePoll.poll.question}</Link>
+              </h3>
+              <VoteCard
+                poll={homePoll.poll}
+                results={homePoll.view.results}
+                myVote={homePoll.view.myVote}
+                voter={homePoll.view.voter}
+                verifyMode={pollVerifyMode()}
+                compact
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ---------- RUNS CLUB: points for couples and vendors (/rewards) ---------- */}
+      {FEATURES.marketplace && (
+        <section className="section--tight band-ink home-runs">
+          <div className="container home-runs__inner">
+            <div>
+              <p className="eyebrow">Runs club</p>
+              <h2 className="display-m">
+                Score runs, save on your <span className="accent">next event</span>
+              </h2>
+              <p className="lede">
+                Plan with us, book with us and invite friends: every one scores runs. Climb from Debut to Hall of Fame
+                and your level&apos;s discount comes off your next quote. Free to join.
+              </p>
+              <BallDots done={3} current={3} className="home-runs__balls" />
+            </div>
+            <div className="btn-row">
+              <Link className="btn btn--primary" href="/rewards">
+                Join the Runs club
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <SeamDivider />
+
+      {/* ---------- FOR VENDORS: the vendor lanes (partner, + marketplace once open), also the phone hero's later slides ---------- */}
+      <section className="section home-vendors">
+        <div className="container">
+          <div className="section-head">
+            <div>
+              <p className="eyebrow">For vendors</p>
+              <h2 className="display-l">
+                {FEATURES.marketplace ? 'Two ways to grow with ' : 'Grow with '}
+                <span className="accent">Zenfest</span>
+              </h2>
+            </div>
+            {FEATURES.marketplace && (
+              <Link href="/vendors" className="section-head__link">
+                For vendors →
+              </Link>
+            )}
+          </div>
+          <Reveal>
+            <VendorPaths heading="h3" />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ---------- MARKETPLACE: the DIY lane — book vendors directly ---------- */}
+      {FEATURES.marketplace && (
+      <section className="section band-soft home-market">
+        <div className="container home-market__inner">
+          <Reveal className="home-market__intro">
+            <p className="eyebrow">Zenfest marketplace</p>
+            <h2 className="display-l">
+              Book vendors <span className="accent">directly</span>
+            </h2>
+            <p className="lede">
+              Doing it yourself? Compare photographers, makeup artists, decorators, caterers and halls across
+              Tamil Nadu — real prices upfront, dates you can trust, every listing checked by our team.
+            </p>
+            <ul className="home-market__cats">
+              {MARKET_CATEGORIES.filter(([v]) => v !== 'other').map(([v, label]) => (
+                <li key={v}>
+                  <Link href={`/marketplace/${v}`}>{label}</Link>
+                </li>
+              ))}
+            </ul>
+            <div className="btn-row">
+              <Link className="btn btn--primary" href="/marketplace">
+                Browse the marketplace
+              </Link>
+              <Link className="home-market__vendor-link" href="/vendors/marketplace">
+                Are you a vendor? List free →
+              </Link>
+            </div>
+          </Reveal>
+          {market.vendors.length > 0 && (
+            <div className="home-market__grid">
+              {market.vendors.map((v, i) => (
+                <Reveal key={v.id} delay={i * 70}>
+                  <VendorCard vendor={v} shortlisted={market.saved.has(v.id)} />
+                </Reveal>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+      )}
+
+      {/* ---------- EARN FROM EVENTS (hosts programme, /earn) ---------- */}
+      {FEATURES.earn && (
+      <section className="section band-ink home-earn">
+        <KolamRosette size={300} className="home-earn__kolam" />
+        <div className="container home-earn__inner">
+          <div>
+            <p className="eyebrow">For families</p>
+            <h2 className="display-l">
+              Earn from your <span className="italic accent">event</span>
+            </h2>
+            <p className="lede">
+              Welcome a few travellers from abroad to your wedding or family function in
+              Tamil Nadu, and earn from it. We verify every guest and look after them.
+            </p>
+          </div>
+          <Link className="btn btn--primary home-earn__btn" href="/earn">
+            Earn from events
+          </Link>
+        </div>
+      </section>
+      )}
+
+      {/* ---------- COMING SOON: AI / marketplace / earn while switched off ---------- */}
+      {soon.length > 0 && (
+        <section className="section band-ink home-soon">
+          <KolamRosette size={300} className="home-earn__kolam" />
+          <div className="container">
+            <p className="eyebrow">Coming soon to Zenfest</p>
+            <h2 className="display-l">
+              More ways to <span className="italic accent">celebrate</span>
+            </h2>
+            <ul className="home-soon__grid">
+              {soon.map((f, i) => (
+                <Reveal key={f.key} as="li" className="home-soon__card" delay={i * 70}>
+                  <Link href={f.href}>
+                    <span className="pill pill--soon">Soon</span>
+                    <strong>{f.label}</strong>
+                    <span className="muted">{f.body}</span>
+                  </Link>
+                </Reveal>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {/* ---------- CLOSING CTA ---------- */}
       <section className="section cta-band band-ink">

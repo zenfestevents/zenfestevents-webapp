@@ -147,16 +147,16 @@ Under `prefers-reduced-motion` all of it stops: the ticker shows a still list an
 becomes a stacked section on a still poster.
 
 ## Pages & sections
-- **Home:**
+- **Home:** clients first, vendors after (owner, 2026-10-24).
   - Hero
   - Scoreboard (Google rating, reviews, cities, services: real figures only)
-  - For vendors (two lanes)
-  - Marketplace band
   - Highlights (Our Work)
-  - Gift registry
   - The squad (services)
   - From the stands (testimonials, with the laurel rating)
+  - Runs club
+  - Then the vendor side: For vendors (two lanes) and the Marketplace band
   - Take guard (closing call to action)
+  - No gift registry band while the Shop is off.
 - **Plan your event (`/enquire`):** five steps as five balls with an "Over 0.n" readout. Sending
   is the sixth ball, which brings the "Howzat!" thank-you.
 - **404:** "Clean bowled". The page is out; back to the pavilion.
