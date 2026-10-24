@@ -5,13 +5,15 @@ import { usePathname } from 'next/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { ANNOUNCE_COMING_SOON, COMING_SOON, FEATURES, VENDORS_HREF } from '../lib/features'
-import { DEFAULT_WA_MESSAGE, SITE_FALLBACK, whatsappLink, type SiteSettings } from '../lib/site'
+import { DEFAULT_WA_MESSAGE, MAJOR_CITIES, SITE_FALLBACK, whatsappLink, type SiteSettings } from '../lib/site'
 import { AiLink } from './ai/ChatLauncher'
+import { Ticker } from './game'
 import { AccountButton } from './market/AccountButton'
 
 const SIGNUP_ENABLED = false
 
-type NavItem = { href: string; label: string; also?: string[]; soon?: boolean }
+/** `desc` is the one-line hint under the label in the laptop dropdown panels. */
+type NavItem = { href: string; label: string; desc?: string; also?: string[]; soon?: boolean }
 /** A dropdown on laptops, a headed group in the phone menu. */
 type NavGroup = { label: string; items: NavItem[] }
 /** A plain link. `group` is its heading in the phone menu, which shows only groups. */
@@ -32,21 +34,23 @@ function buildNav(hasTestimonials: boolean): NavEntry[] {
     {
       label: 'About Zenfest',
       items: [
-        { href: '/', label: 'Home' },
-        { href: '/gallery', label: 'Our Work' },
-        { href: '/about', label: 'About' },
-        ...(hasTestimonials ? [{ href: '/testimonials', label: 'Testimonials' }] : []),
-        ...(FEATURES.polls ? [{ href: '/polls', label: 'Polls' }] : []),
+        { href: '/', label: 'Home', desc: 'Back to the pavilion' },
+        { href: '/gallery', label: 'Our Work', desc: 'Highlights from our events' },
+        { href: '/about', label: 'About', desc: 'The team behind every event' },
+        ...(hasTestimonials
+          ? [{ href: '/testimonials', label: 'Testimonials', desc: 'From the stands: Google reviews' }]
+          : []),
+        ...(FEATURES.polls ? [{ href: '/polls', label: 'Polls', desc: 'Have your say' }] : []),
       ],
     },
     {
       label: 'Services',
       items: [
-        { href: '/services', label: 'Services' },
-        { href: '/packages', label: 'Packages', soon: !FEATURES.packages },
+        { href: '/services', label: 'Services', desc: 'The full squad, under one roof' },
+        { href: '/packages', label: 'Packages', desc: 'Powerplay to Century', soon: !FEATURES.packages },
         // The gift registry is part of the shop now; its pages light up "Shop".
-        ...(FEATURES.shop ? [{ href: '/shop', label: 'Shop', also: ['/registry'] }] : []),
-        ...(FEATURES.earn ? [{ href: '/earn', label: 'Earn from events' }] : []),
+        ...(FEATURES.shop ? [{ href: '/shop', label: 'Shop', desc: 'Gifts for every occasion', also: ['/registry'] }] : []),
+        ...(FEATURES.earn ? [{ href: '/earn', label: 'Earn from events', desc: 'Host travellers at your event' }] : []),
       ],
     },
     { href: '/contact', label: 'Contact', group: 'Contact' },
@@ -54,6 +58,18 @@ function buildNav(hasTestimonials: boolean): NavEntry[] {
 }
 
 const SOON = ANNOUNCE_COMING_SOON ? COMING_SOON.filter((f) => !FEATURES[f.key]) : []
+
+/** The score ticker above the bar: real facts only (Site Settings → Google reviews, our cities). */
+function tickerItems(settings: SiteSettings): string[] {
+  const r = { ...SITE_FALLBACK.reviews, ...(settings?.reviews || {}) }
+  return [
+    r.googleRating && r.googleCount ? `★ ${r.googleRating.toFixed(1)} on Google · ${r.googleCount} reviews` : '',
+    'Weddings · Birthdays · Baby showers · Corporate · Sports events',
+    `Across Tamil Nadu: ${MAJOR_CITIES.slice(0, 6).join(' · ')}`,
+    FEATURES.marketplace ? 'Vendors: list free on the Zenfest Marketplace' : 'Vendors: partner with Zenfest',
+    'Free gift registry for families',
+  ].filter(Boolean)
+}
 
 // Home ('/') matches only itself, not every page.
 const isActive = (pathname: string, item: NavItem) =>
@@ -109,15 +125,23 @@ function NavDropdown({
       </button>
       {open && (
         <div id={id} className="site-nav__menu">
-          {group.items.map((item) => (
+          {group.items.map((item, i) => (
             <Link
               key={item.href}
               href={item.href}
               className={`site-nav__item ${isActive(pathname, item) ? 'is-active' : ''}`}
               aria-current={isActive(pathname, item) ? 'page' : undefined}
             >
-              {item.label}
-              {item.soon && <span className="site-nav__soon">Soon</span>}
+              <span className="site-nav__num mono" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <span className="site-nav__text">
+                <span className="site-nav__label">
+                  {item.label}
+                  {item.soon && <span className="site-nav__soon">Soon</span>}
+                </span>
+                {item.desc && <span className="site-nav__desc">{item.desc}</span>}
+              </span>
             </Link>
           ))}
         </div>
@@ -149,13 +173,18 @@ export function Header({ settings, hasTestimonials = false }: { settings: SiteSe
   }, [])
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
+    document.addEventListener('keydown', onKey)
     return () => {
       document.body.style.overflow = ''
+      document.removeEventListener('keydown', onKey)
     }
   }, [open])
 
   return (
     <header className={`site-header ${scrolled ? 'is-scrolled' : ''} ${compact ? 'site-header--compact' : ''}`}>
+      <Ticker items={tickerItems(settings)} />
       <div className="container site-header__inner">
         <Link href="/" className="wordmark" aria-label="Zenfest Events home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -218,14 +247,18 @@ export function Header({ settings, hasTestimonials = false }: { settings: SiteSe
           className="nav-toggle"
           aria-label={open ? 'Close menu' : 'Open menu'}
           aria-expanded={open}
+          aria-controls="mobile-menu"
           onClick={() => setOpen((v) => !v)}
         >
+          <span className="nav-toggle__word" aria-hidden="true">
+            {open ? 'Close' : 'Menu'}
+          </span>
           <span className={`nav-toggle__bars ${open ? 'is-open' : ''}`} />
         </button>
       </div>
 
       {open && (
-        <div className="mobile-menu">
+        <div className="mobile-menu" id="mobile-menu">
           <nav className="mobile-menu__nav" aria-label="Mobile">
             {/* The same groups as the laptop dropdowns. */}
             <AiLink className="mobile-menu__link mobile-menu__link--ai" fallback={false} onOpen={() => setOpen(false)}>

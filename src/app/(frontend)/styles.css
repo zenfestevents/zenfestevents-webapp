@@ -21,12 +21,50 @@
   --clay: #6f6455; /* muted warm taupe text */
   --clay-line: rgba(13, 13, 13, 0.14);
 
-  --bg: var(--blush);
-  --fg: var(--ink);
+  /* Night match: the site is a floodlit ground at night. Warm blacks in four steps —
+     raised things get lighter instead of casting shadows (Linear/Raycast ladder,
+     Warp's warm near-black so the gold reads rich, not yellow). */
+  --pitch-0: #0b0907; /* the ground: page canvas */
+  --pitch-1: #14110d; /* cards */
+  --pitch-2: #1c1813; /* raised: inputs, hover, inner panels */
+  --pitch-3: #26201a; /* top step: active chips, overlays */
+  --hairline: rgba(255, 236, 200, 0.09);
+  --hairline-strong: rgba(255, 236, 200, 0.17);
+  /* A floodlight catching the top edge of a card. */
+  --edge-light: inset 0 1px 0 rgba(255, 244, 220, 0.06);
+  /* One layered gold glow per section, from above: core, halo, wash. */
+  --floodlight: radial-gradient(38% 30% at 50% 0%, rgba(243, 222, 142, 0.1), transparent 70%),
+    radial-gradient(70% 55% at 50% 0%, rgba(217, 178, 76, 0.07), transparent 75%);
+
+  /* Semantic roles. Components use these, never the raw palette, for anything that
+     flips between the dark ground and paper (.surface-paper below). */
+  --surface: var(--pitch-0);
+  --surface-1: var(--pitch-1);
+  --surface-2: var(--pitch-2);
+  --surface-3: var(--pitch-3);
+  --text: var(--jasmine);
+  --text-muted: rgba(251, 247, 238, 0.68);
+  --line: var(--hairline);
+  --line-strong: var(--hairline-strong);
+  --link: var(--marigold); /* small gold text */
+  --ok: #6fd69a;
+  --err: #ff8f84;
+
+  --bg: var(--surface);
+  --fg: var(--text);
+
+  --font-mono-stack: var(--font-mono), ui-monospace, 'Cascadia Mono', monospace;
+  /* Springy pop for ticks and unlocks (Starbucks' checkbox curve). */
+  --ease-spring: cubic-bezier(0.32, 2.2, 0.6, 0.85);
 
   --container: 1200px;
   --gutter: clamp(1.15rem, 4vw, 3rem);
-  --header-h: 73px; /* bar height; the hero cancels it to reclaim the full viewport */
+  /* The fixed header = score ticker + bar. --header-h stays a plain px value (forms read
+     it with parseFloat) — keep it equal to the two above it. The hero cancels it to
+     reclaim the full viewport. */
+  --ticker-h: 28px;
+  --bar-h: 73px;
+  --header-h: 101px;
 
   --radius-s: 6px;
   --radius-m: 14px;
@@ -70,9 +108,30 @@ html {
   }
 }
 
+/* Paper: the warm ivory of the old site, kept for features that still have their own
+   light styling (gift registry, shop, polls, AI chat). Wrap a page in it and every
+   semantic token flips back to ink on ivory. */
+.surface-paper {
+  --surface: var(--blush);
+  --surface-1: var(--jasmine);
+  --surface-2: var(--blush-200);
+  --surface-3: #e3d6bf;
+  --text: var(--ink);
+  --text-muted: var(--clay);
+  --line: var(--clay-line);
+  --line-strong: rgba(13, 13, 13, 0.26);
+  --link: var(--gold-text);
+  --ok: #1e7a3c;
+  --err: #b3261e;
+  --bg: var(--surface);
+  --fg: var(--text);
+  background: var(--grain-ivory), var(--surface);
+  color: var(--text);
+}
+
 body {
   margin: 0;
-  background: var(--grain-ivory), var(--bg);
+  background: var(--grain-ink), var(--bg);
   color: var(--fg);
   font-family: var(--font-body), system-ui, sans-serif;
   font-size: var(--step-0);
@@ -135,15 +194,32 @@ img {
   padding-block: clamp(2.5rem, 1.5rem + 4vw, 4.5rem);
 }
 
-/* Feature bands: deep plum, photos & CTAs glow against them */
+/* Feature bands: the ground under the floodlights — deeper than the page, with the
+   gold glow from above, so photos and CTAs light up against it. Always dark, even
+   inside .surface-paper. */
 .band-ink {
-  background: var(--grain-ink), radial-gradient(120% 90% at 85% 0%, #1b150d 0%, var(--ink) 60%);
+  --surface-1: var(--pitch-1);
+  --surface-2: var(--pitch-2);
+  --surface-3: var(--pitch-3);
+  --text: var(--jasmine);
+  --text-muted: rgba(251, 247, 238, 0.68);
+  --line: var(--hairline);
+  --line-strong: var(--hairline-strong);
+  --link: var(--marigold);
+  background: var(--floodlight), var(--grain-ink), #070605;
   color: var(--jasmine);
 }
 .band-ink h1,
 .band-ink h2,
 .band-ink h3 {
   color: var(--jasmine);
+}
+/* Every plain section gets one floodlight from above. */
+.section {
+  position: relative;
+}
+.band-soft {
+  background: var(--floodlight), var(--surface-1);
 }
 
 /* ---------- type helpers ---------- */
@@ -153,13 +229,10 @@ img {
   font-size: var(--step--1);
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--marigold-deep);
+  color: var(--link);
   display: inline-flex;
   align-items: center;
   gap: 0.7rem;
-}
-.band-ink .eyebrow {
-  color: var(--marigold);
 }
 .eyebrow::before {
   content: '';
@@ -187,39 +260,41 @@ img {
 .accent {
   color: var(--marigold);
 }
-/* Gold links on light surfaces use the darker text gold; on black bands they stay brand gold. */
+/* Gold links: brand gold on the dark ground, the darker text gold on paper (--link). */
 a.accent {
-  color: var(--gold-text);
+  color: var(--link);
   text-underline-offset: 3px;
 }
 a.accent:hover {
   text-decoration: underline;
 }
-.band-ink a.accent {
-  color: var(--marigold);
-}
 
 .lede {
   font-size: var(--step-1);
-  color: var(--clay);
+  color: var(--text-muted);
   line-height: 1.5;
   max-width: 46ch;
 }
-.band-ink .lede {
-  color: rgba(255, 253, 249, 0.78);
-}
 
 .muted {
-  color: var(--clay);
+  color: var(--text-muted);
 }
-.band-ink .muted {
-  color: rgba(255, 253, 249, 0.7);
+
+/* Scoreboard figures: digits that don't jump as they change. */
+.mono {
+  font-family: var(--font-mono-stack);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.tnum {
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- buttons ---------- */
 .btn {
-  --btn-bg: var(--ink);
-  --btn-fg: var(--jasmine);
+  /* Plain button: the inverse of the ground (ivory on night, ink on paper). */
+  --btn-bg: var(--text);
+  --btn-fg: var(--surface);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -245,9 +320,9 @@ a.accent:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-soft);
 }
-/* A physical press. */
+/* A physical press (Apple/Starbucks: everything gives a little under the thumb). */
 .btn:active {
-  transform: translateY(0) scale(0.98);
+  transform: translateY(0) scale(0.95);
   box-shadow: none;
   transition-duration: 0.06s;
 }
@@ -272,10 +347,23 @@ a.accent:hover {
 .btn--ghost {
   --btn-bg: transparent;
   --btn-fg: currentColor;
-  border-color: var(--clay-line);
+  border-color: var(--line-strong);
 }
-.band-ink .btn--ghost {
-  border-color: rgba(255, 253, 249, 0.28);
+.btn--ghost:hover {
+  border-color: var(--marigold);
+}
+/* SpaceX-style secondary: gold outline, uppercase, never filled until hovered. */
+.btn--outline-gold {
+  --btn-bg: transparent;
+  --btn-fg: var(--link);
+  border-color: var(--marigold);
+  font-size: 0.86rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.btn--outline-gold:hover {
+  --btn-bg: var(--marigold);
+  --btn-fg: var(--ink);
 }
 .btn--whatsapp {
   --btn-bg: #1eae5a;
@@ -318,13 +406,57 @@ a.accent:hover {
 
 /* ---------- cards ---------- */
 .card {
-  background: var(--jasmine);
-  border: 1px solid rgba(111, 100, 85, 0.16);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
   border-radius: var(--radius-m);
+  box-shadow: var(--edge-light);
+  overflow: hidden;
+}
+.surface-paper .card {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.7),
     0 1px 2px rgba(36, 24, 8, 0.04);
-  overflow: hidden;
+}
+/* The one card per grid that matters most: filled with gold (Revolut/The Verge). */
+.card--featured {
+  --text: var(--ink);
+  --text-muted: rgba(13, 13, 13, 0.72);
+  --link: var(--ink);
+  --line: rgba(13, 13, 13, 0.2);
+  --line-strong: rgba(13, 13, 13, 0.32);
+  background:
+    linear-gradient(160deg, rgba(255, 245, 210, 0.45), rgba(255, 245, 210, 0) 45%),
+    var(--marigold);
+  color: var(--ink);
+  border-color: transparent;
+}
+.card--featured h2,
+.card--featured h3 {
+  color: var(--ink);
+}
+.card--featured .btn--primary {
+  --btn-bg: var(--ink);
+  --btn-fg: var(--marigold-bright);
+  background-image: none;
+}
+/* The bails: two small gold bars across the top corner of a card — the signature mark
+   (after NVIDIA's corner square, set inside the rounded corner). */
+.corner-mark {
+  position: relative;
+}
+.corner-mark::after {
+  content: '';
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  width: 22px;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--marigold) 0 45%, transparent 45% 55%, var(--marigold) 55%);
+}
+.card--featured.corner-mark::after,
+.svc-list > .svc-row:last-child:nth-child(odd).corner-mark::after {
+  background: linear-gradient(90deg, var(--ink) 0 45%, transparent 45% 55%, var(--ink) 55%);
 }
 
 /* ---------- kolam signature ---------- */

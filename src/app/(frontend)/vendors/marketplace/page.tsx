@@ -2,7 +2,7 @@ import React from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-import { KolamDivider } from '../../../../components/Kolam'
+import { SeamDivider } from '../../../../components/game'
 import { MARKET_CATEGORIES } from '../../../../lib/marketplaceOptions'
 import { getVendor } from '../../../../lib/session'
 import { FEATURES } from '../../../../lib/features'
@@ -92,7 +92,7 @@ export default async function VendorMarketplacePage() {
               </div>
             ))}
           </div>
-          <KolamDivider />
+          <SeamDivider />
           <h2 className="display-m">How it works</h2>
           <ol className="steps">
             {STEPS.map(([t, body], i) => (

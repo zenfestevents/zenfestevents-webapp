@@ -3,7 +3,7 @@ import React from 'react'
 
 import { ANNOUNCE_COMING_SOON, FEATURES } from '../lib/features'
 import { MAJOR_CITIES, SITE_FALLBACK, telLink, whatsappLink, DEFAULT_WA_MESSAGE, type SiteSettings } from '../lib/site'
-import { KolamDivider } from './Kolam'
+import { SeamDivider } from './game'
 
 export function Footer({ settings, hasTestimonials = false }: { settings: SiteSettings; hasTestimonials?: boolean }) {
   const contact = { ...SITE_FALLBACK.contact, ...(settings?.contact || {}) }
@@ -15,7 +15,7 @@ export function Footer({ settings, hasTestimonials = false }: { settings: SiteSe
   return (
     <footer className="site-footer band-ink">
       <div className="container">
-        <KolamDivider className="site-footer__kolam" />
+        <SeamDivider className="site-footer__kolam" />
 
         <div className="site-footer__grid">
           <div className="site-footer__brand">

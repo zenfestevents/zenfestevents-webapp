@@ -9,9 +9,12 @@ export default function NotFound() {
     <section className="section band-ink not-found">
       <div className="container not-found__inner">
         <KolamRosette size={180} className="not-found__kolam" draw />
+        <p className="howzat not-found__howzat" aria-hidden="true">
+          Clean bowled
+        </p>
         <p className="eyebrow">Page not found</p>
         <h1 className="display-l">
-          This doorway has <span className="accent">no kolam</span> yet
+          This page is <span className="accent">out</span>, back to the pavilion
         </h1>
         <p className="lede">
           The page you were looking for has moved or no longer exists. These will get you back on track.

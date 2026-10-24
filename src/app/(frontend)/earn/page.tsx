@@ -4,7 +4,8 @@ import type { Metadata } from 'next'
 import { whatsappLink, SITE_FALLBACK } from '../../../lib/site'
 import { getSiteSettings } from '../../../lib/getSettings'
 import { HostForm } from '../../../components/HostForm'
-import { KolamDivider, KolamRosette } from '../../../components/Kolam'
+import { KolamRosette } from '../../../components/Kolam'
+import { SeamDivider } from '../../../components/game'
 import { Reveal } from '../../../components/Reveal'
 import { FEATURES } from '../../../lib/features'
 import { ComingSoon } from '../../../components/ComingSoon'
@@ -172,7 +173,7 @@ export default async function EarnPage() {
         </div>
       </section>
 
-      <KolamDivider />
+      <SeamDivider />
 
       {/* ---------- WHY ZENFEST ---------- */}
       <section className="section band-soft">

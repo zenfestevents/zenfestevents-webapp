@@ -5,7 +5,7 @@ import type { Metadata } from 'next'
 import { getPayloadClient } from '../../../lib/payload'
 import { mediaUrl } from '../../../lib/media'
 import { Reveal } from '../../../components/Reveal'
-import { KolamDivider } from '../../../components/Kolam'
+import { SeamDivider } from '../../../components/game'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,7 +39,7 @@ export default async function ServicesPage() {
       <section className="section">
         <div className="container">
           <header className="page-head">
-            <p className="eyebrow">Services</p>
+            <p className="eyebrow">The squad</p>
             <h1 className="display-l">
               One team for <span className="italic accent">every</span> part of the day
             </h1>
@@ -51,12 +51,13 @@ export default async function ServicesPage() {
 
           <div className="svc-list">
             {list.map((s: any, i: number) => (
-              <Reveal key={s.id || i} className="svc-row" delay={i * 60}>
+              <Reveal key={s.id || i} className="svc-row player-card corner-mark" delay={i * 60}>
                 {s.image && (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img className="svc-row__img" src={mediaUrl(s.image, 'card')} alt={s.title} loading="lazy" />
                 )}
                 <div className="svc-row__body">
+                  <span className="player-card__no mono">No. {String(i + 1).padStart(2, '0')}</span>
                   <h2 className="display-m">{s.title}</h2>
                   <p className="muted">{s.description || s.summary}</p>
                 </div>
@@ -66,7 +67,7 @@ export default async function ServicesPage() {
         </div>
       </section>
 
-      <KolamDivider />
+      <SeamDivider />
 
       <section className="section--tight">
         <div className="container text-center stack">

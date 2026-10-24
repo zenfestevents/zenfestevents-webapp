@@ -3,10 +3,12 @@ import React from 'react'
 
 import { getPayloadClient } from '../../../lib/payload'
 import { CONTENT_TAGS, cachedContent } from '../../../lib/contentCache'
-import { whatsappLink, DEFAULT_WA_MESSAGE, SITE_FALLBACK } from '../../../lib/site'
+import { whatsappLink, DEFAULT_WA_MESSAGE, MAJOR_CITIES, SITE_FALLBACK } from '../../../lib/site'
 import { getSiteSettings } from '../../../lib/getSettings'
 import { mediaUrl } from '../../../lib/media'
-import { KolamRosette, KolamDivider } from '../../../components/Kolam'
+import { SERVICES } from '../../../lib/serviceCatalog'
+import { KolamRosette } from '../../../components/Kolam'
+import { LaurelRating, Scoreboard, SeamDivider, type ScoreItem } from '../../../components/game'
 import { Reveal } from '../../../components/Reveal'
 import { ScrubHero } from '../../../components/ScrubHero'
 import { VendorPaths } from '../../../components/VendorPaths'
@@ -86,6 +88,19 @@ export default async function HomePage() {
   const soon = ANNOUNCE_COMING_SOON ? COMING_SOON.filter((f) => !FEATURES[f.key]) : []
   const hero = { ...SITE_FALLBACK.hero, ...(settings?.hero || {}) }
   const wa = whatsappLink(settings?.contact?.whatsapp, DEFAULT_WA_MESSAGE)
+  const rating = { ...SITE_FALLBACK.reviews, ...(settings?.reviews || {}) }
+  // The scoreboard shows real figures only: the Google numbers from Site Settings, the
+  // cities we work in and the size of the service catalogue.
+  const score: ScoreItem[] = [
+    ...(rating.googleRating && rating.googleCount
+      ? [
+          { value: `${rating.googleRating.toFixed(1)}★`, label: 'Google rating' },
+          { value: rating.googleCount, label: 'Google reviews' },
+        ]
+      : []),
+    { value: MAJOR_CITIES.length, label: 'Major cities' },
+    { value: SERVICES.length, label: 'Services in the squad' },
+  ]
 
   return (
     <>
@@ -94,6 +109,14 @@ export default async function HomePage() {
         headline={hero.headline}
         subheadline={hero.subheadline}
       />
+
+      {/* ---------- SCOREBOARD: real numbers, big and tabular ---------- */}
+      <section className="section--tight home-score">
+        <div className="container">
+          <p className="eyebrow">Scoreboard</p>
+          <Scoreboard items={score} className="home-score__board" />
+        </div>
+      </section>
 
       {/* ---------- FOR VENDORS: the vendor lanes (partner, + marketplace once open), also the phone hero's later slides ---------- */}
       <section className="section home-vendors">
@@ -170,7 +193,7 @@ export default async function HomePage() {
         <div className="container">
           <div className="section-head">
             <div>
-              <p className="eyebrow">Our Work</p>
+              <p className="eyebrow">Highlights</p>
               <h2 className="display-l">
                 Photos do the <span className="italic accent">talking</span>
               </h2>
@@ -224,7 +247,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <KolamDivider />
+      <SeamDivider />
 
       {/* ---------- COMING SOON: AI / marketplace / earn while switched off ---------- */}
       {soon.length > 0 && (
@@ -330,7 +353,7 @@ export default async function HomePage() {
         <div className="container">
           <div className="section-head">
             <div>
-              <p className="eyebrow">What we do</p>
+              <p className="eyebrow">The squad</p>
               <h2 className="display-l">Everything, under one roof</h2>
             </div>
             <Link href="/services" className="section-head__link">
@@ -338,9 +361,16 @@ export default async function HomePage() {
             </Link>
           </div>
 
+          {/* Player cards: squad number, name, the gold bail. The "whole event" service is
+              the gold card — the one that captains the rest. */}
           <div className="svc-grid">
             {(data.services.length ? data.services : FALLBACK_SERVICES).map((s: any, i: number) => (
-              <Reveal key={s.id || i} className="svc-card" delay={i * 50}>
+              <Reveal
+                key={s.id || i}
+                className={`svc-card player-card corner-mark ${/coordinat|complete/i.test(s.title) ? 'card--featured' : ''}`}
+                delay={i * 50}
+              >
+                <span className="player-card__no mono">No. {String(i + 1).padStart(2, '0')}</span>
                 <h3 className="svc-card__title">{s.title}</h3>
                 <p className="muted">{s.summary || s.description || ''}</p>
               </Reveal>
@@ -355,16 +385,23 @@ export default async function HomePage() {
           <div className="container">
             <div className="section-head">
               <div>
-                <p className="eyebrow">Testimonials</p>
+                <p className="eyebrow">From the stands</p>
                 <h2 className="display-l">
                   Loved by <span className="italic accent">families</span>
                 </h2>
               </div>
-              <Link href="/testimonials" className="section-head__link">
-                {settings.reviews?.googleRating && settings.reviews?.googleCount
-                  ? `${settings.reviews.googleRating.toFixed(1)} ★ from ${settings.reviews.googleCount} reviews →`
-                  : 'All reviews →'}
-              </Link>
+              {rating.googleRating && rating.googleCount ? (
+                <Link href="/testimonials" className="home-reviews__laurel" aria-label="All reviews">
+                  <LaurelRating
+                    score={rating.googleRating.toFixed(1)}
+                    caption={`${rating.googleCount} Google reviews →`}
+                  />
+                </Link>
+              ) : (
+                <Link href="/testimonials" className="section-head__link">
+                  All reviews →
+                </Link>
+              )}
             </div>
             <div className="testimonial-strip">
               {reviews.map((t, i) => (
@@ -384,7 +421,7 @@ export default async function HomePage() {
       <section className="section cta-band band-ink">
         <KolamRosette size={340} className="cta-band__kolam" />
         <div className="container cta-band__inner">
-          <p className="eyebrow">Let&apos;s plan yours</p>
+          <p className="eyebrow">Take guard</p>
           <h2 className="display-l">
             Tell us about your <span className="italic accent">event</span>
           </h2>

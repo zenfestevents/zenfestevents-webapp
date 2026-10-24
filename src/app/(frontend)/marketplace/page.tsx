@@ -2,7 +2,7 @@ import React from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-import { KolamDivider } from '../../../components/Kolam'
+import { SeamDivider } from '../../../components/game'
 import { SearchBar } from '../../../components/market/SearchBar'
 import { VendorCard } from '../../../components/market/VendorCard'
 import { categoryCounts, listVendors } from '../../../lib/marketplace'
@@ -94,7 +94,7 @@ export default async function MarketplacePage() {
               </div>
             ))}
           </div>
-          <KolamDivider />
+          <SeamDivider />
           <div className="mk-lanes">
             <div>
               <h3>Want us to plan it instead?</h3>

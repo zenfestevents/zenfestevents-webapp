@@ -1,0 +1,749 @@
+/* ============================================================
+   Night match — the cricket game layer (imported last).
+   Pieces in components/game; the mix of brands each part borrows from is in DESIGN.md.
+   Generic cricket only: never a league, team, player or stadium name.
+   ============================================================ */
+
+/* Every plain section gets one floodlight from above. :where() keeps it at zero
+   specificity, so any section that sets its own background wins. */
+:where(.section) {
+  background-image: var(--floodlight);
+}
+
+/* ---------- score ticker (above the bar) ---------- */
+.ticker {
+  height: var(--ticker-h);
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding-left: var(--gutter);
+  overflow: hidden;
+  background: #070605;
+  border-bottom: 1px solid rgba(217, 178, 76, 0.18);
+  font-family: var(--font-mono-stack);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(251, 247, 238, 0.74);
+}
+.ticker__track {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent);
+}
+.ticker__belt {
+  display: flex;
+  width: max-content;
+  animation: ticker-run 48s linear infinite;
+}
+.ticker:hover .ticker__belt {
+  animation-play-state: paused;
+}
+.ticker__row {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ticker__row li {
+  position: relative;
+  padding-inline: 1.5rem;
+  white-space: nowrap;
+}
+.ticker__row li::after {
+  content: '';
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--marigold);
+  opacity: 0.7;
+  transform: translateY(-50%);
+}
+@keyframes ticker-run {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.live-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: none;
+  font-family: var(--font-mono-stack);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--marigold);
+}
+.live-dot__pip {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--marigold);
+  animation: live-pulse 1.8s ease-out infinite;
+}
+@keyframes live-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(217, 178, 76, 0.6);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 7px rgba(217, 178, 76, 0);
+  }
+}
+
+/* ---------- header bar ---------- */
+.site-header {
+  background: #0b0907;
+  border-bottom: 0;
+}
+.site-header__inner {
+  border-bottom: 1px solid rgba(217, 178, 76, 0.22);
+}
+
+/* Hamburger with its word (Lamborghini's "MENU"). */
+.nav-toggle {
+  width: auto;
+  gap: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.85rem 0 0.95rem;
+  border-color: rgba(217, 178, 76, 0.4);
+  border-radius: 999px;
+}
+.nav-toggle__word {
+  font-family: var(--font-mono-stack);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--jasmine);
+}
+.nav-toggle__bars,
+.nav-toggle__bars::before,
+.nav-toggle__bars::after {
+  width: 18px;
+}
+.nav-toggle:focus-visible {
+  outline: 2px solid var(--marigold);
+  outline-offset: 2px;
+}
+
+/* Laptops: the bar floats as a pill under the ticker (Mastercard), translucent black
+   with a gold hairline and a blur of the page behind it (Apple/Sanity). */
+@media (min-width: 1000px) {
+  .site-header {
+    background: linear-gradient(180deg, rgba(7, 6, 5, 0.9), rgba(7, 6, 5, 0));
+  }
+  .site-header__inner {
+    width: calc(100% - 2 * var(--gutter));
+    max-width: 1320px;
+    min-height: calc(var(--bar-h) - 14px);
+    margin: 7px auto;
+    padding-inline: 0.7rem 0.45rem;
+    border: 1px solid rgba(217, 178, 76, 0.3);
+    border-radius: 999px;
+    background: rgba(11, 9, 7, 0.78);
+    backdrop-filter: saturate(160%) blur(16px);
+    -webkit-backdrop-filter: saturate(160%) blur(16px);
+    box-shadow: 0 14px 40px -18px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 240, 200, 0.06);
+  }
+  .site-header.is-scrolled {
+    box-shadow: none;
+  }
+  .site-header .wordmark__mark {
+    width: 40px;
+    height: 40px;
+  }
+  .site-header .wordmark__lockup {
+    height: 26px;
+  }
+  .site-header__cta {
+    gap: 0.5rem;
+  }
+  .site-header__cta .btn {
+    padding: 0.75rem 1.15rem;
+    font-size: 0.92rem;
+  }
+}
+@media (min-width: 1000px) and (max-width: 1199px) {
+  .site-header--compact .site-nav {
+    gap: 1.05rem;
+  }
+  .site-header--compact .site-nav__link {
+    font-size: 0.92rem;
+  }
+  .site-header__inner {
+    gap: 1rem;
+  }
+}
+
+/* The active page: a short gold bar under its link (Oracle). */
+.site-nav__link {
+  position: relative;
+  border-bottom: 0;
+}
+.site-nav__link.is-active {
+  color: var(--marigold-bright);
+}
+.site-nav__link.is-active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 22px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--marigold);
+  transform: translateX(-50%);
+}
+.site-nav__toggle.is-active::after {
+  margin-left: -0.45em;
+}
+
+/* Dropdown panels: number, label and a one-line hint (Airbnb tabs + Tesla panel). */
+.site-nav__menu {
+  top: calc(100% + 1rem);
+  min-width: 17.5rem;
+  gap: 0.15rem;
+  padding: 0.5rem;
+  background: rgba(14, 12, 9, 0.97);
+  border-color: rgba(217, 178, 76, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 24px 50px -16px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 240, 200, 0.06);
+  animation: panel-in 0.16s ease-out;
+}
+.site-nav__menu::before {
+  inset: -1.1rem 0 auto;
+  height: 1.1rem;
+}
+.site-nav__item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 0.8rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  white-space: normal;
+}
+.site-nav__num {
+  padding-top: 0.2rem;
+  font-size: 0.68rem;
+  color: rgba(217, 178, 76, 0.6);
+}
+.site-nav__text {
+  display: grid;
+  gap: 0.1rem;
+}
+.site-nav__label {
+  font-weight: 600;
+}
+.site-nav__desc {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: rgba(251, 247, 238, 0.58);
+}
+.site-nav__item.is-active {
+  background: rgba(217, 178, 76, 0.09);
+  box-shadow: inset 2px 0 0 var(--marigold);
+}
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* ---------- phone menu: a full-screen drawer from the left ----------
+   Gold team stripe on top (BMW M), mono group headings (The Verge), the main button
+   pinned to the bottom (Binance). */
+.mobile-menu {
+  position: fixed;
+  inset: var(--header-h) 0 0 0;
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border-top: 0;
+  background: var(--floodlight), var(--grain-ink), #090806;
+  animation: drawer-in 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.mobile-menu::before {
+  content: '';
+  flex: none;
+  height: 4px;
+  background: linear-gradient(90deg, var(--marigold-deep), var(--marigold-bright) 50%, var(--marigold-deep));
+}
+@keyframes drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+}
+.mobile-menu__nav {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1.1rem var(--gutter) 1.4rem;
+}
+.mobile-menu__group {
+  margin: 1.5rem 0 0.2rem;
+  font-family: var(--font-mono-stack);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: rgba(217, 178, 76, 0.85);
+}
+.mobile-menu__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.8rem 0;
+  font-family: var(--font-display), 'Arial Narrow', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border-bottom-color: var(--hairline);
+}
+.mobile-menu__link[aria-current='page'] {
+  color: var(--marigold);
+}
+.mobile-menu__link[aria-current='page']::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--marigold);
+}
+/* The account button in the menu keeps its own look. */
+.mobile-menu__nav .account-btn {
+  margin-top: 1rem;
+}
+.mobile-menu__cta {
+  flex: none;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.8rem var(--gutter) max(0.8rem, env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(217, 178, 76, 0.22);
+  background: #070605;
+}
+
+/* ---------- seam divider ---------- */
+.seam-divider {
+  display: flex;
+  justify-content: center;
+  padding-block: 0.4rem;
+  color: var(--marigold);
+  opacity: 0.8;
+}
+/* The hero's divider closes the phone text band only (parts.css shows it ≤720px). */
+.seam-divider.scrubhero__divider {
+  display: none;
+}
+@media (max-width: 720px) {
+  .seam-divider.scrubhero__divider {
+    display: flex;
+  }
+}
+.seam-divider svg {
+  max-width: 100%;
+  height: auto;
+}
+.seam-divider path,
+.seam-divider circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.seam-divider .seam-divider__stitch {
+  stroke-width: 1;
+  opacity: 0.75;
+}
+
+/* ---------- one over: ball dots ---------- */
+.balls {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.balls__ball {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(217, 178, 76, 0.45);
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s var(--ease-spring);
+}
+.balls__ball.is-done {
+  border-color: var(--marigold);
+  background: radial-gradient(circle at 35% 30%, var(--marigold-bright), var(--marigold) 45%, var(--marigold-deep));
+}
+.balls__ball.is-current {
+  border-color: var(--marigold-bright);
+  box-shadow: 0 0 0 3px rgba(217, 178, 76, 0.22);
+  transform: scale(1.2);
+}
+
+/* ---------- the hero's over: six balls bowled by the scroll ----------
+   Each ball's gold fades in as --p (ScrubHero) passes its sixth of the film. */
+.scrubhero__over {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 1.5rem;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.45rem 0.8rem 0.45rem 0.95rem;
+  border: 1px solid rgba(217, 178, 76, 0.3);
+  border-radius: 999px;
+  background: rgba(7, 6, 5, 0.6);
+  backdrop-filter: blur(8px);
+  opacity: clamp(0, calc(1.6 - var(--p) * 1.5), 1);
+}
+.scrubhero__over-label {
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(251, 247, 238, 0.8);
+}
+.scrubhero__ball {
+  position: relative;
+  border-color: rgba(217, 178, 76, 0.55);
+}
+.scrubhero__ball::after {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--marigold-bright), var(--marigold) 45%, var(--marigold-deep));
+  opacity: clamp(0, calc((var(--p) * 6 - var(--i)) * 3), 1);
+}
+@media (prefers-reduced-motion: reduce), (max-width: 720px) {
+  .scrubhero__over {
+    display: none;
+  }
+}
+
+/* ---------- scoreboard band ---------- */
+.scoreboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background: var(--surface-1);
+  box-shadow: var(--edge-light);
+  overflow: hidden;
+}
+.scoreboard__cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: clamp(1.1rem, 0.8rem + 1.5vw, 1.8rem) clamp(1.1rem, 0.8rem + 1.5vw, 1.8rem);
+  box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line);
+}
+.scoreboard__value {
+  order: 1;
+  margin: 0;
+  font-family: var(--font-display), 'Arial Narrow', sans-serif;
+  font-size: clamp(2.4rem, 1.8rem + 2.6vw, 4rem);
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--marigold);
+}
+.scoreboard__label {
+  order: 2;
+  font-family: var(--font-mono-stack);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.scoreboard__note {
+  order: 3;
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+/* Homepage: the scoreboard sits right under the hero; the laurel rating leads to reviews. */
+.home-score .eyebrow {
+  margin-bottom: 1rem;
+}
+.home-reviews__laurel {
+  border-radius: var(--radius-m);
+}
+.home-reviews__laurel:hover .laurel__caption {
+  color: var(--marigold);
+}
+
+/* ---------- gold ring (progress to the next tier) ---------- */
+.gold-ring {
+  position: relative;
+  flex: none;
+}
+.gold-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.gold-ring circle {
+  fill: none;
+  stroke-width: 7;
+}
+.gold-ring__track {
+  stroke: var(--surface-3);
+}
+.gold-ring__bar {
+  stroke: var(--marigold);
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(217, 178, 76, 0.45));
+  transition: stroke-dashoffset 1.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.gold-ring__inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+}
+
+/* ---------- tier badge: a gold key-cap (Raycast) ---------- */
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid rgba(217, 178, 76, 0.5);
+  background: linear-gradient(180deg, #2a231b, #15110d);
+  box-shadow: inset 0 1px 0 rgba(255, 240, 200, 0.12), 0 2px 0 #050403;
+  color: var(--marigold-bright);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.tier-badge__level {
+  font-size: 0.7rem;
+  color: rgba(251, 247, 238, 0.55);
+}
+
+/* ---------- laurel rating ---------- */
+.laurel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--marigold);
+}
+.laurel__branch {
+  width: 26px;
+  height: 56px;
+}
+.laurel__branch path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+.laurel__branch ellipse {
+  fill: currentColor;
+  opacity: 0.85;
+}
+.laurel__flip {
+  display: flex;
+  transform: scaleX(-1);
+}
+.laurel__body {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  text-align: center;
+}
+.laurel__score {
+  font-family: var(--font-display), 'Arial Narrow', sans-serif;
+  font-size: 2.8rem;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.laurel__caption {
+  font-family: var(--font-mono-stack);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ---------- player cards (services) ----------
+   Ferrari's driver card: squad number in mono, name, the gold bail on the corner. */
+.player-card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.45rem;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  box-shadow: var(--edge-light);
+}
+.player-card__no {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: rgba(217, 178, 76, 0.75);
+}
+.player-card:hover {
+  background: var(--surface-2);
+  border-color: rgba(217, 178, 76, 0.5);
+  box-shadow: var(--edge-light), 0 20px 40px -24px rgba(0, 0, 0, 0.9);
+}
+/* Beats .svc-card's own surface (parts.css loads after the .card--featured rule). */
+.player-card.card--featured {
+  background:
+    linear-gradient(160deg, rgba(255, 245, 210, 0.45), rgba(255, 245, 210, 0) 45%),
+    var(--marigold);
+  border-color: transparent;
+}
+.player-card.card--featured:hover {
+  background:
+    linear-gradient(160deg, rgba(255, 245, 210, 0.55), rgba(255, 245, 210, 0) 45%),
+    var(--marigold);
+}
+.player-card.card--featured .player-card__no,
+.svc-list > .svc-row:last-child:nth-child(odd) .player-card__no {
+  color: rgba(13, 13, 13, 0.6);
+}
+
+/* ---------- highlights rail (homepage Our Work) ----------
+   Phones: 16:9 tiles that snap sideways (PlayStation/1win rails); laptops keep the grid. */
+@media (max-width: 719px) {
+  .feature-grid {
+    display: flex;
+    gap: 0.8rem;
+    margin-inline: calc(-1 * var(--gutter));
+    padding-inline: var(--gutter);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .feature-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .feature-card {
+    flex: 0 0 82%;
+    aspect-ratio: 16 / 9;
+    scroll-snap-align: start;
+  }
+}
+.feature-card {
+  border: 1px solid var(--line);
+}
+.feature-card__meta {
+  background: linear-gradient(to top, rgba(7, 6, 5, 0.92), transparent);
+}
+
+/* ---------- closing band: a giant stencilled ZENFEST behind it ---------- */
+.cta-band::after {
+  content: 'ZENFEST';
+  position: absolute;
+  left: 50%;
+  bottom: -0.18em;
+  transform: translateX(-50%);
+  font-family: var(--font-display), 'Arial Narrow', sans-serif;
+  font-size: clamp(5rem, 22vw, 18rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(217, 178, 76, 0.13);
+  pointer-events: none;
+}
+
+/* ---------- "Howzat!" moments: an outlined game-box headline (Nintendo), sparingly ---------- */
+.howzat {
+  font-family: var(--font-display), 'Arial Narrow', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: var(--marigold-bright);
+  -webkit-text-stroke: 1px var(--marigold-deep);
+  text-shadow: 3px 3px 0 rgba(169, 121, 31, 0.45);
+}
+
+.not-found__howzat {
+  margin: 0.4rem 0 0.2rem;
+  font-size: clamp(2.4rem, 1.8rem + 3vw, 3.8rem);
+}
+.page-loading {
+  align-content: center;
+  gap: 1rem;
+}
+.page-loading__text {
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--link);
+}
+
+/* Ticks pop like a stump hit (Starbucks' springy checkbox). */
+input[type='checkbox']:checked,
+input[type='radio']:checked {
+  animation: tick-pop 0.32s var(--ease-spring);
+}
+@keyframes tick-pop {
+  40% {
+    transform: scale(1.25);
+  }
+}
+
+/* ---------- section heads: eyebrow as a mono label ---------- */
+.eyebrow {
+  font-family: var(--font-mono-stack);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+}
+.eyebrow::before {
+  width: 1.2rem;
+  height: 2px;
+  background: var(--marigold);
+  opacity: 1;
+}
+.section-head__link {
+  font-family: var(--font-mono-stack);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ---------- reduced motion: the scoreboard holds still ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .ticker__belt,
+  .live-dot__pip,
+  .mobile-menu,
+  .site-nav__menu,
+  input[type='checkbox']:checked,
+  input[type='radio']:checked {
+    animation: none;
+  }
+  .ticker__row[aria-hidden='true'] {
+    display: none;
+  }
+  .balls__ball,
+  .gold-ring__bar {
+    transition: none;
+  }
+}

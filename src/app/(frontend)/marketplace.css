@@ -17,14 +17,14 @@
   border: 0;
   padding: 0;
   font: inherit;
-  color: var(--marigold-deep);
+  color: var(--link);
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
   text-align: left;
 }
 .link-arrow {
-  color: var(--marigold-deep);
+  color: var(--link);
   font-weight: 600;
 }
 .band-ink .link-arrow {
@@ -32,14 +32,14 @@
 }
 .crumbs {
   font-size: var(--step--1);
-  color: var(--clay);
+  color: var(--text-muted);
   margin-bottom: 0.9rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
 }
 .crumbs a:hover {
-  color: var(--marigold-deep);
+  color: var(--link);
 }
 .pill {
   display: inline-block;
@@ -48,34 +48,41 @@
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  background: var(--blush-200);
-  color: var(--ink);
+  background: var(--surface-3);
+  color: var(--text);
   white-space: nowrap;
 }
+/* Status pills: a tint of the status colour with a light text of the same hue
+   (on paper they fall back to the dark text of the old light theme). */
 .pill--new,
 .pill--listing-pending {
-  background: rgba(217, 178, 76, 0.22);
-  color: #6b4b0f;
+  background: rgba(217, 178, 76, 0.18);
+  color: var(--link);
 }
 .pill--quoted,
 .pill--replied {
-  background: #e6eefb;
-  color: #1d3f78;
+  background: rgba(120, 160, 230, 0.16);
+  color: #a9c4f5;
 }
 .pill--booked,
 .pill--listing-published {
-  background: #e3f4e8;
-  color: #17602f;
+  background: rgba(90, 200, 130, 0.15);
+  color: var(--ok);
 }
 .pill--declined,
 .pill--closed,
 .pill--listing-paused {
-  background: #ece9e4;
-  color: #5b5348;
+  background: var(--surface-3);
+  color: var(--text-muted);
 }
 .pill--listing-rejected {
-  background: #fbe9e6;
-  color: #8a2a17;
+  background: rgba(255, 120, 100, 0.14);
+  color: var(--err);
+}
+.surface-paper .pill--quoted,
+.surface-paper .pill--replied {
+  background: #e6eefb;
+  color: #1d3f78;
 }
 
 /* ---------- header account button ---------- */
@@ -132,7 +139,7 @@
   font: inherit;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--marigold-deep);
+  color: var(--link);
   cursor: pointer;
   padding: 0.4rem;
 }
@@ -142,7 +149,7 @@
 }
 .auth__aside a,
 .auth__switch a {
-  color: var(--marigold-deep);
+  color: var(--link);
   font-weight: 600;
 }
 .auth__switch {
@@ -156,10 +163,10 @@
   width: 100%;
   justify-content: center;
   gap: 0.7rem;
-  border: 1px solid var(--clay-line);
+  border: 1px solid var(--line);
 }
 .auth__google:hover {
-  border-color: var(--marigold-deep);
+  border-color: var(--link);
 }
 .auth__google-mark {
   flex: none;
@@ -168,14 +175,14 @@
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  color: var(--clay);
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 .auth__or::before,
 .auth__or::after {
   content: '';
   flex: 1;
-  border-top: 1px solid var(--clay-line);
+  border-top: 1px solid var(--line);
 }
 .auth__google-as {
   display: flex;
@@ -183,7 +190,7 @@
   gap: 0.6rem;
   padding: 0.7rem 0.9rem;
   border-radius: var(--radius-s);
-  background: var(--blush-200);
+  background: var(--surface-2);
   overflow-wrap: anywhere;
 }
 .auth__resend {
@@ -198,7 +205,7 @@
   padding: 0;
   font: inherit;
   font-weight: 600;
-  color: var(--marigold-deep);
+  color: var(--link);
   text-decoration: underline;
   cursor: pointer;
 }
@@ -290,7 +297,8 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--ink);
+  background: var(--surface-3);
+  border: 1px solid rgba(217, 178, 76, 0.45);
   color: var(--marigold);
   font-family: var(--font-display), sans-serif;
   font-size: 1.2rem;
@@ -331,8 +339,8 @@
   gap: 0.6rem;
 }
 .dash__notice {
-  background: var(--jasmine);
-  border: 1px solid var(--clay-line);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
   border-left: 4px solid var(--clay);
   border-radius: var(--radius-m);
   padding: 1rem 1.2rem;
@@ -341,7 +349,7 @@
 }
 .dash__notice--gold {
   border-left-color: var(--marigold);
-  background: #fdf8e9;
+  background: rgba(217, 178, 76, 0.1);
 }
 .dash__notice--warn {
   border-left-color: #c2410c;
@@ -395,7 +403,7 @@
   margin-top: 0.4rem;
 }
 .dash__saved {
-  color: #17602f;
+  color: var(--ok);
   font-weight: 600;
   min-height: 1.4em;
 }
@@ -407,9 +415,9 @@
   max-height: 320px;
   overflow: auto;
   padding: 0.6rem;
-  border: 1px solid var(--clay-line);
+  border: 1px solid var(--line);
   border-radius: var(--radius-s);
-  background: #fff;
+  background: var(--surface-2);
 }
 .choice--inline {
   display: flex;
@@ -427,9 +435,9 @@
   display: grid;
   gap: 0.6rem 0.8rem;
   padding: 1rem;
-  border: 1px solid var(--clay-line);
+  border: 1px solid var(--line);
   border-radius: var(--radius-m);
-  background: #fff;
+  background: var(--surface-2);
   grid-template-columns: 1fr 1fr;
   align-items: end;
 }
@@ -459,7 +467,7 @@
   align-items: center;
   gap: 1rem;
   padding: 1.2rem;
-  border: 2px dashed var(--clay-line);
+  border: 2px dashed var(--line);
   border-radius: var(--radius-m);
   margin-bottom: 1rem;
   cursor: pointer;
@@ -485,7 +493,7 @@
   position: relative;
   border-radius: var(--radius-s);
   overflow: hidden;
-  background: var(--blush-200);
+  background: var(--surface-2);
   aspect-ratio: 1;
   border: 2px solid transparent;
 }
@@ -550,8 +558,8 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 1px solid var(--clay-line);
-  background: var(--jasmine);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
   font-size: 1.2rem;
   cursor: pointer;
 }
@@ -580,7 +588,7 @@
 .cal__wd {
   text-align: center;
   font-size: 0.72rem;
-  color: var(--clay);
+  color: var(--text-muted);
   font-weight: 600;
   padding-bottom: 0.2rem;
 }
@@ -591,11 +599,11 @@
   min-height: 34px;
   border-radius: 6px;
   font-size: 0.88rem;
-  background: #fff;
-  border: 1px solid var(--clay-line);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
   font: inherit;
   font-size: 0.88rem;
-  color: var(--ink);
+  color: var(--text);
 }
 button.cal__day {
   cursor: pointer;
@@ -604,9 +612,9 @@ button.cal__day:hover {
   border-color: var(--marigold);
 }
 .cal__day.is-blocked {
-  background: #3b332b;
-  color: #f1e7d6;
-  border-color: #3b332b;
+  background: repeating-linear-gradient(135deg, var(--surface-3) 0 5px, var(--surface-1) 5px 10px);
+  color: var(--text-muted);
+  border-color: var(--line-strong);
   text-decoration: line-through;
 }
 .cal__day.is-past {
@@ -627,11 +635,11 @@ button.cal__day:hover {
   width: 14px;
   height: 14px;
   border-radius: 3px;
-  background: #fff;
-  border: 1px solid var(--clay-line);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 .cal__swatch.is-blocked {
-  background: #3b332b;
+  background: repeating-linear-gradient(135deg, var(--surface-3) 0 3px, var(--surface-1) 3px 6px);
   margin-left: 0.8rem;
 }
 .dates-list {
@@ -651,9 +659,9 @@ button.cal__day:hover {
   gap: 0.7rem;
 }
 .enq {
-  border: 1px solid var(--clay-line);
+  border: 1px solid var(--line);
   border-radius: var(--radius-m);
-  background: #fff;
+  background: var(--surface-2);
   overflow: hidden;
 }
 .enq.is-unread {
@@ -671,7 +679,7 @@ button.cal__day:hover {
   font: inherit;
   text-align: left;
   cursor: pointer;
-  color: var(--ink);
+  color: var(--text);
 }
 .enq__head .pill {
   grid-row: 1 / span 2;
@@ -707,7 +715,7 @@ button.cal__day:hover {
   gap: 0.4rem;
 }
 .enq__facts li {
-  background: var(--blush);
+  background: var(--surface-2);
   border-radius: 999px;
   padding: 0.2rem 0.75rem;
   font-size: 0.86rem;
@@ -729,7 +737,7 @@ button.cal__day:hover {
   max-width: min(560px, 92%);
   padding: 0.7rem 0.9rem;
   border-radius: 14px 14px 14px 4px;
-  background: var(--blush);
+  background: var(--surface-2);
   display: grid;
   gap: 0.2rem;
   white-space: pre-wrap;
@@ -738,14 +746,14 @@ button.cal__day:hover {
 .enq__msg.is-mine {
   justify-self: end;
   border-radius: 14px 14px 4px 14px;
-  background: #fbf3dc;
+  background: rgba(217, 178, 76, 0.14);
 }
 .enq__who {
   font-size: 0.76rem;
-  color: var(--clay);
+  color: var(--text-muted);
 }
 .enq__quote {
-  color: #17602f;
+  color: var(--ok);
 }
 .enq__reply {
   display: grid;
@@ -784,9 +792,10 @@ button.cal__day:hover {
   gap: 0.8rem;
   padding: 1rem;
   border-radius: var(--radius-m);
-  background: var(--jasmine);
-  color: var(--ink);
-  box-shadow: var(--shadow-soft);
+  background: var(--surface-1);
+  color: var(--text);
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 18px 50px -24px rgba(0, 0, 0, 0.8);
   align-items: end;
 }
 .mk-search .field {
@@ -814,14 +823,14 @@ button.cal__day:hover {
 }
 .mk-search--compact {
   box-shadow: none;
-  border: 1px solid var(--clay-line);
+  border: 1px solid var(--line);
   margin: 1rem 0 0.8rem;
 }
 .mk-results__count {
   margin-bottom: 1.2rem;
 }
 .mk-results__count a {
-  color: var(--marigold-deep);
+  color: var(--link);
   font-weight: 600;
 }
 .mk-section-head {
@@ -846,8 +855,8 @@ button.cal__day:hover {
   height: 100%;
   padding: 1.1rem 1.2rem;
   border-radius: var(--radius-m);
-  border: 1px solid var(--clay-line);
-  background: var(--jasmine);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
 .mk-cat:hover {
@@ -863,7 +872,7 @@ button.cal__day:hover {
   font-size: 0.9rem;
 }
 .mk-cat__count {
-  color: var(--marigold-deep);
+  color: var(--link);
   font-weight: 600;
   margin-top: 0.3rem;
 }
@@ -874,14 +883,14 @@ button.cal__day:hover {
 }
 .mk-card {
   position: relative;
-  background: var(--jasmine);
-  border: 1px solid var(--clay-line);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
   border-radius: var(--radius-m);
   overflow: hidden;
   transition: box-shadow 0.18s ease, transform 0.18s ease;
 }
 .mk-card:hover {
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 18px 44px -22px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(217, 178, 76, 0.4);
   transform: translateY(-2px);
 }
 .mk-card__link {
@@ -889,7 +898,7 @@ button.cal__day:hover {
 }
 .mk-card__img {
   aspect-ratio: 4 / 3;
-  background: var(--blush-200);
+  background: var(--surface-2);
 }
 .mk-card__img img {
   width: 100%;
@@ -910,7 +919,7 @@ button.cal__day:hover {
   font-size: 0.75rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--marigold-deep);
+  color: var(--link);
   font-weight: 600;
 }
 .mk-card__name {
@@ -928,8 +937,8 @@ button.cal__day:hover {
   display: inline-block;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #17602f;
-  background: #e3f4e8;
+  color: var(--ok);
+  background: rgba(90, 200, 130, 0.15);
   border-radius: 999px;
   padding: 0.12rem 0.6rem;
   margin-top: 0.3rem;
@@ -957,11 +966,11 @@ button.cal__day:hover {
   outline-offset: 2px;
 }
 .heart-btn {
-  color: var(--ink);
+  color: var(--text);
 }
 .heart-btn.is-on {
-  color: #b4234a;
-  border-color: #b4234a;
+  color: #f07a97;
+  border-color: #f07a97;
 }
 .mk-empty {
   padding: 2rem;
@@ -1083,7 +1092,7 @@ button.cal__day:hover {
   gap: 0.5rem;
 }
 .vp__facts dt {
-  color: var(--clay);
+  color: var(--text-muted);
   font-weight: 600;
 }
 .vp__facts dd {
@@ -1091,7 +1100,7 @@ button.cal__day:hover {
   overflow-wrap: anywhere;
 }
 .vp__facts a {
-  color: var(--marigold-deep);
+  color: var(--link);
   text-decoration: underline;
 }
 .price-card {
@@ -1102,7 +1111,7 @@ button.cal__day:hover {
 .price-card th,
 .price-card td {
   padding: 0.85rem 0;
-  border-bottom: 1px solid var(--clay-line);
+  border-bottom: 1px solid var(--line);
   vertical-align: top;
 }
 .price-card th {
@@ -1122,7 +1131,7 @@ button.cal__day:hover {
 .price-card__gst {
   display: block;
   font-size: 0.75rem;
-  color: var(--clay);
+  color: var(--text-muted);
 }
 .vp__side {
   display: grid;
@@ -1229,24 +1238,24 @@ button.cal__day:hover {
   display: inline-block;
   padding: 0.35rem 0.85rem;
   border-radius: 999px;
-  border: 1px solid rgba(169, 121, 31, 0.35);
-  background: rgba(251, 247, 238, 0.7);
+  border: 1px solid rgba(217, 178, 76, 0.35);
+  background: var(--surface-2);
   font-size: 0.88rem;
   font-weight: 500;
   transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 .home-market__cats a:hover {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--marigold);
+  background: var(--marigold);
+  border-color: var(--marigold);
+  color: var(--ink);
 }
 .home-market__vendor-link {
   align-self: center;
   font-weight: 600;
-  color: var(--marigold-deep);
+  color: var(--link);
 }
 .home-market__vendor-link:hover {
-  color: var(--ink);
+  color: var(--text);
 }
 .home-market__grid {
   display: grid;

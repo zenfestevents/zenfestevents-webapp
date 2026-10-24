@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import { getSiteSettings } from '../../../lib/getSettings'
 import { listTestimonials } from '../../../lib/testimonials'
 import { Stars, TestimonialCard } from '../../../components/TestimonialCard'
+import { LaurelRating } from '../../../components/game'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,7 +30,7 @@ export default async function TestimonialsPage() {
     <section className="section">
       <div className="container">
         <header className="page-head">
-          <p className="eyebrow">Testimonials</p>
+          <p className="eyebrow">From the stands</p>
           <h1 className="display-l">
             What families <span className="italic accent">say</span>
           </h1>
@@ -41,13 +42,11 @@ export default async function TestimonialsPage() {
 
         {google?.googleRating && (
           <div className="reviews-summary card">
-            <span className="reviews-summary__score">{google.googleRating.toFixed(1)}</span>
-            <div>
-              <Stars rating={google.googleRating} className="reviews-summary__stars" />
-              <p className="muted">
-                {google.googleCount ? `${google.googleCount} reviews on Google` : 'Rated on Google'}
-              </p>
-            </div>
+            <LaurelRating
+              score={google.googleRating.toFixed(1)}
+              caption={google.googleCount ? `${google.googleCount} reviews on Google` : 'Rated on Google'}
+            />
+            <Stars rating={google.googleRating} className="reviews-summary__stars" />
             {google.googleUrl && (
               <a className="btn btn--ghost reviews-summary__btn" href={google.googleUrl} target="_blank" rel="noopener">
                 Read all reviews on Google

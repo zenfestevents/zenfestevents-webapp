@@ -1,6 +1,6 @@
 import React from 'react'
-import type { Metadata } from 'next'
-import { Oswald, Hanken_Grotesk } from 'next/font/google'
+import type { Metadata, Viewport } from 'next'
+import { Oswald, Hanken_Grotesk, JetBrains_Mono } from 'next/font/google'
 
 import './styles.css'
 import './parts.css'
@@ -9,6 +9,7 @@ import './polls.css'
 import './ai.css'
 import './marketplace.css'
 import './shop.css'
+import './game.css'
 import { Header } from '../../components/Header'
 import { Footer } from '../../components/Footer'
 import { MobileCTABar } from '../../components/MobileCTABar'
@@ -31,6 +32,21 @@ const body = Hanken_Grotesk({
   variable: '--font-body',
   display: 'swap',
 })
+
+// Scoreboards, the ticker and runs only — not preloaded, so it never competes with the
+// hero image for the first paint.
+const mono = JetBrains_Mono({
+  weight: ['500'],
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+  preload: false,
+})
+
+// The browser chrome matches the night-match ground on phones.
+export const viewport: Viewport = {
+  themeColor: '#0b0907',
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'),
@@ -56,7 +72,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const agents = ai ? await getAgentProfiles() : []
 
   return (
-    <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${body.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body>
         <a className="skip-link" href="#main">
           Skip to content

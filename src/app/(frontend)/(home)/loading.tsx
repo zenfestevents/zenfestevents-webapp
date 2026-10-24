@@ -12,6 +12,9 @@ export default function Loading() {
   return (
     <div className="page-loading" role="status" aria-live="polite">
       <KolamRosette size={120} className="page-loading__kolam" />
+      <span className="page-loading__text mono" aria-hidden="true">
+        Taking guard…
+      </span>
       <span className="sr-only">Loading…</span>
     </div>
   )

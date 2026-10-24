@@ -6,7 +6,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import { FEATURES } from '../lib/features'
 import { SITE_FALLBACK } from '../lib/site'
 import { AiLink } from './ai/ChatLauncher'
-import { KolamDivider, KolamRosette } from './Kolam'
+import { KolamRosette } from './Kolam'
+import { SeamDivider } from './game'
 
 const HEART_PATH =
   'M50 82 C 20 58, 4 40, 4 24 C 4 11, 15 3, 27 3 C 37 3, 45 10, 50 19 C 55 10, 63 3, 73 3 C 85 3, 96 11, 96 24 C 96 40, 80 58, 50 82 Z'
@@ -553,7 +554,7 @@ export function ScrubHero({
             </Link>
           </div>
           {/* Phones only (see parts.css): closes the dark band under the image. */}
-          <KolamDivider className="scrubhero__divider" />
+          <SeamDivider className="scrubhero__divider" />
           <ul className="scrubhero__tags">
             <li>Weddings</li>
             <li>Birthdays</li>
@@ -613,7 +614,7 @@ export function ScrubHero({
               <Link className="hslide__cta" href={s.href}>
                 {s.cta} →
               </Link>
-              <KolamDivider className="scrubhero__divider" />
+              <SeamDivider className="scrubhero__divider" />
             </div>
           </div>
         ))}
@@ -635,6 +636,16 @@ export function ScrubHero({
         <span className="scrubhero__hint" aria-hidden="true">
           {hint}
         </span>
+
+        {/* One over, bowled by your scroll: each ball lights as --p passes it (game.css). */}
+        <div className="scrubhero__over" aria-hidden="true">
+          <span className="scrubhero__over-label mono">1st over</span>
+          <span className="balls">
+            {Array.from({ length: 6 }, (_, i) => (
+              <span key={i} className="balls__ball scrubhero__ball" style={{ '--i': i } as React.CSSProperties} />
+            ))}
+          </span>
+        </div>
 
         <div className="scrubhero__loader" aria-hidden="true">
           <span className="scrubhero__bar" ref={barRef} />

@@ -53,7 +53,7 @@ export default async function GalleryPage() {
     <section className="section">
       <div className="container">
         <header className="page-head">
-          <p className="eyebrow">Our Work</p>
+          <p className="eyebrow">Highlights</p>
           <h1 className="display-l">
             A gallery of <span className="italic accent">celebrations</span>
           </h1>

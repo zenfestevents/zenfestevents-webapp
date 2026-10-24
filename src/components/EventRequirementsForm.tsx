@@ -16,6 +16,7 @@ import {
 } from '../lib/eventRequirements'
 import { whatsappLink } from '../lib/site'
 import { Checkboxes, Radios } from './FormChoices'
+import { BallDots } from './game'
 
 const STEPS = ['Event', 'When & where', 'Services', 'Details', 'Your details'] as const
 
@@ -171,7 +172,10 @@ export function EventRequirementsForm({ whatsapp, initialEvent }: { whatsapp?: s
       `Hi Zenfest Events, I just shared my ${label} details on your website${name ? ` (${name})` : ''}.`,
     )
     return (
-      <div className="form-success" role="status">
+      <div className="form-success evq-done" role="status">
+        {/* The sixth ball: five steps bowled, this one takes the wicket. */}
+        <BallDots done={6} />
+        <p className="howzat evq-done__howzat">Howzat!</p>
         <h3 className="display-m">Thank you{name ? `, ${name.split(' ')[0]}` : ''}!</h3>
         <p className="muted">
           We&apos;ve got your {label} details. Our team will call you back with ideas and a quote. For a faster reply,
@@ -188,6 +192,13 @@ export function EventRequirementsForm({ whatsapp, initialEvent }: { whatsapp?: s
 
   return (
     <form ref={formRef} className="form evq" onSubmit={onSubmit} noValidate>
+      {/* Each step is a ball of the over; sending is the sixth. */}
+      <p className="evq__over mono" aria-hidden="true">
+        Over 0.{step + 1}
+        <span>
+          {STEPS.length - step} {STEPS.length - step === 1 ? 'ball' : 'balls'} to go
+        </span>
+      </p>
       <ol className="evq__steps" aria-label="Steps">
         {STEPS.map((label, i) => (
           <li key={label} className={i === step ? 'is-current' : i < step ? 'is-done' : ''}>

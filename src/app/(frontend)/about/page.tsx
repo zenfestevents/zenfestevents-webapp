@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 
 import { SITE_FALLBACK } from '../../../lib/site'
 import { getSiteSettings } from '../../../lib/getSettings'
-import { KolamDivider } from '../../../components/Kolam'
+import { SeamDivider } from '../../../components/game'
 import { Reveal } from '../../../components/Reveal'
 
 export const dynamic = 'force-dynamic'
@@ -55,7 +55,7 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <KolamDivider />
+      <SeamDivider />
 
       <section className="section">
         <div className="container">
