@@ -99,6 +99,25 @@ export default async function RewardsPage() {
         ink
       />
 
+      <section className="section--tight band-soft">
+        <div className="container home-runs__inner">
+          <div>
+            <p className="eyebrow">Refer &amp; earn</p>
+            <h2 className="display-m">
+              Bring your friends, and your <span className="accent">vendors</span>
+            </h2>
+            <p className="lede">
+              Invite people planning an event and vendors who want work. Follow each invite live and score +
+              {inr(settings.runsPer.referral)} when a client books, +{inr(settings.runsPer.referral_vendor)} when a vendor
+              is approved.
+            </p>
+          </div>
+          <Link className="btn btn--primary" href="/refer">
+            Invite and track
+          </Link>
+        </div>
+      </section>
+
       <section className="section--tight">
         <div className="container rewards-terms">
           <h2 className="display-s">The small print</h2>

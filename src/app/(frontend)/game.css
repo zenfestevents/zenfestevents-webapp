@@ -1109,6 +1109,215 @@ input[type='radio']:checked {
   padding-left: 1.1rem;
 }
 
+/* ---------- Refer & earn ---------- */
+.invite-share {
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 760px) {
+  .invite-share:not(.invite-share--compact) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.invite-card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.6rem;
+  padding: 1.3rem 1.3rem 1.4rem;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  box-shadow: var(--edge-light);
+  overflow: hidden;
+}
+.invite-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--marigold);
+}
+.invite-card--vendor::before {
+  background: repeating-linear-gradient(180deg, var(--marigold) 0 6px, transparent 6px 10px);
+}
+.invite-share--compact .invite-card {
+  padding: 1rem 1rem 1.1rem 1.2rem;
+  background: var(--surface-2);
+}
+.invite-card__title {
+  font-size: var(--step-1);
+}
+.invite-card__runs {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--marigold);
+}
+.invite-card__link {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  border: 1px dashed rgba(217, 178, 76, 0.5);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.8rem;
+}
+.refer__title {
+  margin: 2.2rem 0 1rem;
+}
+.refer__note {
+  margin-top: 1.2rem;
+  font-size: 0.88rem;
+}
+.refer__terms {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 1.6rem;
+  padding-left: 1.1rem;
+  font-size: 0.9rem;
+}
+@media (min-width: 720px) {
+  .rewards-steps--3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Live progress: one row per invite — who, the ball track, when, runs. */
+.tracker {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+.tracker__row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1.1fr) 2fr auto auto;
+  align-items: center;
+  gap: 0.6rem 1.2rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+}
+.tracker__row.is-won {
+  border-color: rgba(217, 178, 76, 0.6);
+  box-shadow: inset 3px 0 0 var(--marigold);
+}
+.tracker__row.is-ended {
+  opacity: 0.6;
+}
+.tracker__who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.tracker__tag {
+  padding: 0.05rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid rgba(217, 178, 76, 0.45);
+  color: var(--marigold-bright);
+}
+.tracker__tag--vendor {
+  border-style: dashed;
+}
+.tracker__progress {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.tracker__stage {
+  font-weight: 600;
+}
+.tracker__row.is-won .tracker__stage {
+  color: var(--marigold);
+}
+.tracker__when {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.tracker__runs {
+  min-width: 3.5rem;
+  text-align: right;
+  color: var(--marigold);
+}
+@media (max-width: 640px) {
+  /* Two lines: who + runs, then the ball track + when. */
+  .tracker__row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'who runs'
+      'progress when';
+  }
+  .tracker__who {
+    grid-area: who;
+  }
+  .tracker__runs {
+    grid-area: runs;
+  }
+  .tracker__progress {
+    grid-area: progress;
+  }
+  .tracker__when {
+    grid-area: when;
+    text-align: right;
+  }
+}
+
+/* /welcome: where an invite link lands. */
+.welcome__inner {
+  max-width: 60rem;
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+}
+.welcome__inner h1 {
+  margin: 0.4rem 0 0.2rem;
+}
+.welcome__bonus {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(217, 178, 76, 0.5);
+  background: rgba(217, 178, 76, 0.1);
+  color: var(--marigold-bright);
+  font-weight: 600;
+}
+.welcome__choices {
+  width: 100%;
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.6rem;
+}
+@media (min-width: 720px) {
+  .welcome__choices {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.welcome__choice {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.4rem 1.4rem 1.5rem;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+.welcome__choice strong {
+  font-family: var(--font-display), 'Arial Narrow', sans-serif;
+  font-size: var(--step-2);
+  font-weight: 600;
+}
+.welcome__choice:hover {
+  transform: translateY(-2px);
+  border-color: rgba(217, 178, 76, 0.6);
+}
+.welcome__score {
+  width: 100%;
+  margin-top: 1.4rem;
+}
+
 /* Homepage band: join the Runs club. */
 .home-runs__inner {
   display: grid;

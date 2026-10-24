@@ -43,6 +43,7 @@ import { WhatsAppContacts } from './collections/WhatsAppContacts'
 import { WhatsAppMessages } from './collections/WhatsAppMessages'
 import { WhatsAppCampaigns } from './collections/WhatsAppCampaigns'
 import { Runs } from './collections/Runs'
+import { ReferralVisits } from './collections/ReferralVisits'
 import { SiteSettings } from './globals/SiteSettings'
 import { ReminderSettings } from './globals/ReminderSettings'
 import { RewardSettings } from './globals/RewardSettings'
@@ -110,6 +111,7 @@ export default buildConfig({
     WhatsAppMessages,
     WhatsAppCampaigns,
     Runs,
+    ReferralVisits,
   ],
   globals: [SiteSettings, ReminderSettings, RewardSettings],
   editor: lexicalEditor(),

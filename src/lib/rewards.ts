@@ -18,6 +18,7 @@ import {
   SCORING,
   accountKey,
   invitePath,
+  parseAccountKey,
   isReferralCode,
   reasonLabel,
   tierFor,
@@ -75,6 +76,7 @@ export async function getRewardSettings(payload?: Payload, req?: PayloadRequest)
   const client = await clientOr(payload)
   let stored: {
     runsPer?: Partial<Record<AwardReason, number | null>> | null
+    referralMonthlyCap?: number | null
     coupleTiers?: StoredTier[] | null
     vendorTiers?: StoredTier[] | null
   } = {}
@@ -88,8 +90,13 @@ export async function getRewardSettings(payload?: Payload, req?: PayloadRequest)
     const n = stored.runsPer?.[reason]
     if (n != null && Number.isFinite(Number(n)) && Number(n) >= 0) runsPer[reason] = Number(n)
   }
+  const cap = Number(stored.referralMonthlyCap)
   const settings: RewardSettingsData = {
     runsPer,
+    referralMonthlyCap:
+      stored.referralMonthlyCap != null && Number.isFinite(cap) && cap >= 0
+        ? cap
+        : DEFAULT_REWARD_SETTINGS.referralMonthlyCap,
     coupleTiers: cleanTiers(stored.coupleTiers, DEFAULT_REWARD_SETTINGS.coupleTiers),
     vendorTiers: cleanTiers(stored.vendorTiers, DEFAULT_REWARD_SETTINGS.vendorTiers),
   }
@@ -259,6 +266,95 @@ export function refCodeFromCookies(cookieHeader: string | null | undefined) {
   return null
 }
 
+/** The `zf_ref` code from the current request's cookies; null outside a request (scripts). */
+async function cookieRefCode(): Promise<string | null> {
+  try {
+    const { cookies } = await import('next/headers')
+    return (await cookies()).get(REF_COOKIE)?.value ?? null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * The small invite award: someone `referrerKey` invited joined, applied or enquired.
+ * Once per friend (source `phone:<10 digits>`, so joining *and* enquiring counts once)
+ * and at most `referralMonthlyCap` in any 30 days, so invites can't be farmed. The cap
+ * is a count before the insert — fine for a limit; "once" is still the unique index.
+ */
+export async function awardReferralSignup(
+  payload: Payload,
+  referrerKey: unknown,
+  friendPhone: unknown,
+  req?: PayloadRequest,
+) {
+  const ref = parseAccountKey(referrerKey)
+  const phone = normalizePhone(friendPhone)
+  if (!ref || !phone) return { awarded: false, total: null }
+  try {
+    const { referralMonthlyCap } = await getRewardSettings(payload, req)
+    const since = new Date(Date.now() - 30 * 24 * 3600_000).toISOString()
+    const recent = await payload.count({
+      collection: 'runs',
+      where: {
+        and: [
+          { accountKey: { equals: accountKey(ref.kind, ref.id) } },
+          { reason: { equals: 'referral_signup' } },
+          { createdAt: { greater_than: since } },
+        ],
+      },
+      overrideAccess: true,
+      req,
+    })
+    if (recent.totalDocs >= referralMonthlyCap) return { awarded: false, total: null }
+  } catch (err) {
+    // Like awardQuietly: an invite award never breaks the save that triggered it.
+    payload.logger.error({ err, msg: 'Runs club: could not check the invite limit' })
+    return { awarded: false, total: null }
+  }
+  return awardQuietly(payload, { kind: ref.kind, id: ref.id, reason: 'referral_signup', source: `phone:${phone}`, req })
+}
+
+/** The big vendor-invite award: a vendor `referrerKey` invited was approved or went live (once per vendor). */
+export async function awardReferralVendor(payload: Payload, referrerKey: unknown, vendorPhone: unknown, req?: PayloadRequest) {
+  const ref = parseAccountKey(referrerKey)
+  const phone = normalizePhone(vendorPhone)
+  if (!ref || !phone) return { awarded: false, total: null }
+  return awardQuietly(payload, { kind: ref.kind, id: ref.id, reason: 'referral_vendor', source: `phone:${phone}`, req })
+}
+
+/**
+ * Right after a sign-up's `joined` award: if this browser came through an invite link,
+ * remember who invited the new account (`referredBy`), give it welcome runs and give
+ * the inviter the small invite award. Own code / own phone never counts. `code`
+ * defaults to the request's `zf_ref` cookie (tests pass it).
+ */
+export async function welcomeReferredAccount(
+  payload: Payload,
+  input: { kind: RunsKind; id: number | string; phone: unknown; code?: string | null },
+) {
+  try {
+    const code = input.code === undefined ? await cookieRefCode() : input.code
+    if (!code) return
+    const referrer = await findReferrer(payload, code)
+    if (!referrer) return
+    const phone = normalizePhone(input.phone)
+    if (referrer.key === accountKey(input.kind, input.id) || (phone && referrer.phone === phone)) return
+    await payload.update({
+      collection: COLLECTION[input.kind],
+      id: input.id,
+      data: { referredBy: referrer.key },
+      depth: 0,
+      overrideAccess: true,
+      context: { skipRuns: true },
+    })
+    await awardQuietly(payload, { kind: input.kind, id: input.id, reason: 'welcome', source: 'account' })
+    await awardReferralSignup(payload, referrer.key, phone)
+  } catch (err) {
+    payload.logger.error({ err, msg: 'Runs club: could not record an invite on sign-up' })
+  }
+}
+
 /** Gives an account a referral code if it has none (accounts made before the Runs club). */
 export async function ensureReferralCode(payload: Payload, kind: RunsKind, id: number | string, current?: string | null) {
   if (current) return current
@@ -352,17 +448,212 @@ export async function getScorecard(kind: RunsKind, id: number | string, client?:
   }
 }
 
+/** Absolute invite links for both audiences, or null without a code. */
+export async function inviteLinks(code: string | null): Promise<InviteLinks | null> {
+  if (!code) return null
+  const { siteUrl } = await import('./marketplaceMail')
+  return { client: `${siteUrl()}${invitePath(code, 'client')}`, vendor: `${siteUrl()}${invitePath(code, 'vendor')}` }
+}
+
+export type InviteLinks = { client: string; vendor: string }
+
 /** Everything the dashboards' Scorecard tab (components/market/Scorecard.tsx) takes. */
 export async function scorecardProps(kind: RunsKind, id: number | string) {
   const payload = await clientOr()
   const [card, settings] = await Promise.all([getScorecard(kind, id, payload), getRewardSettings(payload)])
-  const { siteUrl } = await import('./marketplaceMail')
   return {
     card,
-    inviteUrl: card.invitePath ? `${siteUrl()}${card.invitePath}` : null,
+    links: await inviteLinks(card.referralCode),
     scoring: SCORING[kind]
-      .map((s) => ({ label: s.label, runs: settings.runsPer[s.reason] }))
+      .map((s) => ({ reason: s.reason, label: s.label, runs: settings.runsPer[s.reason] }))
       .filter((s) => s.runs > 0),
+  }
+}
+
+// ---------- referrals: the live tracker ----------
+
+/** Client invites: joined / enquired → talking to our team → quote sent → booked. */
+export const CLIENT_STAGES = ['Joined or enquired', 'Talking to our team', 'Quote sent', 'Booked'] as const
+/** Vendor invites: joined / applied → under review → approved or live. */
+export const VENDOR_STAGES = ['Joined or applied', 'Under review', 'Approved'] as const
+
+export type ReferralFriend = {
+  /** First name + initial only — the tracker never shows phones or emails. */
+  name: string
+  type: 'client' | 'vendor'
+  /** 1-based position on its track (CLIENT_STAGES / VENDOR_STAGES). */
+  step: number
+  steps: number
+  /** What to show for where they are now, e.g. "Enquired", "Quote sent", "Live". */
+  label: string
+  /** Didn't go ahead / not this time. */
+  ended: boolean
+  updatedAt: string
+  runs: number
+}
+
+export type Referrals = {
+  opened: { client: number; vendor: number; total: number }
+  friends: ReferralFriend[]
+  totals: { joined: number; clientsBooked: number; vendorsApproved: number; runs: number }
+}
+
+/** "Priya Raman" → "Priya R." */
+export function shortName(name: unknown) {
+  const parts = String(name ?? '').trim().split(/\s+/).filter(Boolean)
+  if (!parts.length) return 'A friend'
+  return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0].toUpperCase()}.` : parts[0]
+}
+
+const LEAD_STEP: Record<string, { step: number; label: string; ended?: boolean }> = {
+  new: { step: 1, label: 'Enquired' },
+  contacted: { step: 2, label: 'Talking to our team' },
+  quoted: { step: 3, label: 'Quote sent' },
+  booked: { step: 4, label: 'Booked' },
+  closed: { step: 1, label: 'Didn’t go ahead', ended: true },
+}
+const APPLICATION_STEP: Record<string, { step: number; label: string; ended?: boolean }> = {
+  new: { step: 1, label: 'Applied' },
+  reviewing: { step: 2, label: 'Under review' },
+  approved: { step: 3, label: 'Approved' },
+  rejected: { step: 1, label: 'Not this time', ended: true },
+}
+const LISTING_STEP: Record<string, { step: number; label: string; ended?: boolean }> = {
+  draft: { step: 1, label: 'Joined' },
+  pending: { step: 2, label: 'Under review' },
+  published: { step: 3, label: 'Live' },
+  paused: { step: 3, label: 'Live (paused)' },
+  rejected: { step: 1, label: 'Not this time', ended: true },
+}
+
+/**
+ * Everyone an account invited and how far each has got — the Refer & earn page. One
+ * row per person (merged by phone across accounts, enquiries and partner
+ * applications), first name + initial only. This is the privacy boundary: never pass
+ * the raw docs to the page.
+ */
+export async function getReferrals(kind: RunsKind, id: number | string, client?: Payload): Promise<Referrals> {
+  const payload = await clientOr(client)
+  const key = accountKey(kind, id)
+  const by = { referredBy: { equals: key } }
+  const base = { depth: 0, pagination: false, overrideAccess: true } as const
+  const [clientVisits, vendorVisits, couples, vendors, leads, applications, rows] = await Promise.all([
+    payload.count({ collection: 'referral-visits', where: { and: [{ referrer: { equals: key } }, { audience: { equals: 'client' } }] }, overrideAccess: true }),
+    payload.count({ collection: 'referral-visits', where: { and: [{ referrer: { equals: key } }, { audience: { equals: 'vendor' } }] }, overrideAccess: true }),
+    payload.find({ collection: 'customers', where: by, ...base, select: { name: true, phone: true, updatedAt: true } }),
+    payload.find({ collection: 'vendors', where: by, ...base, select: { name: true, phone: true, listingStatus: true, updatedAt: true } }),
+    payload.find({ collection: 'leads', where: by, ...base, select: { name: true, phone: true, status: true, updatedAt: true } }),
+    payload.find({ collection: 'vendor-applications', where: by, ...base, select: { name: true, phone: true, status: true, updatedAt: true } }),
+    payload.find({
+      collection: 'runs',
+      where: { and: [{ accountKey: { equals: key } }, { reason: { in: ['referral', 'referral_signup', 'referral_vendor'] } }] },
+      ...base,
+      select: { amount: true, source: true },
+    }),
+  ])
+
+  type Row = ReferralFriend & { phone: string }
+  const people = new Map<string, Row>()
+  const leadPhone = new Map<string, string>()
+  // `specific`: an enquiry or application says more than a bare sign-up at the same stage.
+  function put(
+    phoneRaw: unknown,
+    name: unknown,
+    type: Row['type'],
+    at: string,
+    s: { step: number; label: string; ended?: boolean },
+    specific = false,
+  ) {
+    const phone = normalizePhone(phoneRaw)
+    if (!phone) return
+    const steps = type === 'client' ? CLIENT_STAGES.length : VENDOR_STAGES.length
+    const prev = people.get(phone)
+    // Furthest stage wins; on a tie the live one, then the more specific ("Joined" → "Enquired").
+    const better =
+      !prev || s.step > prev.step || (s.step === prev.step && !s.ended && (prev.ended || specific))
+    const row: Row = better
+      ? { phone, name: shortName(name), type, step: s.step, steps, label: s.label, ended: Boolean(s.ended), updatedAt: at, runs: prev?.runs ?? 0 }
+      : prev
+    if (prev && at > prev.updatedAt) row.updatedAt = at
+    people.set(phone, row)
+  }
+  for (const c of couples.docs) put(c.phone, c.name, 'client', c.updatedAt, { step: 1, label: 'Joined' })
+  for (const v of vendors.docs) put(v.phone, v.name, 'vendor', v.updatedAt, LISTING_STEP[v.listingStatus ?? 'draft'] ?? LISTING_STEP.draft)
+  for (const a of applications.docs) put(a.phone, a.name, 'vendor', a.updatedAt, APPLICATION_STEP[a.status ?? 'new'] ?? APPLICATION_STEP.new, true)
+  for (const l of leads.docs) {
+    const p = normalizePhone(l.phone)
+    if (p) leadPhone.set(String(l.id), p)
+    put(l.phone, l.name, 'client', l.updatedAt, LEAD_STEP[l.status ?? 'new'] ?? LEAD_STEP.new, true)
+  }
+
+  let runs = 0
+  for (const r of rows.docs) {
+    const amount = Number(r.amount) || 0
+    runs += amount
+    const src = String(r.source ?? '')
+    const phone = src.startsWith('phone:') ? src.slice(6) : src.startsWith('lead:') ? leadPhone.get(src.slice(5)) : undefined
+    const row = phone ? people.get(phone) : undefined
+    if (row) row.runs += amount
+  }
+
+  const friends = [...people.values()]
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    .map(({ phone: _phone, ...f }) => f)
+  return {
+    opened: { client: clientVisits.totalDocs, vendor: vendorVisits.totalDocs, total: clientVisits.totalDocs + vendorVisits.totalDocs },
+    friends,
+    totals: {
+      joined: friends.length,
+      clientsBooked: friends.filter((f) => f.type === 'client' && f.label === 'Booked').length,
+      vendorsApproved: friends.filter((f) => f.type === 'vendor' && f.step === f.steps).length,
+      runs,
+    },
+  }
+}
+
+/** The inviter's first name for /welcome ("Priya invited you…"), or null. Nothing else leaves. */
+export async function inviterFirstName(code: unknown, client?: Payload): Promise<string | null> {
+  const payload = await clientOr(client)
+  const referrer = await findReferrer(payload, code).catch(() => null)
+  if (!referrer) return null
+  const doc = (await payload
+    .findByID({ collection: COLLECTION[referrer.kind], id: referrer.id, depth: 0, select: { name: true }, overrideAccess: true })
+    .catch(() => null)) as { name?: string | null } | null
+  return String(doc?.name ?? '').trim().split(/\s+/)[0] || null
+}
+
+/** Everything the Refer & earn page shows a logged-in account. */
+export async function referPageData(kind: RunsKind, id: number | string) {
+  const payload = await clientOr()
+  const [account, settings, referrals] = await Promise.all([
+    payload.findByID({ collection: COLLECTION[kind], id, depth: 0, select: { referralCode: true }, overrideAccess: true }) as Promise<{
+      referralCode?: string | null
+    }>,
+    getRewardSettings(payload),
+    getReferrals(kind, id, payload),
+  ])
+  const code = await ensureReferralCode(payload, kind, id, account.referralCode)
+  return {
+    referrals,
+    links: await inviteLinks(code),
+    runs: {
+      small: settings.runsPer.referral_signup,
+      client: settings.runsPer.referral,
+      vendor: settings.runsPer.referral_vendor,
+      welcome: settings.runsPer.welcome,
+    },
+    cap: settings.referralMonthlyCap,
+  }
+}
+
+/** Records one person opening an invite link (once per browser per inviter). */
+export async function recordReferralVisit(payload: Payload, referrerKey: string, visitor: string, audience: 'client' | 'vendor') {
+  try {
+    const where: Where = { and: [{ referrer: { equals: referrerKey } }, { visitor: { equals: visitor } }] }
+    if ((await payload.count({ collection: 'referral-visits', where, overrideAccess: true })).totalDocs) return
+    await payload.create({ collection: 'referral-visits', data: { referrer: referrerKey, visitor, audience }, overrideAccess: true })
+  } catch {
+    // The (referrer, visitor) unique index: already counted.
   }
 }
 

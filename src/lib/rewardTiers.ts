@@ -13,7 +13,10 @@ export const RUNS_REASONS = [
   { value: 'profile', label: 'Finished the profile' },
   { value: 'enquiry', label: 'Planned an event with us' },
   { value: 'booking', label: 'Booked with Zenfest' },
-  { value: 'referral', label: 'Referred someone who booked' },
+  { value: 'referral', label: 'A client you invited booked' },
+  { value: 'referral_signup', label: 'Someone you invited joined, applied or enquired' },
+  { value: 'referral_vendor', label: 'A vendor you invited was approved or went live' },
+  { value: 'welcome', label: 'Joined through an invite' },
   { value: 'listing_live', label: 'Listing went live' },
   { value: 'vendor_reply', label: 'Replied to an enquiry' },
   { value: 'vendor_booking', label: 'Booked through the marketplace' },
@@ -37,7 +40,10 @@ export const SCORING: Record<RunsKind, { reason: AwardReason; label: string }[]>
     { reason: 'profile', label: 'Add your city and event date' },
     { reason: 'enquiry', label: 'Plan an event with us (first enquiry)' },
     { reason: 'booking', label: 'Book an event with Zenfest' },
-    { reason: 'referral', label: 'Invite a friend who books' },
+    { reason: 'referral_signup', label: 'Someone you invite joins, applies or enquires' },
+    { reason: 'referral', label: 'A client you invite books' },
+    { reason: 'referral_vendor', label: 'A vendor you invite is approved or goes live' },
+    { reason: 'welcome', label: 'Join through a friend’s invite (welcome runs)' },
   ],
   v: [
     { reason: 'joined', label: 'Join the Runs club' },
@@ -45,7 +51,10 @@ export const SCORING: Record<RunsKind, { reason: AwardReason; label: string }[]>
     { reason: 'listing_live', label: 'Get your listing approved' },
     { reason: 'vendor_reply', label: 'Reply to a couple’s enquiry' },
     { reason: 'vendor_booking', label: 'Mark a marketplace booking' },
-    { reason: 'referral', label: 'Invite someone who books Zenfest' },
+    { reason: 'referral_signup', label: 'Someone you invite joins, applies or enquires' },
+    { reason: 'referral', label: 'A client you invite books' },
+    { reason: 'referral_vendor', label: 'A vendor you invite is approved or goes live' },
+    { reason: 'welcome', label: 'Join through a friend’s invite (welcome runs)' },
   ],
 }
 
@@ -53,6 +62,7 @@ export type RewardTier = { name: string; minRuns: number; rupeesOff: number; per
 
 export type RewardSettingsData = {
   runsPer: Record<AwardReason, number>
+  referralMonthlyCap: number
   coupleTiers: RewardTier[]
   vendorTiers: RewardTier[]
 }
@@ -66,7 +76,13 @@ export const DEFAULT_RUNS_PER: Record<AwardReason, number> = {
   listing_live: 200,
   vendor_reply: 20,
   vendor_booking: 300,
+  referral_signup: 25,
+  referral_vendor: 300,
+  welcome: 100,
 }
+
+/** At most this many `referral_signup` awards per inviter in any 30 days (so invites can't be farmed). */
+export const DEFAULT_REFERRAL_MONTHLY_CAP = 10
 
 export const DEFAULT_COUPLE_TIERS: RewardTier[] = [
   { name: 'Debut', minRuns: 0, rupeesOff: 0, perks: 'Welcome to the Runs club. Every booking and referral adds runs.' },
@@ -85,6 +101,7 @@ export const DEFAULT_VENDOR_TIERS: RewardTier[] = [
 
 export const DEFAULT_REWARD_SETTINGS: RewardSettingsData = {
   runsPer: DEFAULT_RUNS_PER,
+  referralMonthlyCap: DEFAULT_REFERRAL_MONTHLY_CAP,
   coupleTiers: DEFAULT_COUPLE_TIERS,
   vendorTiers: DEFAULT_VENDOR_TIERS,
 }
@@ -123,8 +140,12 @@ export function parseAccountKey(key: unknown): { kind: RunsKind; id: number } | 
   return m ? { kind: m[1] as RunsKind, id: Number(m[2]) } : null
 }
 
-/** The share link that sets the referral cookie. */
-export const invitePath = (code: string) => `/invite/${encodeURIComponent(code)}`
+/** Who an invite is for: a client (plans an event) or a vendor (joins Zenfest). */
+export type InviteAudience = 'client' | 'vendor'
+
+/** The share link that sets the referral cookie; vendor invites land on the vendor welcome. */
+export const invitePath = (code: string, audience: InviteAudience = 'client') =>
+  `/invite/${encodeURIComponent(code)}${audience === 'vendor' ? '?for=vendor' : ''}`
 
 /** 8 characters from an alphabet without look-alikes (no 0/O, 1/I/L). */
 export const REFERRAL_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'

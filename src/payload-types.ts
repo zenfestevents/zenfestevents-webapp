@@ -103,6 +103,7 @@ export interface Config {
     'whatsapp-messages': WhatsappMessage;
     'whatsapp-campaigns': WhatsappCampaign;
     runs: Run;
+    'referral-visits': ReferralVisit;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -148,6 +149,7 @@ export interface Config {
     'whatsapp-messages': WhatsappMessagesSelect<false> | WhatsappMessagesSelect<true>;
     'whatsapp-campaigns': WhatsappCampaignsSelect<false> | WhatsappCampaignsSelect<true>;
     runs: RunsSelect<false> | RunsSelect<true>;
+    'referral-visits': ReferralVisitsSelect<false> | ReferralVisitsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -680,6 +682,10 @@ export interface Customer {
    */
   runs?: number | null;
   referralCode?: string | null;
+  /**
+   * c:<id> = couple, v:<id> = vendor.
+   */
+  referredBy?: string | null;
   city?: string | null;
   eventDate?: string | null;
   shortlist?: (number | Vendor)[] | null;
@@ -727,6 +733,10 @@ export interface Vendor {
    */
   runs?: number | null;
   referralCode?: string | null;
+  /**
+   * c:<id> = couple, v:<id> = vendor.
+   */
+  referredBy?: string | null;
   category:
     | 'photography'
     | 'makeup'
@@ -920,6 +930,10 @@ export interface VendorApplication {
   portfolioUrl?: string | null;
   message?: string | null;
   vendor?: (number | null) | Vendor;
+  /**
+   * c:<id> = couple, v:<id> = vendor.
+   */
+  referredBy?: string | null;
   status?: ('new' | 'reviewing' | 'approved' | 'rejected') | null;
   updatedAt: string;
   createdAt: string;
@@ -1599,6 +1613,9 @@ export interface Run {
     | 'enquiry'
     | 'booking'
     | 'referral'
+    | 'referral_signup'
+    | 'referral_vendor'
+    | 'welcome'
     | 'listing_live'
     | 'vendor_reply'
     | 'vendor_booking'
@@ -1608,6 +1625,26 @@ export interface Run {
    */
   source?: string | null;
   note?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Someone opened an invite link. Anonymous: only who shared the link and when.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referral-visits".
+ */
+export interface ReferralVisit {
+  id: number;
+  /**
+   * Who shared the link: c:<id> = couple, v:<id> = vendor.
+   */
+  referrer: string;
+  /**
+   * Anonymous browser id.
+   */
+  visitor: string;
+  audience: 'client' | 'vendor';
   updatedAt: string;
   createdAt: string;
 }
@@ -2134,6 +2171,7 @@ export interface VendorApplicationsSelect<T extends boolean = true> {
   portfolioUrl?: T;
   message?: T;
   vendor?: T;
+  referredBy?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2410,6 +2448,7 @@ export interface VendorsSelect<T extends boolean = true> {
   googleId?: T;
   runs?: T;
   referralCode?: T;
+  referredBy?: T;
   category?: T;
   otherService?: T;
   areas?: T;
@@ -2470,6 +2509,7 @@ export interface CustomersSelect<T extends boolean = true> {
   googleId?: T;
   runs?: T;
   referralCode?: T;
+  referredBy?: T;
   city?: T;
   eventDate?: T;
   shortlist?: T;
@@ -2742,6 +2782,17 @@ export interface RunsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referral-visits_select".
+ */
+export interface ReferralVisitsSelect<T extends boolean = true> {
+  referrer?: T;
+  visitor?: T;
+  audience?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -2921,10 +2972,17 @@ export interface RewardSetting {
     enquiry?: number | null;
     booking?: number | null;
     referral?: number | null;
+    referral_signup?: number | null;
+    referral_vendor?: number | null;
+    welcome?: number | null;
     listing_live?: number | null;
     vendor_reply?: number | null;
     vendor_booking?: number | null;
   };
+  /**
+   * Most "someone you invited joined, applied or enquired" awards one person can get in any 30 days. Booked and approved awards have no limit.
+   */
+  referralMonthlyCap?: number | null;
   coupleTiers?:
     | {
         name: string;
@@ -3055,10 +3113,14 @@ export interface RewardSettingsSelect<T extends boolean = true> {
         enquiry?: T;
         booking?: T;
         referral?: T;
+        referral_signup?: T;
+        referral_vendor?: T;
+        welcome?: T;
         listing_live?: T;
         vendor_reply?: T;
         vendor_booking?: T;
       };
+  referralMonthlyCap?: T;
   coupleTiers?:
     | T
     | {

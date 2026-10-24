@@ -1,7 +1,8 @@
 import { APIError, type CollectionBeforeChangeHook, type CollectionConfig } from 'payload'
 
-import { anyone, authenticated } from '../access'
+import { anyone, authenticated, isAdminField } from '../access'
 import { linkVendorApplication } from '../hooks/linkVendorApplication'
+import { applicationRuns, stampApplicationReferral } from '../hooks/runsClub'
 import { notifySubmission } from '../hooks/notifySubmission'
 import { requireVerifiedPhone } from '../hooks/requireVerifiedPhone'
 import { syncToAirtable } from '../hooks/syncToAirtable'
@@ -58,7 +59,8 @@ export const VendorApplications: CollectionConfig = {
   hooks: {
     // Validate first; requireVerifiedPhone consumes the one-time proof, so it
     // must run last or a rejected form would burn the vendor's verification.
-    beforeChange: [requireCakeBasics, requireVerifiedPhone],
+    // stampApplicationReferral only reads a cookie, so it can run before the proof is used.
+    beforeChange: [requireCakeBasics, stampApplicationReferral, requireVerifiedPhone],
     afterChange: [
       notifySubmission('vendor application', [
         'name',
@@ -94,6 +96,7 @@ export const VendorApplications: CollectionConfig = {
       ]),
       syncToAirtable,
       linkVendorApplication,
+      applicationRuns,
     ],
   },
   fields: [
@@ -296,6 +299,16 @@ export const VendorApplications: CollectionConfig = {
       relationTo: 'vendors',
       label: 'Marketplace account',
       admin: { position: 'sidebar', readOnly: true },
+    },
+    {
+      // `c:<id>` / `v:<id>`: who invited this applicant (lib/rewards.ts). Set in code from the
+      // /invite/<code> cookie, never from the request.
+      name: 'referredBy',
+      type: 'text',
+      label: 'Invited by',
+      index: true,
+      access: { create: isAdminField, update: isAdminField },
+      admin: { position: 'sidebar', readOnly: true, description: 'c:<id> = couple, v:<id> = vendor.' },
     },
     {
       name: 'status',

@@ -88,6 +88,16 @@ export const Vendors: CollectionConfig = {
       access: { create: isAdminField, update: isAdminField },
       admin: { position: 'sidebar', readOnly: true },
     },
+    {
+      // `c:<id>` / `v:<id>`: who invited this account (lib/rewards.ts). Set in code from the
+      // /invite/<code> cookie, never from the request.
+      name: 'referredBy',
+      type: 'text',
+      label: 'Invited by',
+      index: true,
+      access: { create: isAdminField, update: isAdminField },
+      admin: { position: 'sidebar', readOnly: true, description: 'c:<id> = couple, v:<id> = vendor.' },
+    },
     { name: 'category', type: 'select', required: true, options: CATEGORY_OPTIONS },
     {
       name: 'otherService',

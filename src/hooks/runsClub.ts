@@ -5,7 +5,15 @@
 import type { CollectionAfterChangeHook, CollectionBeforeChangeHook } from 'payload'
 
 import { normalizePhone } from '../lib/phoneVerification'
-import { awardQuietly, findReferrer, kindOfCollection, newReferralCode, refCodeFromCookies } from '../lib/rewards'
+import {
+  awardQuietly,
+  awardReferralSignup,
+  awardReferralVendor,
+  findReferrer,
+  kindOfCollection,
+  newReferralCode,
+  refCodeFromCookies,
+} from '../lib/rewards'
 import { accountKey } from '../lib/rewardTiers'
 
 type Rel = number | string | { id: number | string } | null | undefined
@@ -35,6 +43,8 @@ export const vendorRuns: CollectionAfterChangeHook = async ({ doc, previousDoc, 
   }
   if (doc.listingStatus === 'published' && previousDoc?.listingStatus !== 'published') {
     await awardQuietly(req.payload, { kind: 'v', id: doc.id, reason: 'listing_live', source: 'account', req })
+    // Whoever invited this vendor: the big vendor-invite award (once per vendor's phone).
+    if (doc.referredBy) await awardReferralVendor(req.payload, doc.referredBy, doc.phone, req)
   }
   return doc
 }
@@ -55,14 +65,57 @@ export const stampLeadAccounts: CollectionBeforeChangeHook = async ({ data, oper
   if (user && userKind === 'c') data.customer = user.id
 
   const code = refCodeFromCookies(req.headers?.get?.('cookie'))
+  const referrer = code ? await findReferrer(req.payload, code, req).catch(() => null) : null
+  if (referrer) {
+    const ownAccount = user && userKind ? referrer.key === accountKey(userKind, user.id) : false
+    const phones = [normalizePhone(data.phone), normalizePhone(user?.phone)].filter(Boolean)
+    const ownPhone = Boolean(referrer.phone && phones.includes(referrer.phone))
+    if (!ownAccount && !ownPhone) data.referredBy = referrer.key
+    return data
+  }
+  // No invite cookie (it lasts 60 days): a couple who joined through an invite still
+  // credits whoever invited them, for as long as they have the account.
+  if (user && userKind === 'c') {
+    const account = (await req.payload
+      .findByID({ collection: 'customers', id: user.id, depth: 0, select: { referredBy: true }, overrideAccess: true, req })
+      .catch(() => null)) as { referredBy?: string | null } | null
+    if (account?.referredBy) data.referredBy = account.referredBy
+  }
+  return data
+}
+
+/**
+ * Partner applications (/vendors/partner), on create: who invited this vendor, from the
+ * /invite/<code> cookie only — never the request body. Own code / own phone doesn't
+ * count. Runs before requireVerifiedPhone (which must stay last).
+ */
+export const stampApplicationReferral: CollectionBeforeChangeHook = async ({ data, operation, req }) => {
+  if (operation !== 'create') return data
+  delete data.referredBy
+  const code = refCodeFromCookies(req.headers?.get?.('cookie'))
   if (!code) return data
   const referrer = await findReferrer(req.payload, code, req).catch(() => null)
   if (!referrer) return data
+  const user = req.user as { id: number | string; collection?: string; phone?: string | null } | null | undefined
+  const userKind = kindOfCollection(user?.collection)
   const ownAccount = user && userKind ? referrer.key === accountKey(userKind, user.id) : false
   const phones = [normalizePhone(data.phone), normalizePhone(user?.phone)].filter(Boolean)
-  const ownPhone = Boolean(referrer.phone && phones.includes(referrer.phone))
-  if (!ownAccount && !ownPhone) data.referredBy = referrer.key
+  if (!ownAccount && !(referrer.phone && phones.includes(referrer.phone))) data.referredBy = referrer.key
   return data
+}
+
+/** Partner applications: the small invite award when it arrives, the big one when staff approve it. */
+export const applicationRuns: CollectionAfterChangeHook = async ({ data, doc, previousDoc, operation, req, context }) => {
+  if (context.skipRuns) return doc
+  const referredBy = doc.referredBy ?? data?.referredBy
+  if (!referredBy) return doc
+  const phone = doc.phone ?? data?.phone
+  if (operation === 'create') await awardReferralSignup(req.payload, referredBy, phone, req)
+  // Only on an update: the public create can't make itself "approved" and pay out.
+  if (operation === 'update' && doc.status === 'approved' && previousDoc?.status !== 'approved') {
+    await awardReferralVendor(req.payload, referredBy, phone, req)
+  }
+  return doc
 }
 
 /**
@@ -80,6 +133,8 @@ export const leadRuns: CollectionAfterChangeHook = async ({ data, doc, previousD
   if (operation === 'create' && customer) {
     await awardQuietly(payload, { kind: 'c', id: customer, reason: 'enquiry', source: 'account', req })
   }
+  // An enquiry from someone who was invited: the inviter's small award (once per phone, capped).
+  if (operation === 'create' && referredBy) await awardReferralSignup(payload, referredBy, doc.phone ?? data?.phone, req)
   if (doc.status === 'booked' && previousDoc?.status !== 'booked') {
     const source = `lead:${doc.id}`
     if (customer) await awardQuietly(payload, { kind: 'c', id: customer, reason: 'booking', source, req })

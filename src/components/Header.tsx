@@ -49,7 +49,12 @@ function buildNav(hasTestimonials: boolean): NavEntry[] {
         { href: '/services', label: 'Services', desc: 'The full squad, under one roof' },
         { href: '/packages', label: 'Packages', desc: 'Powerplay to Century', soon: !FEATURES.packages },
         // The Runs club needs accounts, which open with the marketplace.
-        ...(FEATURES.marketplace ? [{ href: '/rewards', label: 'Runs club', desc: 'Score runs, unlock ₹ off' }] : []),
+        ...(FEATURES.marketplace
+          ? [
+              { href: '/rewards', label: 'Runs club', desc: 'Score runs, unlock ₹ off' },
+              { href: '/refer', label: 'Refer & earn', desc: 'Invite clients and vendors', also: ['/welcome'] },
+            ]
+          : []),
         // The gift registry is part of the shop now; its pages light up "Shop".
         ...(FEATURES.shop ? [{ href: '/shop', label: 'Shop', desc: 'Gifts for every occasion', also: ['/registry'] }] : []),
         ...(FEATURES.earn ? [{ href: '/earn', label: 'Earn from events', desc: 'Host travellers at your event' }] : []),
@@ -69,7 +74,7 @@ function tickerItems(settings: SiteSettings): string[] {
     'Weddings · Birthdays · Baby showers · Corporate · Sports events',
     `Across Tamil Nadu: ${MAJOR_CITIES.slice(0, 6).join(' · ')}`,
     FEATURES.marketplace ? 'Vendors: list free on the Zenfest Marketplace' : 'Vendors: partner with Zenfest',
-    'Free gift registry for families',
+    FEATURES.marketplace ? 'Refer & earn: invite a friend or a vendor and score runs' : '',
   ].filter(Boolean)
 }
 

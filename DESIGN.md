@@ -159,6 +159,13 @@ becomes a stacked section on a still poster.
   - No gift registry band while the Shop is off.
 - **Plan your event (`/enquire`):** five steps as five balls with an "Over 0.n" readout. Sending
   is the sixth ball, which brings the "Howzat!" thank-you.
+- **Refer & earn (`/refer`):**
+  - A scoreboard of invites.
+  - Two invite cards: a solid gold edge for clients, a dashed edge for vendors.
+  - **Live progress:** one row per person, with a ball for each stage they have passed and
+    a gold ring on the stage they're at now.
+- **Welcome (`/welcome`):** where an invite lands, "{Name} invited you". There are client
+  and vendor versions, each with two big choice cards.
 - **404:** "Clean bowled". The page is out; back to the pavilion.
 - **Loading (Home):** the rosette with "Taking guard…".
 

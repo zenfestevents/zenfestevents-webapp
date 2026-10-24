@@ -65,6 +65,16 @@ export const Customers: CollectionConfig = {
       access: { create: isAdminField, update: isAdminField },
       admin: { position: 'sidebar', readOnly: true },
     },
+    {
+      // `c:<id>` / `v:<id>`: who invited this account (lib/rewards.ts). Set in code from the
+      // /invite/<code> cookie, never from the request.
+      name: 'referredBy',
+      type: 'text',
+      label: 'Invited by',
+      index: true,
+      access: { create: isAdminField, update: isAdminField },
+      admin: { position: 'sidebar', readOnly: true, description: 'c:<id> = couple, v:<id> = vendor.' },
+    },
     { name: 'city', type: 'text', label: 'Area / city' },
     { name: 'eventDate', type: 'date', label: 'Event date (if known)' },
     { name: 'shortlist', type: 'relationship', relationTo: 'vendors', hasMany: true },

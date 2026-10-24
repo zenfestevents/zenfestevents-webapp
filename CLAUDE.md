@@ -738,7 +738,31 @@ src/
   - A gold progress line on the phone bar.
 
   The account button and the bar share one `/account/session` fetch per page
-  (`useAccountSession`), which now also returns the Runs club standing. Loyalty points
+  (`useAccountSession`), which now also returns the Runs club standing.
+
+  **Referrals: anyone invites anyone (owner, 2026-10-24).** Couples and vendors both
+  invite clients and vendors; recruiting vendors is a main goal.
+  - **Links:** each member has two, `/invite/<code>` (client) and `?for=vendor`.
+    - The route sets `zf_ref`, counts the visit once per browser (`referral-visits`,
+      anonymous `zf_vis`), then lands on `/welcome` ("{first name} invited you").
+  - **Who gets what:**
+    - The friend: `welcome` runs on sign-up (`welcomeReferredAccount`, all three sign-up
+      paths; stores `referredBy` on the account).
+    - The inviter, small: `referral_signup` when the friend joins, enquires or applies.
+      Source `phone:<10 digits>`, so once per person. Capped by `referralMonthlyCap` per
+      30 days.
+    - The inviter, big: `referral` when a client books, `referral_vendor` when a partner
+      application is **approved (update only, so a public create can't pay out)** or a
+      vendor listing goes live.
+  - **Partner applications** get `referredBy` from the cookie in
+    `stampApplicationReferral`, which runs *before* `requireVerifiedPhone`.
+  - **Leads from a referred couple** keep crediting the inviter after the 60-day cookie
+    expires.
+  - **`/refer`** shows the live tracker from `getReferrals()`.
+    - That function is the privacy boundary: first name + initial only, no phones.
+    - Stages: client joined/enquired → talking → quote sent → booked; vendor joined/applied
+      → under review → approved/live.
+    - It refreshes every 60 s while open. Loyalty points
   for couples and vendors (owner): runs can't be bought, have no cash value, nothing is
   chance-based; a tier's ₹ off is honoured by staff when quoting (Leads show the couple's
   tier in the sidebar). Runs per action and tiers are in `/admin` → Rewards. Easy to get wrong:

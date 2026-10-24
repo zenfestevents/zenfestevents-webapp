@@ -4,6 +4,7 @@ import { isAdmin } from '../access'
 import {
   AWARD_REASONS,
   DEFAULT_COUPLE_TIERS,
+  DEFAULT_REFERRAL_MONTHLY_CAP,
   DEFAULT_RUNS_PER,
   DEFAULT_VENDOR_TIERS,
   reasonLabel,
@@ -66,6 +67,18 @@ export const RewardSettings: GlobalConfig = {
           })),
         },
       ],
+    },
+    {
+      name: 'referralMonthlyCap',
+      type: 'number',
+      label: 'Invite runs: limit per 30 days',
+      min: 0,
+      defaultValue: DEFAULT_REFERRAL_MONTHLY_CAP,
+      admin: {
+        placeholder: String(DEFAULT_REFERRAL_MONTHLY_CAP),
+        description:
+          'Most "someone you invited joined, applied or enquired" awards one person can get in any 30 days. Booked and approved awards have no limit.',
+      },
     },
     tiers('coupleTiers', 'Couple tiers', DEFAULT_COUPLE_TIERS),
     tiers('vendorTiers', 'Vendor tiers', DEFAULT_VENDOR_TIERS),

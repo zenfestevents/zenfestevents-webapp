@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import Link from 'next/link'
 
-import type { Scorecard as ScorecardData } from '../../lib/rewards'
+import type { InviteLinks, Scorecard as ScorecardData } from '../../lib/rewards'
 import { GoldRing, TierBadge } from '../game'
+import { InviteShare } from './InviteShare'
 
 const inr = (n: number) => n.toLocaleString('en-IN')
 
@@ -15,36 +16,17 @@ const inr = (n: number) => n.toLocaleString('en-IN')
  */
 export function Scorecard({
   card,
-  inviteUrl,
+  links,
   scoring,
 }: {
   card: ScorecardData
-  /** Absolute /invite/<code> link, or null if the account has no code yet. */
-  inviteUrl: string | null
+  /** Absolute client / vendor invite links, or null if the account has no code yet. */
+  links: InviteLinks | null
   /** "How to score" rows with this account's run values. */
-  scoring: { label: string; runs: number }[]
+  scoring: { reason: string; label: string; runs: number }[]
 }) {
-  const [copied, setCopied] = useState(false)
   const level = card.tiers.findIndex((t) => t.name === card.tier.name) + 1
-  const referralRuns = scoring.find((s) => /invite/i.test(s.label))?.runs ?? 0
-  const share = inviteUrl
-    ? `https://wa.me/?text=${encodeURIComponent(
-        card.kind === 'c'
-          ? `Planning an event? Zenfest Events plans weddings, birthdays and more across Tamil Nadu. Use my link: ${inviteUrl}`
-          : `Zenfest Events plans weddings and celebrations across Tamil Nadu. Plan yours here: ${inviteUrl}`,
-      )}`
-    : ''
-
-  async function copy() {
-    if (!inviteUrl) return
-    try {
-      await navigator.clipboard.writeText(inviteUrl)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // Clipboard blocked: the link is selectable in the field anyway.
-    }
-  }
+  const runsFor = (reason: string) => scoring.find((s) => s.reason === reason)?.runs ?? 0
 
   return (
     <div className="scorecard">
@@ -100,24 +82,20 @@ export function Scorecard({
         <section className="scorecard__invite">
           <h3 className="scorecard__title">Invite and score</h3>
           <p className="muted">
-            Share your link. When someone you invite books an event with Zenfest, you get{' '}
-            {referralRuns ? `${inr(referralRuns)} runs` : 'runs'}.
+            Invite clients and vendors. You score when they join, and big when a client books or a vendor is approved.
           </p>
-          {inviteUrl ? (
-            <>
-              <input className="scorecard__link mono" readOnly value={inviteUrl} onFocus={(e) => e.currentTarget.select()} aria-label="Your invite link" />
-              <div className="btn-row">
-                <a className="btn btn--whatsapp btn--small" href={share} target="_blank" rel="noopener">
-                  Share on WhatsApp
-                </a>
-                <button type="button" className="btn btn--ghost btn--small" onClick={copy}>
-                  {copied ? 'Copied' : 'Copy link'}
-                </button>
-              </div>
-            </>
+          {links ? (
+            <InviteShare
+              links={links}
+              compact
+              runs={{ small: runsFor('referral_signup'), client: runsFor('referral'), vendor: runsFor('referral_vendor') }}
+            />
           ) : (
-            <p className="muted">Your invite link will appear here shortly.</p>
+            <p className="muted">Your invite links will appear here shortly.</p>
           )}
+          <Link className="link-arrow" href="/refer">
+            Track your invites →
+          </Link>
         </section>
       </div>
 

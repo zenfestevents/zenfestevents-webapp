@@ -4,6 +4,8 @@
 //   2. referrals: the referrer is paid, self-referrals (same account or phone) are refused
 //   3. a client-sent `customer` / `referredBy` on a lead is ignored
 //   4. vendors: listing live, first reply, marketplace booking; staff's manual rows
+//   5. invites both ways: couples and vendors invite clients and vendors, welcome runs,
+//      the small capped award, vendor approvals, the live tracker
 // Test rows use numbers 6100000001–6100000099 and are removed before and after each run.
 // Refuses to run against Postgres, so it can never touch production.
 import 'dotenv/config'
@@ -13,7 +15,14 @@ import { getPayload, type Payload } from 'payload'
 
 import config from '../payload.config'
 import { newCode, newToken } from '../lib/phoneVerification'
-import { awardRuns, getScorecard, REF_COOKIE } from '../lib/rewards'
+import {
+  awardReferralSignup,
+  awardRuns,
+  getReferrals,
+  getScorecard,
+  recordReferralVisit,
+  REF_COOKIE,
+} from '../lib/rewards'
 import { tierFor, DEFAULT_COUPLE_TIERS } from '../lib/rewardTiers'
 import { createWhatsAppAccount } from '../lib/whatsappAuth'
 
@@ -97,6 +106,8 @@ async function cleanUp(p: Payload) {
   }
   await p.delete({ collection: 'enquiries', where: { message: { like: '[runs-test]' } }, overrideAccess: true })
   await p.delete({ collection: 'leads', where: { phone: like }, overrideAccess: true })
+  await p.delete({ collection: 'vendor-applications', where: { phone: like }, overrideAccess: true })
+  await p.delete({ collection: 'referral-visits', where: { visitor: { like: 'runs-test-' } }, overrideAccess: true })
   await p.delete({ collection: 'phone-verifications', where: { phone: like }, overrideAccess: true })
   await p.delete({ collection: 'customers', where: { phone: like }, overrideAccess: true })
   await p.delete({ collection: 'vendors', where: { phone: like }, overrideAccess: true })
@@ -165,7 +176,7 @@ await check('a referral that books pays the referrer', async () => {
   const paid = await rows(`c:${anu}`, 'referral')
   assert.equal(paid.length, 1)
   assert.equal(paid[0].source, `lead:${lead.id}`)
-  assert.equal((await account('customers', anu)).runs, 1700)
+  assert.equal((await account('customers', anu)).runs, 1725, '1,200 own + 500 booked + 25 for the invite')
   assert.equal((await rows(`c:${bala.id}`, 'booking')).length, 1, 'and the booking couple gets booking runs')
 })
 
@@ -221,7 +232,7 @@ await check('even a Local API create cannot set customer / referredBy', async ()
 
 await check("staff see the couple's tier on the lead", async () => {
   const lead = await payload.findByID({ collection: 'leads', id: anuLead, depth: 0, overrideAccess: true })
-  assert.equal(lead.customerTier, 'Captain · ₹2,500 off (1,700 runs)')
+  assert.equal(lead.customerTier, 'Captain · ₹2,500 off (1,750 runs)')
 })
 
 // =====================================================================
@@ -287,6 +298,149 @@ await check('tierFor: progress and the top tier', async () => {
   const top = tierFor(99999, DEFAULT_COUPLE_TIERS)
   assert.equal(top.next, null)
   assert.equal(top.progress, 1)
+})
+
+// =====================================================================
+console.log('\n5. Invites both ways')
+
+const codeOf = async (kind: 'customers' | 'vendors', id: number) => String((await account(kind, id)).referralCode)
+let deepa = 0 // a couple Anu invited
+let ravi = 0 // a vendor Anu invited
+
+await check('a couple joining through an invite gets welcome runs; the inviter gets the small award', async () => {
+  const before = (await account('customers', anu)).runs ?? 0
+  const { id } = await createWhatsAppAccount(
+    payload,
+    'customer',
+    { name: 'Deepa Kumar', phone: local(20), phoneProof: await proofFor(local(20)) },
+    await codeOf('customers', anu),
+  )
+  deepa = id
+  const doc = (await payload.findByID({ collection: 'customers', id, depth: 0, overrideAccess: true })) as {
+    referredBy?: string
+    runs?: number
+  }
+  assert.equal(doc.referredBy, `c:${anu}`)
+  assert.equal(doc.runs, 150, '50 joined + 100 welcome')
+  const small = await rows(`c:${anu}`, 'referral_signup')
+  assert.ok(small.some((r) => r.source === `phone:${local(20)}`))
+  assert.equal((await account('customers', anu)).runs, before + 25)
+})
+
+await check('the same friend enquiring later (no cookie) adds no second small award, but booking pays 500', async () => {
+  const before = (await account('customers', anu)).runs ?? 0
+  const lead = await postLead({ name: 'Deepa Kumar', phone: local(20) }, { user: await asUser('customers', deepa) })
+  assert.equal(lead.referredBy, `c:${anu}`, 'credited from the account, though the cookie is gone')
+  assert.equal((await account('customers', anu)).runs, before, 'still one small award for Deepa')
+  await setLead(lead.id, 'contacted')
+  await setLead(lead.id, 'quoted')
+  await setLead(lead.id, 'booked')
+  assert.equal((await account('customers', anu)).runs, before + 500)
+})
+
+await check('a couple invites a vendor: small award on sign-up, 300 when the listing goes live', async () => {
+  const before = (await account('customers', anu)).runs ?? 0
+  const { id } = await createWhatsAppAccount(
+    payload,
+    'vendor',
+    {
+      name: 'Ravi Shankar',
+      businessName: 'Ravi Decor',
+      category: 'decoration',
+      phone: local(21),
+      phoneProof: await proofFor(local(21)),
+    } as never,
+    await codeOf('customers', anu),
+  )
+  ravi = id
+  const doc = (await payload.findByID({ collection: 'vendors', id, depth: 0, overrideAccess: true })) as { referredBy?: string }
+  assert.equal(doc.referredBy, `c:${anu}`)
+  assert.equal((await rows(`v:${id}`, 'welcome')).length, 1, 'vendors get welcome runs too')
+  await payload.update({ collection: 'vendors', id, data: { listingStatus: 'pending' } as never, overrideAccess: true })
+  await payload.update({ collection: 'vendors', id, data: { listingStatus: 'published' } as never, overrideAccess: true })
+  assert.equal((await account('customers', anu)).runs, before + 25 + 300)
+  assert.equal((await rows(`c:${anu}`, 'referral_vendor')).length, 1)
+})
+
+let applicationId = 0
+await check('a vendor invites a partner applicant: small award on applying, 300 when staff approve', async () => {
+  const before = (await account('vendors', ravi)).runs ?? 0
+  const app = await payload.create({
+    collection: 'vendor-applications',
+    data: {
+      name: 'Meena Iyer',
+      businessName: 'Meena Florals',
+      vendorType: 'decoration',
+      phone: local(22),
+      phoneVerification: await proofFor(local(22)),
+      referredBy: 'c:999',
+    } as never,
+    overrideAccess: false,
+    req: { headers: new Headers({ cookie: `${REF_COOKIE}=${await codeOf('vendors', ravi)}` }) },
+  })
+  applicationId = app.id
+  const saved = (await payload.findByID({ collection: 'vendor-applications', id: app.id, depth: 0, overrideAccess: true })) as {
+    referredBy?: string
+  }
+  assert.equal(saved.referredBy, `v:${ravi}`, 'from the cookie, not the body')
+  assert.equal((await account('vendors', ravi)).runs, before + 25)
+  for (const status of ['reviewing', 'approved', 'approved']) {
+    await payload.update({ collection: 'vendor-applications', id: app.id, data: { status } as never, overrideAccess: true })
+  }
+  assert.equal((await account('vendors', ravi)).runs, before + 25 + 300, 'approved pays once')
+})
+
+await check('a vendor invites a couple who books: 500 to the vendor', async () => {
+  const before = (await account('vendors', ravi)).runs ?? 0
+  const lead = await postLead({ name: 'Karthik Raja', phone: local(23) }, { cookie: `${REF_COOKIE}=${await codeOf('vendors', ravi)}` })
+  assert.equal(lead.referredBy, `v:${ravi}`)
+  await setLead(lead.id, 'booked')
+  assert.equal((await account('vendors', ravi)).runs, before + 25 + 500)
+})
+
+await check('an applicant using their own vendor code is refused', async () => {
+  const ownPhone = (await account('vendors', ravi)).phone
+  const app = await payload.create({
+    collection: 'vendor-applications',
+    data: { name: 'Ravi Shankar', businessName: 'Ravi Decor', vendorType: 'decoration', phone: ownPhone, phoneVerification: await proofFor(ownPhone) } as never,
+    overrideAccess: false,
+    req: { headers: new Headers({ cookie: `${REF_COOKIE}=${await codeOf('vendors', ravi)}` }) },
+  })
+  const saved = (await payload.findByID({ collection: 'vendor-applications', id: app.id, depth: 0, overrideAccess: true })) as {
+    referredBy?: string | null
+  }
+  assert.equal(saved.referredBy ?? null, null)
+})
+
+await check('opening an invite link counts once per browser', async () => {
+  await recordReferralVisit(payload, `c:${anu}`, 'runs-test-a', 'client')
+  await recordReferralVisit(payload, `c:${anu}`, 'runs-test-a', 'client')
+  await recordReferralVisit(payload, `c:${anu}`, 'runs-test-b', 'vendor')
+  const r = await getReferrals('c', anu, payload)
+  assert.deepEqual(r.opened, { client: 1, vendor: 1, total: 2 })
+})
+
+await check('the small award stops at the monthly limit (10)', async () => {
+  const fresh = await makeCustomer(30)
+  for (let n = 40; n <= 50; n++) await awardReferralSignup(payload, `c:${fresh.id}`, local(n))
+  assert.equal((await rows(`c:${fresh.id}`, 'referral_signup')).length, 10)
+})
+
+await check('the live tracker: first name + initial, client and vendor stages, runs per person', async () => {
+  const r = await getReferrals('c', anu, payload)
+  const byName = Object.fromEntries(r.friends.map((f) => [f.name, f]))
+  assert.equal(byName['Deepa K.']?.label, 'Booked')
+  assert.equal(byName['Deepa K.']?.type, 'client')
+  assert.equal(byName['Deepa K.']?.runs, 525)
+  assert.equal(byName['Ravi S.']?.type, 'vendor')
+  assert.equal(byName['Ravi S.']?.label, 'Live')
+  assert.equal(byName['Ravi S.']?.step, byName['Ravi S.']?.steps)
+  assert.equal(r.totals.vendorsApproved, 1)
+  assert.ok(!JSON.stringify(r).includes(local(20)), 'no phone numbers in the tracker')
+  const v = await getReferrals('v', ravi, payload)
+  assert.equal(v.friends.find((f) => f.name === 'Meena I.')?.label, 'Approved')
+  assert.equal(v.friends.find((f) => f.name === 'Karthik R.')?.label, 'Booked')
+  assert.ok(applicationId > 0)
 })
 
 await cleanUp(payload)

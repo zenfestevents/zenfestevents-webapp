@@ -11,15 +11,23 @@ import { placeholderEmail } from './accountOptions'
 import { signUpData, verifiedAccountsWithPhone, type SignUpDetails } from './accountSignup'
 import { UserError } from './formCheck'
 import { consumePhoneProof, normalizePhone } from './phoneVerification'
-import { awardQuietly } from './rewards'
+import { awardQuietly, welcomeReferredAccount } from './rewards'
 import { ACCOUNT, type AccountKind } from './session'
 
 type Proof = SignUpDetails['phoneProof']
 
 const NEED_PROOF = 'Verify your number on WhatsApp first.'
 
-/** Creates the account; the WhatsApp proof is consumed last, after every other check. */
-export async function createWhatsAppAccount(payload: Payload, kind: AccountKind, input: SignUpDetails) {
+/**
+ * Creates the account; the WhatsApp proof is consumed last, after every other check.
+ * `refCode` is the invite code to credit (defaults to the request's invite cookie).
+ */
+export async function createWhatsAppAccount(
+  payload: Payload,
+  kind: AccountKind,
+  input: SignUpDetails,
+  refCode?: string | null,
+) {
   const { data, phone } = await signUpData(kind, input)
   if ((await verifiedAccountsWithPhone(payload, kind, phone)).length) {
     throw new UserError('There is already an account with this WhatsApp number. Log in instead.')
@@ -41,6 +49,8 @@ export async function createWhatsAppAccount(payload: Payload, kind: AccountKind,
   })
   // Runs club: welcome runs (once per account — the unique index makes a repeat a no-op).
   await awardQuietly(payload, { kind: kind === 'vendor' ? 'v' : 'c', id: account.id, reason: 'joined', source: 'account' })
+  // Came through an invite link: welcome runs, and the inviter's small award.
+  await welcomeReferredAccount(payload, { kind: kind === 'vendor' ? 'v' : 'c', id: account.id, phone, code: refCode })
   return { id: account.id, data }
 }
 

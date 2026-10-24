@@ -14,6 +14,7 @@ import * as migration_20261014_124216_whatsapp_cloud from './20261014_124216_wha
 import * as migration_20261022_172310_testimonials from './20261022_172310_testimonials';
 import * as migration_20261022_172311_google_reviews from './20261022_172311_google_reviews';
 import * as migration_20261024_061243_runs_club from './20261024_061243_runs_club';
+import * as migration_20261024_075645_referrals from './20261024_075645_referrals';
 
 export const migrations = [
   {
@@ -94,6 +95,11 @@ export const migrations = [
   {
     up: migration_20261024_061243_runs_club.up,
     down: migration_20261024_061243_runs_club.down,
-    name: '20261024_061243_runs_club'
+    name: '20261024_061243_runs_club',
+  },
+  {
+    up: migration_20261024_075645_referrals.up,
+    down: migration_20261024_075645_referrals.down,
+    name: '20261024_075645_referrals'
   },
 ];
