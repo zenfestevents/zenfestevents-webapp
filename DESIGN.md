@@ -2,129 +2,176 @@
 
 Derived from the official **gold-on-black** brand logo (emblem with a stylised "Z",
 photographer + couple silhouettes; "ZENFEST" bold condensed logotype; tagline
-"Your Gateway to Stress-Free Celebrations"). The identity is **luxury, gold on black** —
-photos glow like an exhibition against black feature bands.
+"Your Gateway to Stress-Free Celebrations"). The logo, its colours and its text never change.
+
+## Night match (owner, 2026-10-24)
+The site is a **floodlit cricket ground at night**, and the web app plays like a game:
+scoreboards, overs, levels, unlocks. Cricket is what everyone in Tamil Nadu connects with.
+The look is **mostly dark**; ivory survives only as `.surface-paper` for features that still
+carry their own light styling (gift registry, shop, polls, Zenfest AI).
+
+### Brand safety: generic cricket only
+- **Allowed:** stumps, bails, ball seam, pitch, scoreboard, overs, floodlights, a generic
+  gold trophy, and words like Powerplay, Super Over, Free Hit, Hat-trick, Century, Sixer,
+  Yorker, Man of the Match, Duck, Captain, Debut, Drinks Break and Howzat.
+- **Never:** IPL, BCCI, ICC, or any league, team (or abbreviation), player, stadium or
+  sponsor name. Never a team's colour pair.
+- **Never, not even in playful copy:** "Whistle Podu", "Orange Cap", "Purple Cap",
+  "Strategic Timeout".
+  - "Whistle Podu" is a registered Class 41 trademark of Chennai Super Kings Cricket Ltd
+    (no. 3903998). Class 41 covers our own event services.
+  - The other three are sponsored IPL properties.
+  - Use instead: Zenfest Gold Cap / Top Scorer, Wicket Taker, Drinks Break,
+    Howzat! / Semma shot! / Vera level!
+- **Gold stays the logo's muted gold.** Never push it to bright yellow, which reads as a
+  team colour.
+- **The Runs club is a loyalty programme, not a game of money or chance.** Runs can't be
+  bought and have no cash value. There are no spin wheels and no prediction prizes.
+
+### Future package names
+- Powerplay (starter)
+- Boundary / Sixer (mid)
+- Half-Century / Century (full)
+- Hat-trick (engagement + wedding + reception)
+- Super Over (last-minute add-on)
+
+### The brand mix
+Each part is borrowed from a different system in `Design/awesome-design-md-main`:
+
+| Part | From | On Zenfest |
+|---|---|---|
+| Surfaces | Linear, Raycast, Warp | `--pitch-0..3` warm blacks; raised = lighter, not shadowed; translucent hairlines |
+| Card top edge | Shopify, Framer | `--edge-light`, a floodlight catching the top edge |
+| Section glow | Resend, Replicate | `--floodlight`, one layered gold glow from above per section |
+| Score ticker | Al Jazeera, Jobright | `Ticker` above the bar: LIVE dot + real facts, pauses on hover / reduced motion |
+| Laptop nav | Mastercard, Apple, Oracle | floating translucent pill, gold hairline, blur; short gold bar under the active link |
+| Dropdowns | Airbnb, Tesla | numbered items with a one-line hint |
+| Hamburger | Lamborghini | the word MENU beside the bars |
+| Phone menu | PlayStation, BMW M, Binance | full-screen drawer from the left, gold team stripe, main buttons pinned at the bottom |
+| Service cards | Ferrari driver card, NVIDIA | player cards: mono squad number + the gold bails (`.corner-mark`) |
+| Featured card | Revolut, The Verge | one gold-filled card per grid (`.card--featured`) |
+| Our Work | PlayStation / 1win rails | phones: 16:9 tiles snapping sideways |
+| Buttons | Binance, Apple, SpaceX | gold with dark text; press = scale .95; `.btn--outline-gold` uppercase secondary |
+| Big numbers | Ferrari, Binance, Stripe | `Scoreboard`: tabular Oswald numbers over mono captions, **real numbers only** |
+| Rating | Airbnb | `LaurelRating`, generic laurels around the Google score |
+| Steps | Binance, Meta, DJI | each step is a ball of the over (`.evq__dot`, `BallDots`); chosen options get a gold ring |
+| Ticks | Starbucks | checkboxes pop on a spring curve |
+| Tiers | Starbucks Rewards, PlayStation | tier cards with a gold bar on top, level badge, perks |
+| Progress | Oura | `GoldRing` |
+| Achievements | Raycast | `TierBadge`, a gold key-cap |
+| Big moments | Nintendo box art | `.howzat`, outlined gold display type ("Howzat!", "Clean bowled"); sparingly |
+| Closing band | Superhuman, Together.ai | a faint stencilled ZENFEST behind the final call to action |
 
 ## Palette (from the logo)
-- `--ink` #0d0d0d — near-black (primary dark / feature bands)
-- `--marigold` #d9b24c — brand gold (primary accent, CTAs)  ·  `--marigold-bright` #f3de8e champagne highlight
-- `--marigold-deep` #a9791f — deep gold / bronze
-- `--emerald` #9c6b1a — bronze (rare secondary accent)
-- `--blush` #f6f1e7 — warm ivory (light content surfaces)
-- `--jasmine` #fbf7ee — lightest (text on dark)
-- `--clay` #6f6455 — muted warm taupe (secondary text, hairlines)
+- `--ink` #0d0d0d (near-black)
+- `--marigold` #d9b24c (brand gold: accent, CTAs)
+  - `--marigold-bright` #f3de8e (champagne highlight)
+  - `--marigold-deep` #a9791f (bronze)
+- Ivory (paper only): `--blush` #f6f1e7 and `--jasmine` #fbf7ee (also the text colour on dark)
+- `--clay` #6f6455 (muted text on paper)
+- The ground: `--pitch-0` #0b0907 → `--pitch-3` #26201a
 
-Rhythm: airy ivory content sections alternate with black feature bands so the gallery
-and CTAs read as premium evening-celebration moments. Accent words are emphasised in
-**gold**, not italic.
+**Components use the semantic tokens, never the raw palette,** for anything that differs
+between the dark ground and paper:
+- `--surface`, `--surface-1..3`
+- `--text`, `--text-muted`
+- `--line`, `--line-strong`
+- `--link` (small gold text)
+- `--ok`, `--err`
+
+`.surface-paper` flips them all back to ink on ivory. `.band-ink` forces them dark.
 
 ## Typography
-- **Display:** Oswald — bold condensed geometric sans echoing the "ZENFEST" logotype.
-  Loaded via `next/font/google` (self-hosted).
-- **Body/UI:** Hanken Grotesk — clean, legible on mobile. Loaded via `next/font/google`
-  (self-hosted).
-- **Labels/eyebrows:** uppercase, letter-spaced (echoing the spaced "EVENTS").
-- Both fonts are self-hosted by Next.js; no external font loading required after build.
+- **Display:** Oswald. A bold condensed sans echoing the "ZENFEST" logotype.
+- **Body/UI:** Hanken Grotesk.
+- **Scoreboard:** JetBrains Mono 500, used for eyebrows, the ticker, overs, squad numbers and
+  captions. It is not preloaded, so it never delays the first paint.
+- All are self-hosted via `next/font`. Accent words are gold (`.accent`), not italic. All
+  figures use tabular numerals.
 
 ## Logo
-Gold-on-black emblem + wordmark. The header bar is **solid black** so the gold logo sits
-on its native ground: the circular emblem (`emblem.png`) beside the "ZENFEST EVENTS"
-wordmark (`wordmark.png`, transparent background). The square stacked lockup
-(`logo-full.png`) is reserved for the footer — it does not read at bar height, which is
-why the horizontal pairing exists. Phones keep the full pairing too — the emblem plus
-"ZENFEST EVENTS™" — since the bar only holds the logo and the menu button there (the
-wordmark shrinks slightly below 340px).
+Gold-on-black emblem + wordmark. On laptops it sits in the floating pill; on phones it sits
+in the solid bar.
+- `emblem.webp` + `wordmark.webp` beside each other in the bar.
+- `logo-full.png` (the square stacked lockup) only in the footer.
+- Phones keep the full "ZENFEST EVENTS™" pairing.
 
 ## Signature
-Kolam (Tamil threshold line-art), rendered in gold line-work — a subtle "welcome" motif
-on the hero, dividers, and around the gallery. Kept restrained so it complements, not
-competes with, the emblem. The divider is a thin gold stroke (`.kolam-divider`), never a
-filled shape — it closes the phone hero's text band and separates sections elsewhere.
-
-On light page heads (any section whose container starts with `.page-head` — Services,
-Gallery, Packages, About) the rosette appears as a large, faint gold watermark in the empty
-space to the right (`--kolam-rosette` in `styles.css`), turning very slowly and still under
-reduced motion. One rosette per page; don't add more.
-
-A second, smaller echo is **zari** — the gold thread border of a silk saree: the phone
-bar's gold "Enquire" button has a slow sheen crossing it, and the vendor button is
-outlined in a double gold line.
+- **Ball seam** (`SeamDivider`): a gold line stitched both sides with the ball at its centre.
+  It separates sections and closes the phone hero's text band.
+- **The bails:** two small gold bars on the top corner of player cards.
+- **Kolam** stays where it means the Tamil welcome: the rotating rosette watermark on page
+  heads (`.page-head`), the registry, the 404 and the homepage loading screen.
 
 ## The hero
-**Laptop and desktop:** one full-bleed, scroll-scrubbed film of a real Zenfest reception. Scrolling drives the
-footage forward and back, and on the same progress two gold heart halves glide together
-and meet as it ends — "two hearts, one celebration". The nav bar greets you, steps aside
-for the whole hero so nothing covers the film, and returns as the footage leaves.
+**Laptop and desktop:**
+- One full-bleed, scroll-scrubbed film of a real Zenfest reception.
+- Two gold heart halves glide together as the film ends.
+- A pill at the bottom right bowls **one over**: six balls light up as the film plays
+  (`--p`).
+- The nav bar (with its ticker) steps aside for the whole hero and returns as the film
+  leaves.
 
 Rules learned building it:
-- **The film is the subject; nothing sits on top of it.** The heart is sized and lifted to
-  *frame* the couple, clear of their faces — verified against real frames, not guessed.
-- **Darken only behind the letters.** Type over film needs a contained highlight hugging
-  the text (or a chip), never a full-width wash — a wash hides the footage, which defeats
-  the point of having it.
-- **Never make the visitor wait.** A poster paints instantly and the film loads behind it;
-  on metered or slow connections the film never downloads and the poster simply stays.
+- **The film is the subject; nothing sits on top of it.** The heart frames the couple, clear of their faces.
+- **Darken only behind the letters** (a contained highlight or chip), never a full-width wash.
+- **Never make the visitor wait.** A poster paints instantly. On slow or metered connections
+  the film never downloads.
 
-**Phones (≤720px): a still welcome, not the film.** Touch-scrubbing a 20 MB film was slow
-and laggy, so phones get the team image instead — the whole Zenfest crew (caterer,
-photographer, decorator, makeup, mehendi, baker, return gifts, MC, DJ, magician, dancer,
-Iyer, Mangala Vadyam) around the mascot, who offers the welcome tray, with a baked-in
-speech bubble: *"Vanakkam! Welcome to Zenfest Events — Let's plan your event!"*
-- **Shown whole, never cropped.** Full width, starting just under the header. Cropping it
-  to fill the screen cut people off at the sides and tucked the bubble under the header.
-- **Text goes below the image, never on it.** A dark band under it holds, in order: the
-  gold location line, the headline, the description, and a kolam divider.
-- **Actions live in the bottom bar, not the hero** (see Quality floor).
+**Phones (≤720px): a still welcome, not the film.**
+- The team image is shown whole, never cropped, starting under the header.
+- Text goes in the dark band below it, never on the image.
+- Actions live in the bottom bar.
+- Swipe slides follow for the vendor lanes.
 
 ## Surfaces & details
-- Black bands carry a fine warm grain plus a soft bronze glow from the top right
-  (`--grain-ink`); the ivory page has a fainter grain (`--grain-ivory`). Never flat black.
-- Headings use `text-wrap: balance` (no lone last words); paragraphs `pretty`.
-- Gold text on ivory uses `--gold-text` (#8a6414) for readability; brand gold
-  (`--marigold`) stays for large type and anything on black.
-- Buttons press (scale .98) and the gold ones cast a gold-tinted shadow on hover.
-- Prices use tabular figures.
-- Services: the odd last service ("Complete coordination") is the black card — the
-  "hand us the whole event" option — and service cards are not numbered (they're not a
-  sequence; step lists like Registry/Earn keep their numbers).
+- The page is `--pitch-0` with fine warm grain. Cards are `--surface-1` with a hairline and
+  the edge light. Hover lifts a card one step lighter, with a gold-tinted border.
+- Headings use `text-wrap: balance`; paragraphs use `pretty`.
+- Buttons press (scale .95). Gold buttons cast a gold-tinted shadow on hover.
+- Services:
+  - "Complete coordination" is the gold card, the "hand us the whole event" option.
+  - Player cards are numbered like a squad, not a sequence.
+- Form fields are `--surface-2` with `color-scheme: dark`, and a gold focus ring.
 
-## Motion (restrained)
-Hero: the scroll-scrubbed film above. Elsewhere the kolam line draws itself once and
-gallery items get a one-shot scroll-reveal. `prefers-reduced-motion` fully respected —
-the hero becomes an ordinary stacked section on a still poster, with no video fetched.
+## Motion
+- The hero film.
+- The ticker's slow belt.
+- The LIVE pulse.
+- The drawer sliding in.
+- Ticks popping.
+- One-shot scroll reveals.
+- The rosette turning slowly.
+
+Under `prefers-reduced-motion` all of it stops: the ticker shows a still list and the hero
+becomes a stacked section on a still poster.
 
 ## Pages & sections
-- **Home:** Hero (film on desktop, team image on phones) + featured gallery + services
-  grid (on `band-soft` background). With no projects in the CMS, the gallery shows a
-  "Coming soon" panel on its own — it disappears once the first project is added.
-- **Gallery (Our Work):** Full project grid, each with category tag, title, cover image
-- **Services:** Service cards with descriptions, linked to `/packages` or `/contact`
-- **Packages:** Bundled service offerings (currently "Coming soon"; flip `PACKAGES_READY`
-  when ready)
-- **About:** Company story and values (content managed via Payload CMS)
-- **Contact:** Inquiry form (POST to `/api/leads`); includes WhatsApp / Call CTAs
-- **Marketplace (`/marketplace`):** the DIY lane — vendor cards with cover, service, areas
-  and "From ₹"; a homepage band (after Zenfest AI, so the two lanes sit together) shows the
-  newest four listings with a slight table-top stagger.
-- **404:** black band, self-drawing gold rosette, "This doorway has no kolam yet".
-- **Vendor signup:** Partner enrollment form (POST to `/api/vendor-applications`)
-- **Earn from events (`/earn`):** families in Tamil Nadu apply to host foreign guests at
-  their wedding or function. Intro + application form, "How it works" ink band with gold
-  numerals, earnings cards, "Why Zenfest", FAQ accordion, closing CTA. Reached from a
-  black homepage band (between featured work and services) with a gold "Earn from
-  events" button, plus the nav and footer.
-- **Signup / offer:** Event details capture (POST to `/api/signups`); branches on
-  "planning an event?"
+- **Home:**
+  - Hero
+  - Scoreboard (Google rating, reviews, cities, services: real figures only)
+  - For vendors (two lanes)
+  - Marketplace band
+  - Highlights (Our Work)
+  - Gift registry
+  - The squad (services)
+  - From the stands (testimonials, with the laurel rating)
+  - Take guard (closing call to action)
+- **Plan your event (`/enquire`):** five steps as five balls with an "Over 0.n" readout. Sending
+  is the sixth ball, which brings the "Howzat!" thank-you.
+- **404:** "Clean bowled". The page is out; back to the pavilion.
+- **Loading (Home):** the rosette with "Taking guard…".
 
-All page layouts use the root layout (`app/(frontend)/layout.tsx`), which includes
-Header, Footer, and MobileCTABar. Content sections are wrapped in `.section` containers
-with `.container` for max-width and gutter padding.
+All page layouts use the root layout (`app/(frontend)/layout.tsx`), which includes Header,
+Footer and MobileCTABar. Registry, shop, polls and plan routes add a `PaperSurface` layout.
 
 ## Quality floor
-Mobile-first, visible keyboard focus, accessible contrast. On phones a dark sticky bottom
-bar on every page carries the three actions: **WhatsApp** (green) · **Enquire** (gold
-zari, → /contact) · **Enroll as a vendor** (double gold outline, → /vendors). There is
-no Call button there; the phone number lives on the Contact page and in the footer.
-Text over imagery must stay legible at the film's brightest frame, not just its average one.
-All form fields are accessible with labels; submission handling includes email notification
-(when SMTP is configured).
+Mobile-first, visible keyboard focus, accessible contrast on both grounds.
+
+On phones a dark sticky bottom bar on every page carries three actions:
+- **WhatsApp** (green)
+- **Plan your event** (gold zari sheen)
+- **For vendors** (double gold outline)
+
+Text over imagery must stay legible at the film's brightest frame. All form fields have
+labels.

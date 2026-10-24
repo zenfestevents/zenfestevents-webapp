@@ -82,6 +82,7 @@ src/
     styles.css            Design tokens (colors, typography, spacing)
     parts.css             Component & section styles
     registry.css, polls.css, ai.css, marketplace.css, shop.css   Feature styles (imported in that order)
+    game.css              The cricket "night match" layer (imported last)
   app/(payload)/        Payload admin (generated boilerplate — avoid hand-editing)
   collections/          Users, Media, Categories, Services (+ `ai` specialist group),
                         Packages, Projects, Leads, Signups, VendorApplications,
@@ -225,6 +226,29 @@ src/
 - **Styling:** plain CSS design system. Tokens live in `styles.css`; component/section
   styles in `parts.css`. Use the existing CSS variables and class prefixes; avoid
   adding a CSS framework.
+- **Night match: cricket theme, mostly dark (owner, 2026-10-24; see DESIGN.md).** Easy to
+  get wrong:
+  - **Use the semantic tokens** for anything that must work on both grounds:
+    `--surface`/`-1..3`, `--text`, `--text-muted`, `--line`, `--link`, `--ok`, `--err`.
+    `var(--ink)` as a text colour turns invisible on the dark page.
+  - **Light pages:** `.surface-paper` flips the tokens back to ink on ivory. The registry,
+    `r`, `dashboard`, `shop`, `polls` and `plan` routes get it from a one-line `layout.tsx`
+    (`components/PaperSurface.tsx`), because `registry.css`, `polls.css`, `ai.css` and
+    `shop.css` still use the raw ivory palette.
+  - **`.band-ink` forces dark** even inside paper.
+  - Game pieces live in `components/game` (server-safe):
+    - `SeamDivider` replaced `KolamDivider` everywhere except paper features.
+    - `BallDots`, `Scoreboard`, `Ticker`, `GoldRing`, `TierBadge`, `LaurelRating`.
+    - Their styles are in `game.css`.
+  - **The header is ticker + bar.** `--header-h` (101px) must stay a plain px value equal
+    to `--ticker-h` + `--bar-h`: `EventRequirementsForm` reads it with `parseFloat`.
+  - **Never put `backdrop-filter` or `transform` on `.site-header` itself.** Either one makes
+    it the containing block for the fixed phone drawer, which then collapses into the bar.
+    The laptop pill's blur sits on `.site-header__inner`.
+  - Scoreboards show **real numbers only**.
+  - **Cricket copy is generic: never IPL, a league, team, player or stadium name.** Also
+    never "Whistle Podu" (a registered Class 41 trademark of the Chennai team), "Orange
+    Cap", "Purple Cap" or "Strategic Timeout". The full list is in DESIGN.md.
 - **Scroll animation:** two patterns — `components/Reveal.tsx` (IntersectionObserver,
   one-shot fade/rise for section reveals) and `components/ScrubHero.tsx` (the homepage
   hero). The scrub sets an inherited `--p` (0→1) CSS variable on the **outermost**
@@ -361,7 +385,9 @@ src/
 
 ## Current state (things that are deliberate, not oversights)
 - **Feature switches (`lib/features.ts`, 2026-10-14).** The owner trimmed the site to what
-  is live: `FEATURES = { ai, marketplace, earn, polls }`, **all `false`**. Off means the code
+  is live: `FEATURES = { ai, marketplace, earn, polls }`, all `false` then.
+  **`marketplace` is `true` since 2026-10-24** (owner: open vendor sign-up, the marketplace
+  and couple login now; everything else stays hidden). Off means the code
   stays and: AI / Marketplace / Earn pages render `<ComingSoon feature=…>` (`/plan`,
   `/marketplace/*`, `/earn`, `/vendors/marketplace`, and the vendor + couple sign-up /
   complete-signup pages — `signUp` / `completeGoogleSignUp` refuse server-side too); poll
