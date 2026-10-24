@@ -32,6 +32,7 @@ import type { VerifyMode } from '../PhoneVerify'
 import { ChangePhone } from './ChangePhone'
 import { EnquiryFacts, EnquiryThread, StatusPill, formatDay } from './EnquiryThread'
 import { MonthCalendar } from './MonthCalendar'
+import { Scorecard } from './Scorecard'
 import { statusText, useSave } from './useSave'
 
 export type DashboardVendor = {
@@ -58,7 +59,7 @@ export type DashboardVendor = {
   hasApplication: boolean
 }
 
-type Tab = 'enquiries' | 'listing' | 'prices' | 'photos' | 'availability'
+type Tab = 'enquiries' | 'listing' | 'prices' | 'photos' | 'availability' | 'scorecard'
 
 const LOGIN = '/vendors/login'
 
@@ -68,8 +69,11 @@ export function VendorDashboard({
   verifyMode,
   initialTab,
   welcome,
+  scorecard,
 }: {
   vendor: DashboardVendor
+  /** The Runs club tab (lib/rewards.ts scorecardProps). */
+  scorecard: React.ComponentProps<typeof Scorecard>
   enquiries: VendorEnquiry[]
   verifyMode: VerifyMode
   initialTab: string
@@ -81,6 +85,7 @@ export function VendorDashboard({
     ['prices', 'Prices'],
     ['photos', 'Photos'],
     ['availability', 'Dates'],
+    ['scorecard', 'Scorecard'],
   ]
   const live = vendor.listingStatus === 'published'
   const fallback: Tab = live || enquiries.length ? 'enquiries' : 'listing'
@@ -153,6 +158,7 @@ export function VendorDashboard({
             >
               {label}
               {t === 'enquiries' && unread > 0 && <span className="dash__badge">{unread}</span>}
+              {t === 'scorecard' && <span className="runs-chip mono">{scorecard.card.total.toLocaleString('en-IN')}</span>}
             </button>
           ))}
         </div>
@@ -163,6 +169,7 @@ export function VendorDashboard({
           {tab === 'prices' && <PricesTab vendor={vendor} />}
           {tab === 'photos' && <PhotosTab vendor={vendor} />}
           {tab === 'availability' && <DatesTab vendor={vendor} />}
+          {tab === 'scorecard' && <Scorecard {...scorecard} />}
         </div>
       </div>
     </section>

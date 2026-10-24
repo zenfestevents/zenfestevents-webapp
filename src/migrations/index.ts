@@ -13,6 +13,7 @@ import * as migration_20261014_040817_tamil_nadu_copy from './20261014_040817_ta
 import * as migration_20261014_124216_whatsapp_cloud from './20261014_124216_whatsapp_cloud';
 import * as migration_20261022_172310_testimonials from './20261022_172310_testimonials';
 import * as migration_20261022_172311_google_reviews from './20261022_172311_google_reviews';
+import * as migration_20261024_061243_runs_club from './20261024_061243_runs_club';
 
 export const migrations = [
   {
@@ -89,5 +90,10 @@ export const migrations = [
     up: migration_20261022_172311_google_reviews.up,
     down: migration_20261022_172311_google_reviews.down,
     name: '20261022_172311_google_reviews',
+  },
+  {
+    up: migration_20261024_061243_runs_club.up,
+    down: migration_20261024_061243_runs_club.down,
+    name: '20261024_061243_runs_club'
   },
 ];

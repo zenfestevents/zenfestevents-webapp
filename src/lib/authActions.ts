@@ -20,6 +20,7 @@ import { PASSWORD_MIN, categoryLabel } from './marketplaceOptions'
 import { getPayloadClient } from './payload'
 import { consumePhoneProof, verifyMode } from './phoneVerification'
 import { rateLimited } from './rateLimit'
+import { awardQuietly } from './rewards'
 import {
   ACCOUNT,
   clearSessionCookie,
@@ -128,6 +129,7 @@ export async function signUp(input: SignUpInput): Promise<AuthResult> {
       disableVerificationEmail: !confirm,
       overrideAccess: true,
     })
+    await awardQuietly(payload, { kind: kind === 'vendor' ? 'v' : 'c', id: account.id, reason: 'joined', source: 'account' })
 
     if (kind === 'vendor') {
       await tellTeamAboutVendor(data, email, account.id, confirm ? 'email not confirmed yet' : 'email')
@@ -176,6 +178,7 @@ export async function completeGoogleSignUp(
       overrideAccess: true,
     })
     jar.delete(PENDING_COOKIE)
+    await awardQuietly(payload, { kind: kind === 'vendor' ? 'v' : 'c', id: account.id, reason: 'joined', source: 'account' })
     await startSession(collection, account.id)
 
     if (kind === 'vendor') await tellTeamAboutVendor(data, pending.email, account.id, 'Google')

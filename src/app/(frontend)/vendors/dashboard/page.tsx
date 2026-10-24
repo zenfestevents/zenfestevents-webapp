@@ -6,6 +6,7 @@ import { VendorDashboard, type DashboardVendor } from '../../../../components/ma
 import { dayKey, enquiriesForVendor, photo, type PublicPhoto } from '../../../../lib/marketplace'
 import { getPayloadClient } from '../../../../lib/payload'
 import { verifyMode } from '../../../../lib/phoneVerification'
+import { scorecardProps } from '../../../../lib/rewards'
 import { requireVendor } from '../../../../lib/session'
 import type { Vendor } from '../../../../payload-types'
 
@@ -72,6 +73,7 @@ export default async function VendorDashboardPage({ searchParams }: { searchPara
       verifyMode={verifyMode()}
       initialTab={param(sp.tab)}
       welcome={param(sp.welcome) === '1'}
+      scorecard={await scorecardProps('v', v.id)}
     />
   )
 }

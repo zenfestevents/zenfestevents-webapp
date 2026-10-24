@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { adminOrSelf, isAdmin, isAdminField } from '../access'
+import { assignReferralCode, customerRuns } from '../hooks/runsClub'
 import { accountAuth } from './accountAuth'
 
 /**
@@ -25,6 +26,7 @@ export const Customers: CollectionConfig = {
     description: 'Couples and families with a Zenfest account.',
   },
   defaultSort: '-createdAt',
+  hooks: { beforeChange: [assignReferralCode], afterChange: [customerRuns] },
   fields: [
     { name: 'name', type: 'text', required: true },
     { name: 'phone', type: 'text', required: true },
@@ -44,6 +46,24 @@ export const Customers: CollectionConfig = {
       label: 'Google account ID',
       access: { create: isAdminField, read: isAdminField, update: isAdminField },
       admin: { position: 'sidebar', readOnly: true, description: 'Set when they sign in with Google.' },
+    },
+    {
+      // Runs club total — a cache of the sum of this account's `runs` rows (lib/rewards.ts).
+      name: 'runs',
+      type: 'number',
+      defaultValue: 0,
+      label: 'Runs',
+      access: { create: isAdminField, update: isAdminField },
+      admin: { position: 'sidebar', readOnly: true, description: 'Runs club total. Add a Runs entry to change it.' },
+    },
+    {
+      // Share code for /invite/<code>; set on create, back-filled by the Runs club migration.
+      name: 'referralCode',
+      type: 'text',
+      unique: true,
+      index: true,
+      access: { create: isAdminField, update: isAdminField },
+      admin: { position: 'sidebar', readOnly: true },
     },
     { name: 'city', type: 'text', label: 'Area / city' },
     { name: 'eventDate', type: 'date', label: 'Event date (if known)' },

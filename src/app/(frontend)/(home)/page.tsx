@@ -8,7 +8,7 @@ import { getSiteSettings } from '../../../lib/getSettings'
 import { mediaUrl } from '../../../lib/media'
 import { SERVICES } from '../../../lib/serviceCatalog'
 import { KolamRosette } from '../../../components/Kolam'
-import { LaurelRating, Scoreboard, SeamDivider, type ScoreItem } from '../../../components/game'
+import { BallDots, LaurelRating, Scoreboard, SeamDivider, type ScoreItem } from '../../../components/game'
 import { Reveal } from '../../../components/Reveal'
 import { ScrubHero } from '../../../components/ScrubHero'
 import { VendorPaths } from '../../../components/VendorPaths'
@@ -378,6 +378,30 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ---------- RUNS CLUB: points for couples and vendors (/rewards) ---------- */}
+      {FEATURES.marketplace && (
+        <section className="section--tight band-ink home-runs">
+          <div className="container home-runs__inner">
+            <div>
+              <p className="eyebrow">Runs club</p>
+              <h2 className="display-m">
+                Score runs, save on your <span className="accent">next event</span>
+              </h2>
+              <p className="lede">
+                Plan with us, book with us and invite friends: every one scores runs. Climb from Debut to Hall of Fame
+                and your level&apos;s discount comes off your next quote. Free to join.
+              </p>
+              <BallDots done={3} current={3} className="home-runs__balls" />
+            </div>
+            <div className="btn-row">
+              <Link className="btn btn--primary" href="/rewards">
+                Join the Runs club
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ---------- TESTIMONIALS: three reviews (collections/Testimonials.ts), all on /testimonials ---------- */}
       {reviews.length > 0 && (

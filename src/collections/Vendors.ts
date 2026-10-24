@@ -1,6 +1,7 @@
 import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 
 import { adminOrSelf, isAdmin, isAdminField } from '../access'
+import { assignReferralCode, vendorRuns } from '../hooks/runsClub'
 import {
   CATEGORY_OPTIONS,
   LANGUAGES,
@@ -46,7 +47,7 @@ export const Vendors: CollectionConfig = {
       'Vendor accounts and their marketplace listings. Set "Listing status" to Live to publish one.',
   },
   defaultSort: '-updatedAt',
-  hooks: { beforeChange: [setStartingPrice] },
+  hooks: { beforeChange: [setStartingPrice, assignReferralCode], afterChange: [vendorRuns] },
   fields: [
     { name: 'name', type: 'text', required: true, label: 'Contact name' },
     { name: 'businessName', type: 'text', required: true },
@@ -68,6 +69,24 @@ export const Vendors: CollectionConfig = {
       label: 'Google account ID',
       access: { create: isAdminField, read: isAdminField, update: isAdminField },
       admin: { position: 'sidebar', readOnly: true, description: 'Set when they sign in with Google.' },
+    },
+    {
+      // Runs club total — a cache of the sum of this account's `runs` rows (lib/rewards.ts).
+      name: 'runs',
+      type: 'number',
+      defaultValue: 0,
+      label: 'Runs',
+      access: { create: isAdminField, update: isAdminField },
+      admin: { position: 'sidebar', readOnly: true, description: 'Runs club total. Add a Runs entry to change it.' },
+    },
+    {
+      // Share code for /invite/<code>; set on create, back-filled by the Runs club migration.
+      name: 'referralCode',
+      type: 'text',
+      unique: true,
+      index: true,
+      access: { create: isAdminField, update: isAdminField },
+      admin: { position: 'sidebar', readOnly: true },
     },
     { name: 'category', type: 'select', required: true, options: CATEGORY_OPTIONS },
     {

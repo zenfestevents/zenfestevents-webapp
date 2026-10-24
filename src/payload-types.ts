@@ -102,6 +102,7 @@ export interface Config {
     'whatsapp-contacts': WhatsappContact;
     'whatsapp-messages': WhatsappMessage;
     'whatsapp-campaigns': WhatsappCampaign;
+    runs: Run;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -146,6 +147,7 @@ export interface Config {
     'whatsapp-contacts': WhatsappContactsSelect<false> | WhatsappContactsSelect<true>;
     'whatsapp-messages': WhatsappMessagesSelect<false> | WhatsappMessagesSelect<true>;
     'whatsapp-campaigns': WhatsappCampaignsSelect<false> | WhatsappCampaignsSelect<true>;
+    runs: RunsSelect<false> | RunsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -158,10 +160,12 @@ export interface Config {
   globals: {
     'site-settings': SiteSetting;
     'reminder-settings': ReminderSetting;
+    'reward-settings': RewardSetting;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'reminder-settings': ReminderSettingsSelect<false> | ReminderSettingsSelect<true>;
+    'reward-settings': RewardSettingsSelect<false> | RewardSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -569,6 +573,18 @@ export interface Lead {
   };
   status?: ('new' | 'contacted' | 'quoted' | 'booked' | 'closed') | null;
   source?: string | null;
+  /**
+   * Set when a logged-in couple sent this.
+   */
+  customer?: (number | null) | Customer;
+  /**
+   * Honour the ₹ off by hand when quoting.
+   */
+  customerTier?: string | null;
+  /**
+   * c:<id> = couple, v:<id> = vendor.
+   */
+  referredBy?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -645,128 +661,49 @@ export interface AiConversation {
   createdAt: string;
 }
 /**
- * People who signed up for the ₹100-off offer. Honour the discount when quoting.
+ * Couples and families with a Zenfest account.
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "signups".
+ * via the `definition` "customers".
  */
-export interface Signup {
+export interface Customer {
   id: number;
   name: string;
-  phone: string;
-  birthday: string;
-  planningEvent: 'yes' | 'no';
-  eventType?: ('wedding' | 'birthday' | 'corporate' | 'housewarming' | 'sports' | 'other') | null;
-  eventDate?: string | null;
-  guestCount?: number | null;
-  message?: string | null;
-  status?: ('new' | 'contacted' | 'redeemed' | 'closed') | null;
-  offer?: string | null;
-  source?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Vendors who want to work with Zenfest Events.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "vendor-applications".
- */
-export interface VendorApplication {
-  id: number;
-  name: string;
-  businessName?: string | null;
-  vendorType: 'photography' | 'cake' | 'decoration' | 'catering' | 'dj' | 'other';
-  /**
-   * What the vendor offers, when they chose "Other".
-   */
-  otherService?: string | null;
-  photography?: {
-    coverage?: ('single' | 'all') | null;
-    specialty?: ('traditional-photo' | 'traditional-video' | 'candid-photo' | 'candid-video' | 'drone') | null;
-    rates?:
-      | {
-          service: 'traditional-photo' | 'traditional-video' | 'candid-photo' | 'candid-video' | 'drone';
-          /**
-           * 1 session ≈ 5 hours.
-           */
-          sessionPrice?: number | null;
-          camera?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    editing?: ('album-traditional' | 'album-candid' | 'video-traditional' | 'video-candid')[] | null;
-  };
-  cake?: {
-    flavours?:
-      | {
-          flavour: string;
-          ratePerKg?: number | null;
-          id?: string | null;
-        }[]
-      | null;
-    menu?: (number | null) | VendorUpload;
-    egglessCharge?: number | null;
-    egglessUnit?: ('per-kg' | 'flat' | 'nil' | 'none') | null;
-    wheatCharge?: number | null;
-    wheatUnit?: ('per-kg' | 'flat' | 'nil' | 'none') | null;
-    tier2kgCharge?: number | null;
-    tier3kgCharge?: number | null;
-    tierUnit?: ('flat' | 'per-kg' | 'none') | null;
-    customCharge?: number | null;
-    customUnit?: ('per-cake' | 'per-kg' | 'none') | null;
-    minOrder?: ('half-kg' | '1kg') | null;
-    leadNormalDays?: number | null;
-    leadCustomDays?: number | null;
-    fssaiNumber?: string | null;
-    fssaiCertificate?: (number | null) | VendorUpload;
-    deliveryRadiusKm?: number | null;
-    deliveryRates?: string | null;
-    venueServing?: ('yes' | 'no') | null;
-  };
   phone: string;
   phoneVerified?: boolean | null;
-  phoneVerification?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  email?: string | null;
-  city?: string | null;
   /**
-   * Link to work samples / Instagram / website.
+   * Set when they sign in with Google.
    */
-  portfolioUrl?: string | null;
-  message?: string | null;
-  vendor?: (number | null) | Vendor;
-  status?: ('new' | 'reviewing' | 'approved' | 'rejected') | null;
+  googleId?: string | null;
+  /**
+   * Runs club total. Add a Runs entry to change it.
+   */
+  runs?: number | null;
+  referralCode?: string | null;
+  city?: string | null;
+  eventDate?: string | null;
+  shortlist?: (number | Vendor)[] | null;
+  marketingConsent?: boolean | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * FSSAI certificates and menu cards sent with vendor applications.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "vendor-uploads".
- */
-export interface VendorUpload {
-  id: number;
-  kind: 'fssai' | 'menu' | 'other';
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'customers';
 }
 /**
  * Vendor accounts and their marketplace listings. Set "Listing status" to Live to publish one.
@@ -785,6 +722,11 @@ export interface Vendor {
    * Set when they sign in with Google.
    */
   googleId?: string | null;
+  /**
+   * Runs club total. Add a Runs entry to change it.
+   */
+  runs?: number | null;
+  referralCode?: string | null;
   category:
     | 'photography'
     | 'makeup'
@@ -900,6 +842,130 @@ export interface VendorMedia {
       filename?: string | null;
     };
   };
+}
+/**
+ * Vendors who want to work with Zenfest Events.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vendor-applications".
+ */
+export interface VendorApplication {
+  id: number;
+  name: string;
+  businessName?: string | null;
+  vendorType: 'photography' | 'cake' | 'decoration' | 'catering' | 'dj' | 'other';
+  /**
+   * What the vendor offers, when they chose "Other".
+   */
+  otherService?: string | null;
+  photography?: {
+    coverage?: ('single' | 'all') | null;
+    specialty?: ('traditional-photo' | 'traditional-video' | 'candid-photo' | 'candid-video' | 'drone') | null;
+    rates?:
+      | {
+          service: 'traditional-photo' | 'traditional-video' | 'candid-photo' | 'candid-video' | 'drone';
+          /**
+           * 1 session ≈ 5 hours.
+           */
+          sessionPrice?: number | null;
+          camera?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    editing?: ('album-traditional' | 'album-candid' | 'video-traditional' | 'video-candid')[] | null;
+  };
+  cake?: {
+    flavours?:
+      | {
+          flavour: string;
+          ratePerKg?: number | null;
+          id?: string | null;
+        }[]
+      | null;
+    menu?: (number | null) | VendorUpload;
+    egglessCharge?: number | null;
+    egglessUnit?: ('per-kg' | 'flat' | 'nil' | 'none') | null;
+    wheatCharge?: number | null;
+    wheatUnit?: ('per-kg' | 'flat' | 'nil' | 'none') | null;
+    tier2kgCharge?: number | null;
+    tier3kgCharge?: number | null;
+    tierUnit?: ('flat' | 'per-kg' | 'none') | null;
+    customCharge?: number | null;
+    customUnit?: ('per-cake' | 'per-kg' | 'none') | null;
+    minOrder?: ('half-kg' | '1kg') | null;
+    leadNormalDays?: number | null;
+    leadCustomDays?: number | null;
+    fssaiNumber?: string | null;
+    fssaiCertificate?: (number | null) | VendorUpload;
+    deliveryRadiusKm?: number | null;
+    deliveryRates?: string | null;
+    venueServing?: ('yes' | 'no') | null;
+  };
+  phone: string;
+  phoneVerified?: boolean | null;
+  phoneVerification?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  email?: string | null;
+  city?: string | null;
+  /**
+   * Link to work samples / Instagram / website.
+   */
+  portfolioUrl?: string | null;
+  message?: string | null;
+  vendor?: (number | null) | Vendor;
+  status?: ('new' | 'reviewing' | 'approved' | 'rejected') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * FSSAI certificates and menu cards sent with vendor applications.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vendor-uploads".
+ */
+export interface VendorUpload {
+  id: number;
+  kind: 'fssai' | 'menu' | 'other';
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * People who signed up for the ₹100-off offer. Honour the discount when quoting.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "signups".
+ */
+export interface Signup {
+  id: number;
+  name: string;
+  phone: string;
+  birthday: string;
+  planningEvent: 'yes' | 'no';
+  eventType?: ('wedding' | 'birthday' | 'corporate' | 'housewarming' | 'sports' | 'other') | null;
+  eventDate?: string | null;
+  guestCount?: number | null;
+  message?: string | null;
+  status?: ('new' | 'contacted' | 'redeemed' | 'closed') | null;
+  offer?: string | null;
+  source?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * WhatsApp phone checks from the website forms. Created automatically.
@@ -1247,46 +1313,6 @@ export interface PollVoter {
   createdAt: string;
 }
 /**
- * Couples and families with a Zenfest account.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customers".
- */
-export interface Customer {
-  id: number;
-  name: string;
-  phone: string;
-  phoneVerified?: boolean | null;
-  /**
-   * Set when they sign in with Google.
-   */
-  googleId?: string | null;
-  city?: string | null;
-  eventDate?: string | null;
-  shortlist?: (number | Vendor)[] | null;
-  marketingConsent?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  _verified?: boolean | null;
-  _verificationToken?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'customers';
-}
-/**
  * Quote requests couples sent to vendors through the marketplace.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1539,6 +1565,49 @@ export interface WhatsappCampaign {
    */
   audienceTag?: string | null;
   status?: ('draft' | 'sending' | 'done') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Every award of runs. To give a bonus or correct a total, add a row with reason "Added by the Zenfest team".
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "runs".
+ */
+export interface Run {
+  id: number;
+  account:
+    | {
+        relationTo: 'customers';
+        value: number | Customer;
+      }
+    | {
+        relationTo: 'vendors';
+        value: number | Vendor;
+      };
+  /**
+   * c:<id> for a couple, v:<id> for a vendor. Filled in automatically.
+   */
+  accountKey?: string | null;
+  /**
+   * Negative takes runs away.
+   */
+  amount: number;
+  reason:
+    | 'joined'
+    | 'profile'
+    | 'enquiry'
+    | 'booking'
+    | 'referral'
+    | 'listing_live'
+    | 'vendor_reply'
+    | 'vendor_booking'
+    | 'manual';
+  /**
+   * What it was for, e.g. lead:42 or enquiry:7.
+   */
+  source?: string | null;
+  note?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1979,6 +2048,9 @@ export interface LeadsSelect<T extends boolean = true> {
   aiConversation?: T;
   status?: T;
   source?: T;
+  customer?: T;
+  customerTier?: T;
+  referredBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2336,6 +2408,8 @@ export interface VendorsSelect<T extends boolean = true> {
   phone?: T;
   phoneVerified?: T;
   googleId?: T;
+  runs?: T;
+  referralCode?: T;
   category?: T;
   otherService?: T;
   areas?: T;
@@ -2394,6 +2468,8 @@ export interface CustomersSelect<T extends boolean = true> {
   phone?: T;
   phoneVerified?: T;
   googleId?: T;
+  runs?: T;
+  referralCode?: T;
   city?: T;
   eventDate?: T;
   shortlist?: T;
@@ -2652,6 +2728,20 @@ export interface WhatsappCampaignsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "runs_select".
+ */
+export interface RunsSelect<T extends boolean = true> {
+  account?: T;
+  accountKey?: T;
+  amount?: T;
+  reason?: T;
+  source?: T;
+  note?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -2751,6 +2841,10 @@ export interface SiteSetting {
     googleRating?: number | null;
     googleCount?: number | null;
   };
+  /**
+   * Shown on the homepage scoreboard. Leave blank to hide it.
+   */
+  eventsDelivered?: number | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2814,6 +2908,45 @@ export interface ReminderSetting {
   createdAt?: string | null;
 }
 /**
+ * How many runs each action earns and what each tier unlocks. 0 switches an action off.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reward-settings".
+ */
+export interface RewardSetting {
+  id: number;
+  runsPer?: {
+    joined?: number | null;
+    profile?: number | null;
+    enquiry?: number | null;
+    booking?: number | null;
+    referral?: number | null;
+    listing_live?: number | null;
+    vendor_reply?: number | null;
+    vendor_booking?: number | null;
+  };
+  coupleTiers?:
+    | {
+        name: string;
+        minRuns: number;
+        rupeesOff?: number | null;
+        perks?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  vendorTiers?:
+    | {
+        name: string;
+        minRuns: number;
+        rupeesOff?: number | null;
+        perks?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
@@ -2863,6 +2996,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         googleRating?: T;
         googleCount?: T;
       };
+  eventsDelivered?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -2904,6 +3038,45 @@ export interface ReminderSettingsSelect<T extends boolean = true> {
         recipients?: T;
       };
   ingestWebsite?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reward-settings_select".
+ */
+export interface RewardSettingsSelect<T extends boolean = true> {
+  runsPer?:
+    | T
+    | {
+        joined?: T;
+        profile?: T;
+        enquiry?: T;
+        booking?: T;
+        referral?: T;
+        listing_live?: T;
+        vendor_reply?: T;
+        vendor_booking?: T;
+      };
+  coupleTiers?:
+    | T
+    | {
+        name?: T;
+        minRuns?: T;
+        rupeesOff?: T;
+        perks?: T;
+        id?: T;
+      };
+  vendorTiers?:
+    | T
+    | {
+        name?: T;
+        minRuns?: T;
+        rupeesOff?: T;
+        perks?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

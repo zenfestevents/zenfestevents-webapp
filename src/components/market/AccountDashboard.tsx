@@ -13,6 +13,7 @@ import { EnquiryFacts, EnquiryThread, StatusPill, formatDay } from './EnquiryThr
 import { VendorCard } from './VendorCard'
 import type { VerifyMode } from '../PhoneVerify'
 import { ChangePhone } from './ChangePhone'
+import { Scorecard } from './Scorecard'
 import { statusText, useSave } from './useSave'
 
 type Profile = {
@@ -24,7 +25,7 @@ type Profile = {
   eventDate: string
 }
 
-type Tab = 'enquiries' | 'shortlist' | 'planner' | 'profile'
+type Tab = 'enquiries' | 'shortlist' | 'planner' | 'scorecard' | 'profile'
 
 export function AccountDashboard({
   profile,
@@ -33,8 +34,11 @@ export function AccountDashboard({
   initialTab,
   sentTo,
   verifyMode,
+  scorecard,
 }: {
   profile: Profile
+  /** The Runs club tab (lib/rewards.ts scorecardProps). */
+  scorecard: React.ComponentProps<typeof Scorecard>
   verifyMode: VerifyMode
   enquiries: CustomerEnquiry[]
   shortlist: PublicVendor[]
@@ -45,6 +49,7 @@ export function AccountDashboard({
     ['enquiries', 'My enquiries'],
     ['shortlist', 'Shortlist'],
     ['planner', 'Plan with Zenfest'],
+    ['scorecard', 'Scorecard'],
     ['profile', 'Profile'],
   ]
   const fallback: Tab = enquiries.length ? 'enquiries' : 'shortlist'
@@ -93,6 +98,7 @@ export function AccountDashboard({
               {label}
               {t === 'enquiries' && unread > 0 && <span className="dash__badge">{unread}</span>}
               {t === 'shortlist' && shortlist.length > 0 && <span className="dash__count">{shortlist.length}</span>}
+              {t === 'scorecard' && <span className="runs-chip mono">{scorecard.card.total.toLocaleString('en-IN')}</span>}
             </button>
           ))}
         </div>
@@ -101,6 +107,7 @@ export function AccountDashboard({
           {tab === 'enquiries' && <EnquiriesTab enquiries={enquiries} />}
           {tab === 'shortlist' && <ShortlistTab shortlist={shortlist} />}
           {tab === 'planner' && <PlannerTab shortlistCount={shortlist.length} enquiryCount={enquiries.length} />}
+          {tab === 'scorecard' && <Scorecard {...scorecard} />}
           {tab === 'profile' && <ProfileTab profile={profile} verifyMode={verifyMode} />}
         </div>
       </div>

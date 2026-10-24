@@ -729,6 +729,410 @@ input[type='radio']:checked {
   text-transform: uppercase;
 }
 
+/* ---------- dashboards on the dark ground: the tab track (registry.css is ivory) ---------- */
+.dash .reg-tabs {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+.dash .reg-tab {
+  color: var(--text-muted);
+}
+.dash .reg-tab:hover {
+  color: var(--text);
+}
+.dash .reg-tab.is-active {
+  background: var(--marigold);
+  color: var(--ink);
+}
+
+/* ---------- Runs club ---------- */
+/* The runs chip: header account button, dashboard tab, phone menu. */
+.runs-chip {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 6px;
+  background: rgba(217, 178, 76, 0.16);
+  border: 1px solid rgba(217, 178, 76, 0.45);
+  color: var(--marigold-bright);
+  font-size: 0.7rem;
+  line-height: 1.3;
+  vertical-align: 0.1em;
+}
+.reg-tab.is-active .runs-chip {
+  background: rgba(13, 13, 13, 0.12);
+  border-color: rgba(13, 13, 13, 0.35);
+  color: var(--ink);
+}
+.account-btn .runs-chip {
+  margin-left: 0;
+}
+@media (max-width: 1439px) {
+  /* The button is icon-only there: the chip rides on its corner. */
+  .account-btn {
+    position: relative;
+  }
+  .account-btn .runs-chip {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    padding: 0 0.3rem;
+    font-size: 0.6rem;
+    background: var(--marigold);
+    color: var(--ink);
+  }
+}
+
+/* Phone bar: a gold line along its top edge filling toward the next level (Spotify's
+   progress line). The whole line is a link to the scorecard. */
+.mobilebar__runs {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--marigold-deep), var(--marigold-bright)) 0 0 / calc(var(--runs, 0) * 100%) 100% no-repeat,
+    rgba(217, 178, 76, 0.18);
+}
+.mobilebar__runs::after {
+  /* A taller invisible hit area. */
+  content: '';
+  position: absolute;
+  inset: -8px 0 -4px;
+}
+
+/* The Scorecard tab. */
+.scorecard {
+  display: grid;
+  gap: 1.4rem;
+}
+.scorecard__hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.4rem 2rem;
+  padding: clamp(1.2rem, 0.8rem + 2vw, 2rem);
+  border-radius: var(--radius-l);
+  border: 1px solid rgba(217, 178, 76, 0.3);
+  overflow: hidden;
+  position: relative;
+}
+.scorecard__hero::before {
+  /* PlayStation's tier banner: a gold bar across the top. */
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, var(--marigold-deep), var(--marigold-bright), var(--marigold));
+}
+.scorecard__total {
+  font-family: var(--font-display), 'Arial Narrow', sans-serif;
+  font-size: 2.3rem;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--jasmine);
+}
+.scorecard__unit {
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--marigold);
+}
+.scorecard__standing {
+  display: grid;
+  justify-items: start;
+  gap: 0.55rem;
+  flex: 1 1 16rem;
+}
+.scorecard__off {
+  font-family: var(--font-display), 'Arial Narrow', sans-serif;
+  font-size: 1.5rem;
+  line-height: 1.1;
+  color: var(--marigold-bright);
+}
+.scorecard__next {
+  font-size: 0.74rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--marigold);
+}
+.scorecard__title {
+  margin: 0.4rem 0 0.2rem;
+  font-size: var(--step-1);
+}
+.scorecard__cols {
+  display: grid;
+  gap: 1.4rem;
+}
+@media (min-width: 760px) {
+  .scorecard__cols {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+}
+.scorecard__invite {
+  display: grid;
+  align-content: start;
+  gap: 0.7rem;
+}
+.scorecard__link {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  border: 1px dashed rgba(217, 178, 76, 0.5);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+.scorecard__terms {
+  font-size: 0.85rem;
+}
+.scorecard__terms a {
+  color: var(--link);
+  white-space: nowrap;
+}
+
+/* The ladder: levels as steps, reached ones gold. */
+.ladder {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(8.5rem, 1fr);
+  gap: 0.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+.ladder::-webkit-scrollbar {
+  display: none;
+}
+.ladder__step {
+  scroll-snap-align: start;
+}
+.ladder__step {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.2rem;
+  padding: 0.9rem 0.9rem 1rem;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+.ladder__step.is-reached {
+  border-color: rgba(217, 178, 76, 0.45);
+  color: var(--text);
+}
+.ladder__step.is-current {
+  background:
+    linear-gradient(160deg, rgba(255, 245, 210, 0.45), rgba(255, 245, 210, 0) 45%),
+    var(--marigold);
+  border-color: transparent;
+  color: var(--ink);
+}
+.ladder__min {
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.ladder__name {
+  font-family: var(--font-display), 'Arial Narrow', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+.ladder__off {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.ladder__unlocked {
+  justify-self: start;
+  margin-top: 0.3rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid currentColor;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transform: rotate(-4deg);
+}
+
+/* How to score: label … +runs. */
+.score-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+.score-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.score-list__runs {
+  flex: none;
+  color: var(--marigold);
+}
+@media (min-width: 760px) {
+  .score-list--wide {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 2.5rem;
+  }
+}
+
+/* Ball by ball: the history as a timeline down a gold line (The Verge). */
+.ballbyball {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 1.1rem;
+  border-left: 2px solid rgba(217, 178, 76, 0.4);
+  display: grid;
+  gap: 0.2rem;
+}
+.ballbyball li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 7.5rem 1fr auto;
+  align-items: baseline;
+  gap: 0.8rem;
+  padding: 0.55rem 0;
+}
+.ballbyball li::before {
+  content: '';
+  position: absolute;
+  left: calc(-1.1rem - 6px);
+  top: 0.95rem;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--marigold-bright), var(--marigold) 45%, var(--marigold-deep));
+}
+.ballbyball__when {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.ballbyball__runs {
+  color: var(--marigold);
+}
+.ballbyball__runs.is-minus {
+  color: var(--err);
+}
+@media (max-width: 560px) {
+  .ballbyball li {
+    grid-template-columns: 1fr auto;
+  }
+  .ballbyball__when {
+    grid-column: 1 / -1;
+  }
+}
+
+/* /rewards */
+.rewards__cta {
+  margin-top: 1.6rem;
+}
+.rewards__login {
+  margin-top: 0.8rem;
+}
+.rewards-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 720px) {
+  .rewards-steps {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.rewards-step {
+  display: grid;
+  align-content: start;
+  gap: 0.6rem;
+  padding: 1.3rem 1.3rem 1.4rem;
+}
+.rewards-step__title {
+  font-size: var(--step-2);
+}
+.tier-cards {
+  list-style: none;
+  margin: 0 0 2rem;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1rem;
+}
+.tier-card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 0.55rem;
+  padding: 1.5rem 1.3rem 1.4rem;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  box-shadow: var(--edge-light);
+  overflow: hidden;
+}
+.tier-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--marigold-deep), var(--marigold-bright), var(--marigold));
+}
+.tier-card__min {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.tier-card__off {
+  font-family: var(--font-display), 'Arial Narrow', sans-serif;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--marigold);
+}
+.rewards-terms {
+  max-width: 72ch;
+}
+.rewards-terms ul {
+  display: grid;
+  gap: 0.5rem;
+  padding-left: 1.1rem;
+}
+
+/* Homepage band: join the Runs club. */
+.home-runs__inner {
+  display: grid;
+  gap: 1.6rem;
+  align-items: center;
+}
+.home-runs__balls {
+  margin-top: 1.1rem;
+}
+.home-runs__ladder {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 900px) {
+  .home-runs__inner {
+    grid-template-columns: 1fr auto;
+    gap: 3rem;
+  }
+}
+
 /* ---------- reduced motion: the scoreboard holds still ---------- */
 @media (prefers-reduced-motion: reduce) {
   .ticker__belt,

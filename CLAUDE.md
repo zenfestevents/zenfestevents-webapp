@@ -728,6 +728,40 @@ src/
   `earn/page.tsx`. Option lists (incl. `HOST_CITIES`, Tamil Nadu only for now) live in
   `lib/hostOptions.ts`; they are Postgres enums, so adding a city needs `migrate:create`.
   Reached from the homepage band ("Earn from events" button), the header nav and footer.
+- **Runs club (`collections/Runs.ts`, `globals/RewardSettings.ts`, `lib/rewards.ts`,
+  `lib/rewardTiers.ts`, `hooks/runsClub.ts`, `/invite/[code]`), 2026-10-24.**
+  Screens:
+  - The dashboards' **Scorecard** tab (`components/market/Scorecard.tsx`, fed by
+    `scorecardProps()`).
+  - The public `/rewards` page (404s while `FEATURES.marketplace` is off).
+  - A runs chip on the account button.
+  - A gold progress line on the phone bar.
+
+  The account button and the bar share one `/account/session` fetch per page
+  (`useAccountSession`), which now also returns the Runs club standing. Loyalty points
+  for couples and vendors (owner): runs can't be bought, have no cash value, nothing is
+  chance-based; a tier's ₹ off is honoured by staff when quoting (Leads show the couple's
+  tier in the sidebar). Runs per action and tiers are in `/admin` → Rewards. Easy to get wrong:
+  - **One award once** = the unique index on `runs` (`accountKey`, `reason`, `source`), like
+    `poll-votes`. `awardRuns()` swallows the duplicate inside a Postgres **savepoint** — a
+    failed INSERT would otherwise abort the hook's whole transaction and sink the lead /
+    account save. Award from hooks with `awardQuietly(payload, { …, req })`.
+  - An account's `runs` field is a cache of the sum of its rows, rewritten with
+    `context.skipRuns` (which every award hook checks, so nothing loops). `withContext` puts the
+    request's context back afterwards — Payload merges a nested call's `context` into `req`.
+  - Leads: `customer` comes **only** from the session (`req.user.collection === 'customers'`)
+    and `referredBy` only from the httpOnly `zf_ref` cookie (`/invite/<code>`, 60 days), both
+    stamped by `stampLeadAccounts`; client-sent values are dropped, and a code that is the
+    submitter's own account or phone is ignored. `doc` in `afterChange` has been through
+    afterRead (admin-only fields hidden for a couple's REST create), so read them from `data` too.
+  - Sources: `joined` / `profile` / `enquiry` / `listing_live` are once per account
+    (`account`); `booking` + `referral` are `lead:<id>` (status → Booked), `vendor_reply` +
+    `vendor_booking` are `enquiry:<id>`. Staff's `manual` rows get a random source.
+  - Referral codes: 8 characters, set on create (`assignReferralCode`); the 2026-10-24 migration
+    back-filled existing accounts; `getScorecard()` fills any still missing (local SQLite push).
+  - `npm run test:rewards` (local SQLite only). The Postgres savepoint path was not run locally.
+  - Cricket names stay generic (DESIGN.md list): Debut … Hall of Fame, Net Bowler … Player of
+    the Series.
 - **Occasion reminders (`/admin` → Occasion Reminders; `collections/Contacts.ts`,
   `Reminders.ts`, `globals/ReminderSettings.ts`, `lib/occasions/*`) — internal only.**
   The owner wanted yearly birthdays/anniversaries of past clients and unconverted leads

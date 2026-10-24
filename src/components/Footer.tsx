@@ -70,6 +70,7 @@ export function Footer({ settings, hasTestimonials = false }: { settings: SiteSe
             )}
             {(FEATURES.earn || ANNOUNCE_COMING_SOON) && <Link href="/earn">Earn from events{!FEATURES.earn && <Soon />}</Link>}
             {FEATURES.polls && <Link href="/polls">Polls</Link>}
+            {FEATURES.marketplace && <Link href="/rewards">Runs club</Link>}
             {FEATURES.marketplace && <Link href="/account">My account</Link>}
           </div>
 

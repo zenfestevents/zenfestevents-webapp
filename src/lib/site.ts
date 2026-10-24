@@ -24,6 +24,8 @@ export type SiteSettings = {
   social?: { instagram?: string; facebook?: string; youtube?: string }
   ai?: { enabled?: boolean | null; greeting?: string | null; bandHeadline?: string | null }
   reviews?: { googleUrl?: string | null; googleRating?: number | null; googleCount?: number | null }
+  /** Homepage scoreboard count; 0 / blank hides it (real numbers only). */
+  eventsDelivered?: number | null
 }
 
 /**
@@ -79,6 +81,8 @@ export const SITE_FALLBACK: Required<SiteSettings> = {
     googleRating: 4.8,
     googleCount: 117,
   },
+  // Blank until the owner enters the real count in Site Settings.
+  eventsDelivered: 0,
   ai: {
     enabled: true,
     greeting:

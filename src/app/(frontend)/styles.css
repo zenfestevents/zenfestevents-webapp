@@ -98,6 +98,8 @@
 }
 
 html {
+  /* Scrollbars, date pickers and the like follow the night-match ground. */
+  color-scheme: dark;
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
 }
@@ -127,6 +129,7 @@ html {
   --fg: var(--text);
   background: var(--grain-ivory), var(--surface);
   color: var(--text);
+  color-scheme: light;
 }
 
 body {

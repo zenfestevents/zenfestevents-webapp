@@ -11,6 +11,7 @@ import { placeholderEmail } from './accountOptions'
 import { signUpData, verifiedAccountsWithPhone, type SignUpDetails } from './accountSignup'
 import { UserError } from './formCheck'
 import { consumePhoneProof, normalizePhone } from './phoneVerification'
+import { awardQuietly } from './rewards'
 import { ACCOUNT, type AccountKind } from './session'
 
 type Proof = SignUpDetails['phoneProof']
@@ -38,6 +39,8 @@ export async function createWhatsAppAccount(payload: Payload, kind: AccountKind,
     disableVerificationEmail: true,
     overrideAccess: true,
   })
+  // Runs club: welcome runs (once per account — the unique index makes a repeat a no-op).
+  await awardQuietly(payload, { kind: kind === 'vendor' ? 'v' : 'c', id: account.id, reason: 'joined', source: 'account' })
   return { id: account.id, data }
 }
 

@@ -110,5 +110,13 @@ export const SiteSettings: GlobalConfig = {
         { name: 'googleCount', type: 'number', label: 'Number of Google reviews', min: 0 },
       ],
     },
+    {
+      // The homepage scoreboard's "events delivered" — a real number only; blank hides it.
+      name: 'eventsDelivered',
+      type: 'number',
+      label: 'Events delivered',
+      min: 0,
+      admin: { description: 'Shown on the homepage scoreboard. Leave blank to hide it.' },
+    },
   ],
 }

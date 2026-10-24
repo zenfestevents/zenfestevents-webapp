@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { isAdmin } from '../access'
+import { enquiryRuns } from '../hooks/runsClub'
 import { ENQUIRY_STATUSES, EVENT_TYPES, toOptionList } from '../lib/marketplaceOptions'
 
 /**
@@ -19,6 +20,7 @@ export const Enquiries: CollectionConfig = {
     description: 'Quote requests couples sent to vendors through the marketplace.',
   },
   defaultSort: '-updatedAt',
+  hooks: { afterChange: [enquiryRuns] },
   fields: [
     { name: 'summary', type: 'text', admin: { readOnly: true } },
     { name: 'customer', type: 'relationship', relationTo: 'customers', required: true, index: true },

@@ -48,6 +48,8 @@ function buildNav(hasTestimonials: boolean): NavEntry[] {
       items: [
         { href: '/services', label: 'Services', desc: 'The full squad, under one roof' },
         { href: '/packages', label: 'Packages', desc: 'Powerplay to Century', soon: !FEATURES.packages },
+        // The Runs club needs accounts, which open with the marketplace.
+        ...(FEATURES.marketplace ? [{ href: '/rewards', label: 'Runs club', desc: 'Score runs, unlock ₹ off' }] : []),
         // The gift registry is part of the shop now; its pages light up "Shop".
         ...(FEATURES.shop ? [{ href: '/shop', label: 'Shop', desc: 'Gifts for every occasion', also: ['/registry'] }] : []),
         ...(FEATURES.earn ? [{ href: '/earn', label: 'Earn from events', desc: 'Host travellers at your event' }] : []),

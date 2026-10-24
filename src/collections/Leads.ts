@@ -4,6 +4,8 @@ import { anyone, authenticated, isAdminField } from '../access'
 import { ALL_SERVICES, EXTRA_SHOOTS } from '../lib/eventRequirements'
 import { notifySubmission } from '../hooks/notifySubmission'
 import { syncLeadToContacts } from '../hooks/syncOccasionFromWebsite'
+import { leadRuns, stampLeadAccounts } from '../hooks/runsClub'
+import { tierSummary } from '../lib/rewards'
 
 /** Field-level: only signed-in admins (the Local API used by Zenfest AI bypasses access). */
 const adminOnly = isAdminField
@@ -36,6 +38,7 @@ export const Leads: CollectionConfig = {
   },
   defaultSort: '-createdAt',
   hooks: {
+    beforeChange: [stampLeadAccounts],
     afterChange: [
       notifySubmission('enquiry', [
         'name',
@@ -59,6 +62,7 @@ export const Leads: CollectionConfig = {
         'requirements.budget',
       ]),
       syncLeadToContacts,
+      leadRuns,
     ],
   },
   fields: [
@@ -192,6 +196,48 @@ export const Leads: CollectionConfig = {
       type: 'text',
       defaultValue: 'website',
       admin: { position: 'sidebar', readOnly: true },
+    },
+    {
+      // Runs club: set only by stampLeadAccounts from the session — never from the
+      // request body (field access strips a client-sent value before the hook runs).
+      name: 'customer',
+      type: 'relationship',
+      relationTo: 'customers',
+      label: 'Couple account',
+      access: { create: adminOnly, read: adminOnly, update: adminOnly },
+      admin: { position: 'sidebar', readOnly: true, description: 'Set when a logged-in couple sent this.' },
+    },
+    {
+      // Virtual: the couple's Runs club tier and ₹ off, for quoting (lib/rewards.ts).
+      name: 'customerTier',
+      type: 'text',
+      virtual: true,
+      label: 'Runs club tier',
+      access: { create: () => false, read: adminOnly, update: () => false },
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        condition: (data) => Boolean(data?.customer),
+        description: 'Honour the ₹ off by hand when quoting.',
+      },
+      hooks: {
+        afterRead: [
+          async ({ siblingData, req }) => {
+            const c = siblingData?.customer
+            const id = c && typeof c === 'object' ? c.id : c
+            if (!id) return null
+            return tierSummary(req.payload, 'c', id, req).catch(() => null)
+          },
+        ],
+      },
+    },
+    {
+      // `c:<id>` / `v:<id>` from the /invite/<code> cookie; that account gets runs if this books.
+      name: 'referredBy',
+      type: 'text',
+      label: 'Referred by',
+      access: { create: adminOnly, read: adminOnly, update: adminOnly },
+      admin: { position: 'sidebar', readOnly: true, description: 'c:<id> = couple, v:<id> = vendor.' },
     },
   ],
 }
