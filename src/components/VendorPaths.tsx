@@ -22,8 +22,8 @@ export function VendorPaths({
   return (
     <div className={`vendor-paths ${FEATURES.marketplace ? '' : 'vendor-paths--single'}`}>
       <article className="vendor-path card">
-        <p className="eyebrow">Open now</p>
-        <H className="display-m">Partner with Zenfest</H>
+        <p className="eyebrow">Partner with Zenfest</p>
+        <H className="display-m">{FEATURES.marketplace ? 'Zenfest brings you work' : 'Partner with Zenfest'}</H>
         <p className="muted">
           Join our vendor team. We plan weddings, birthdays and celebrations across Tamil Nadu and bring you in when
           an event suits your work — we coordinate the client, you focus on delivery.
@@ -42,8 +42,8 @@ export function VendorPaths({
 
       {FEATURES.marketplace && (
       <article className="vendor-path card">
-        <p className="eyebrow">Free listing</p>
-        <H className="display-m">List on the Zenfest Marketplace</H>
+        <p className="eyebrow">Free marketplace listing</p>
+        <H className="display-m">Couples book you directly</H>
         <p className="muted">
           Your own listing with photos and an all-in price card. Couples who plan it themselves find you and
           contact you directly.

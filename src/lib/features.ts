@@ -5,7 +5,7 @@ export const FEATURES = {
   /** Zenfest AI planner (/plan, bubble, homepage band). Also needs AI_API_KEY + Site Settings. */
   ai: false,
   /** Vendor marketplace (/marketplace/*) and the vendor/couple sign-ups that feed it. */
-  marketplace: false,
+  marketplace: true,
   /** "Earn from events" hosts programme (/earn). */
   earn: false,
   /** Public polls (/polls/*, homepage band) and the registry's family polls tabs. */
