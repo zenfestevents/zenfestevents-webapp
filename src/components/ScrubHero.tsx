@@ -487,7 +487,16 @@ export function ScrubHero({
           <picture>
             {/* phones: the whole team welcoming the visitor, shown uncropped. The size
                 reserves its height before it loads (phones size the hero by the image, so
-                without it the page jumped); files from build-hero-mobile.cjs. */}
+                without it the page jumped); files from build-hero-mobile.cjs. AVIF first:
+                about half the bytes of the WebP, which is the fallback for old browsers. */}
+            <source
+              media={MOBILE_QUERY}
+              type="image/avif"
+              srcSet="/hero/poster-mobile-540.avif 540w, /hero/poster-mobile-720.avif 720w, /hero/poster-mobile-860.avif 860w, /hero/poster-mobile-1080.avif 1080w"
+              sizes="100vw"
+              width={860}
+              height={1290}
+            />
             <source
               media={MOBILE_QUERY}
               srcSet="/hero/poster-mobile-720.webp 720w, /hero/poster-mobile-860.webp 860w, /hero/poster-mobile-1080.webp 1080w, /hero/poster-mobile-1290.webp 1290w"

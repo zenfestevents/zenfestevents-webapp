@@ -266,8 +266,11 @@ src/
   (`.scrubhero__divider`, phones only); the desktop buttons and tags are hidden there —
   **phone actions live in `MobileCTABar`, never in the hero**. All of it is the last
   `@media (max-width: 720px)` block in `parts.css`. Regenerate the images with
-  `node build-hero-mobile.cjs` (sharp, WebP quality 66; keep its `WIDTHS` in step with the
-  `srcSet`). WebP, not JPEG: the busy petals/sparks made the JPEGs twice the size.
+  `node build-hero-mobile.cjs` (sharp, WebP quality 66; keep its `WIDTHS` and `AVIF_WIDTHS`
+  in step with the two `srcSet`s). WebP, not JPEG: the busy petals/sparks made the JPEGs twice
+  the size. **AVIF comes first (2026-10-25):** quality 40, 540–1080w, about half the WebP's
+  bytes with no visible change; it stops at 1080w (a 3x phone took the 367 KB 1290w WebP).
+  The image was the phone homepage's biggest download, which kept its PageSpeed LCP at 3.2 s.
   **Phones swipe (owner, 2026-10-22):** the image + band is slide 1 of a scroll-snap slider;
   the next slides are the vendor lanes (`VENDOR_SLIDES` in `ScrubHero.tsx`: Partner with
   Zenfest, plus Vendor Marketplace only once `FEATURES.marketplace` is on — so two slides and
