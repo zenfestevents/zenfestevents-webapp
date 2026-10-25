@@ -685,6 +685,45 @@
 .evq__tick {
   font-weight: 600;
 }
+/* Last step when logged in: who is sending, instead of the contact fields. */
+.evq__account {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--surface-2);
+}
+.evq__account p {
+  margin: 0;
+}
+.evq__account-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.evq__account-name {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+.evq__account-name .mono {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+.evq__account-switch {
+  justify-self: start;
+  margin-top: 0.3rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--link);
+  font: inherit;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
 .evq__nav {
   display: flex;
   justify-content: space-between;

@@ -423,7 +423,18 @@ src/
   `requirements` group (text `hasMany`, validated against the lists, so adding a service
   needs no migration). `eventType` gained `babyshower` (an enum → migration). Steps stay
   mounted (`hidden`) so one FormData holds every answer; `problem(step)` is the only rule
-  set. Corporate events and housewarmings still go through `/contact`.
+  set. Corporate events and housewarmings still go through `/contact`. **Logged in (couple or
+  vendor, owner 2026-10-25), the last step asks nothing**: it shows "Sending as <name> ·
+  ••••1234" with "Not you? Log out" (Payload's `/api/<collection>/logout`, then the fields
+  appear; answers stay). `stampLeadAccounts` overwrites a couple's lead name/phone with the
+  account's own; no email is sent (accounts only have the placeholder one).
+- **Sign-up popup (`components/JoinPrompt.tsx`, root layout), owner 2026-10-25:** 8 s into a
+  page, a visitor who isn't logged in gets a `<dialog>` to join (couple sign-up, log in, or
+  "Are you a vendor?") listing the runs from Reward Settings (`/account/session` returns
+  `join: { joined, enquiry }` when logged out). Once per browser session (`sessionStorage`
+  `zenfest-join-prompt`), only while `FEATURES.marketplace` is on, never on `QUIET` pages
+  (account/vendor pages, `/enquire`, `/plan`, `/welcome`, `/invite`, `/rewards`, `/refer`,
+  registry `/r/*` and `/dashboard/*`) or over another open dialog. Styles at the end of `game.css`.
 - **Packages aren't published yet.** `FEATURES.packages = false` (it was a local
   `PACKAGES_READY` until 2026-10-22): the page shows "Coming soon" with a CTA to custom quote
   instead of displaying packages, and its link in the Services menu, phone menu and footer

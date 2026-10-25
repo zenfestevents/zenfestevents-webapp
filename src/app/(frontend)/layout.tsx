@@ -13,6 +13,7 @@ import './game.css'
 import { Header } from '../../components/Header'
 import { Footer } from '../../components/Footer'
 import { MobileCTABar } from '../../components/MobileCTABar'
+import { JoinPrompt } from '../../components/JoinPrompt'
 import { NavProgress } from '../../components/NavProgress'
 import { getSiteSettings } from '../../lib/getSettings'
 import { hasTestimonials } from '../../lib/testimonials'
@@ -94,6 +95,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <main id="main">{children}</main>
           <Footer settings={settings} hasTestimonials={testimonials} />
           <MobileCTABar settings={settings} />
+          <JoinPrompt />
         </AiShell>
       </body>
     </html>

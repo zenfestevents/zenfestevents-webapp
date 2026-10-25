@@ -1342,12 +1342,118 @@ input[type='radio']:checked {
   }
 }
 
+/* ---------- sign-up popup (JoinPrompt): join the Runs club ---------- */
+.join {
+  width: min(28rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background: radial-gradient(120% 80% at 50% 0%, rgba(217, 178, 76, 0.16), transparent 60%), var(--surface-1);
+  color: var(--text);
+  box-shadow: var(--shadow-lift);
+  animation: join-in 0.35s ease-out;
+}
+.join::backdrop {
+  background: rgba(5, 5, 5, 0.66);
+}
+.join__inner {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  padding: 1.8rem 1.5rem 1.5rem;
+  text-align: center;
+}
+.join__inner p {
+  margin: 0;
+}
+.join__close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.7rem;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-muted);
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.join__close:hover,
+.join__close:focus-visible {
+  color: var(--text);
+  background: var(--surface-2);
+}
+.join__title {
+  margin: 0;
+}
+.join__runs {
+  display: grid;
+  gap: 0.45rem;
+  width: 100%;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+.join__runs li {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--surface-2);
+}
+.join__runs b {
+  color: var(--marigold);
+}
+.join__how {
+  font-size: 0.9rem;
+}
+.join__cta {
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.3rem;
+}
+.join__login,
+.join__vendor {
+  font-size: 0.92rem;
+}
+.join__login a,
+.join__vendor a {
+  color: var(--link);
+}
+.join__vendor {
+  color: var(--text-muted);
+}
+@keyframes join-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+/* Phones: a sheet from the bottom, clear of the thumb-reach bottom bar it covers. */
+@media (max-width: 720px) {
+  .join {
+    width: 100vw;
+    max-width: 100vw;
+    margin: auto 0 0;
+    border-radius: var(--radius-l) var(--radius-l) 0 0;
+    border-bottom: 0;
+  }
+  .join__inner {
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+}
+
 /* ---------- reduced motion: the scoreboard holds still ---------- */
 @media (prefers-reduced-motion: reduce) {
   .ticker__belt,
   .live-dot__pip,
   .mobile-menu,
   .site-nav__menu,
+  .join,
   input[type='checkbox']:checked,
   input[type='radio']:checked {
     animation: none;

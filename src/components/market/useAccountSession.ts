@@ -10,6 +10,8 @@ export type AccountSession = {
   standing: { runs: number; tier: string; next: string | null; toNext: number; progress: number } | null
   /** A couple's shortlisted vendor ids (empty otherwise). */
   shortlist: number[]
+  /** Logged out: runs for joining and for a first enquiry (Reward Settings), for the sign-up popup. */
+  join?: { joined: number; enquiry: number } | null
 }
 
 // The header button and the phone bar both ask on every navigation: one request per page.

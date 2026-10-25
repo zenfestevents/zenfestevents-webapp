@@ -60,9 +60,18 @@ export const stampLeadAccounts: CollectionBeforeChangeHook = async ({ data, oper
   delete data.customer
   delete data.referredBy
 
-  const user = req.user as { id: number | string; collection?: string; phone?: string | null } | null | undefined
+  const user = req.user as
+    | { id: number | string; collection?: string; name?: string | null; phone?: string | null }
+    | null
+    | undefined
   const userKind = kindOfCollection(user?.collection)
-  if (user && userKind === 'c') data.customer = user.id
+  if (user && userKind === 'c') {
+    data.customer = user.id
+    // A logged-in couple isn't asked for contact details on /enquire: the lead carries the
+    // account's own name and number, never ones sent with the request.
+    if (user.name) data.name = user.name
+    if (user.phone) data.phone = user.phone
+  }
 
   const code = refCodeFromCookies(req.headers?.get?.('cookie'))
   const referrer = code ? await findReferrer(req.payload, code, req).catch(() => null) : null

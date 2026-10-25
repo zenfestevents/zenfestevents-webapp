@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { EventRequirementsForm } from '../../../components/EventRequirementsForm'
 import { getSiteSettings } from '../../../lib/getSettings'
 import { isEnquiryEvent } from '../../../lib/eventRequirements'
+import { getSessionUser } from '../../../lib/session'
 import { DEFAULT_WA_MESSAGE, SITE_FALLBACK, whatsappLink } from '../../../lib/site'
 
 export const dynamic = 'force-dynamic'
@@ -25,9 +26,15 @@ type Props = { searchParams: Promise<{ event?: string }> }
  */
 export default async function EnquirePage({ searchParams }: Props) {
   const { event } = await searchParams
-  const settings = await getSiteSettings()
+  const [settings, user] = await Promise.all([getSiteSettings(), getSessionUser().catch(() => null)])
   const whatsapp = settings?.contact?.whatsapp || SITE_FALLBACK.contact.whatsapp
   const wa = whatsappLink(whatsapp, DEFAULT_WA_MESSAGE)
+  // A logged-in couple or vendor isn't asked for their name and number again.
+  const signedIn = user?.collection === 'customers' || user?.collection === 'vendors' ? user : null
+  const account =
+    signedIn && signedIn.name && signedIn.phone
+      ? { name: String(signedIn.name), phone: String(signedIn.phone), couple: signedIn.collection === 'customers' }
+      : undefined
 
   return (
     <section className="section">
@@ -44,7 +51,11 @@ export default async function EnquirePage({ searchParams }: Props) {
         </header>
 
         <div className="card evq-card">
-          <EventRequirementsForm whatsapp={whatsapp} initialEvent={isEnquiryEvent(event) ? event : undefined} />
+          <EventRequirementsForm
+            whatsapp={whatsapp}
+            initialEvent={isEnquiryEvent(event) ? event : undefined}
+            account={account}
+          />
         </div>
 
         <p className="muted evq-other">

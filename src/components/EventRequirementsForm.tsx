@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import React, { useRef, useState } from 'react'
 
 import {
@@ -20,17 +21,39 @@ import { BallDots } from './game'
 
 const STEPS = ['Event', 'When & where', 'Services', 'Details', 'Your details'] as const
 
+/** The logged-in couple or vendor, whose name and number the form doesn't ask for again. */
+export type EnquiryAccount = { name: string; phone: string; couple: boolean }
+
 /** Today in India, as YYYY-MM-DD (the date input's `min`). */
 const todayIST = () => new Date(Date.now() + 5.5 * 3600_000).toISOString().slice(0, 10)
+
+/** "••••••1234": enough to recognise your own number on a shared screen. */
+const maskPhone = (phone: string) => {
+  const digits = phone.replace(/\D/g, '')
+  return digits.length >= 4 ? `••••••${digits.slice(-4)}` : ''
+}
 
 /**
  * "Plan your event" (/enquire): the team's Tally forms rebuilt as one stepped form.
  * The first answer (wedding / birthday / baby shower) decides the rest. Every step
  * stays mounted (hidden) so the final FormData has all answers; each step is checked
  * before moving on. Saves a Lead (`requirements` group) like the other site forms.
+ * Logged in, the last step only confirms who is sending (the server stamps a couple's
+ * own name and number on the lead, see stampLeadAccounts).
  */
-export function EventRequirementsForm({ whatsapp, initialEvent }: { whatsapp?: string; initialEvent?: EnquiryEvent }) {
+export function EventRequirementsForm({
+  whatsapp,
+  initialEvent,
+  account: signedIn,
+}: {
+  whatsapp?: string
+  initialEvent?: EnquiryEvent
+  account?: EnquiryAccount
+}) {
   const formRef = useRef<HTMLFormElement>(null)
+  // Cleared by "Not you?", which logs out and shows the contact fields instead.
+  const [account, setAccount] = useState(signedIn ?? null)
+  const [leaving, setLeaving] = useState(false)
   const [step, setStep] = useState(initialEvent ? 1 : 0)
   const [event, setEvent] = useState<EnquiryEvent | ''>(initialEvent ?? '')
   const [part, setPart] = useState('')
@@ -81,6 +104,7 @@ export function EventRequirementsForm({ whatsapp, initialEvent }: { whatsapp?: s
         return ''
       }
       default:
+        if (account) return ''
         if (!get('name')) return 'Enter your name.'
         if (!tenDigitMobile(get('phone'))) return 'Enter a 10-digit WhatsApp / mobile number.'
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(get('email'))) return 'Enter a valid email address.'
@@ -99,6 +123,19 @@ export function EventRequirementsForm({ whatsapp, initialEvent }: { whatsapp?: s
       const top = form.getBoundingClientRect().top + window.scrollY - header - 16
       if (top < window.scrollY) window.scrollTo({ top, behavior: 'smooth' })
     }
+  }
+
+  /** "Not you?": log this account out (Payload's own endpoint) and ask for contact details instead.
+   *  The answers so far stay, because every step stays mounted. */
+  async function notYou() {
+    if (!account) return
+    setLeaving(true)
+    await fetch(`/api/${account.couple ? 'customers' : 'vendors'}/logout`, { method: 'POST', credentials: 'include' }).catch(
+      () => null,
+    )
+    setLeaving(false)
+    setAccount(null)
+    setError('')
   }
 
   function next() {
@@ -126,9 +163,10 @@ export function EventRequirementsForm({ whatsapp, initialEvent }: { whatsapp?: s
       event === 'birthday' ? (twins === 'yes' ? `Twins: ${get('twinsType')}` : get('birthdayChild')) : undefined
 
     const payload = {
-      name: get('name'),
-      phone: tenDigitMobile(get('phone')),
-      email: get('email'),
+      name: account?.name ?? get('name'),
+      phone: tenDigitMobile(account?.phone ?? get('phone')) || account?.phone,
+      // Accounts sign in with WhatsApp only and have no real email to send.
+      email: account ? undefined : get('email'),
       eventType: event,
       // Noon IST, so the calendar day survives every timezone (see lib/occasions/dates.ts).
       eventDate: new Date(`${get('eventDate')}T12:00:00+05:30`).toISOString(),
@@ -181,6 +219,11 @@ export function EventRequirementsForm({ whatsapp, initialEvent }: { whatsapp?: s
           We&apos;ve got your {label} details. Our team will call you back with ideas and a quote. For a faster reply,
           message us on WhatsApp.
         </p>
+        {account?.couple && (
+          <p className="muted">
+            Runs for planning with us go on your <Link href="/account">Scorecard</Link>.
+          </p>
+        )}
         {whatsapp && (
           <a className="btn btn--whatsapp" href={wa} target="_blank" rel="noopener">
             Continue on WhatsApp
@@ -203,7 +246,7 @@ export function EventRequirementsForm({ whatsapp, initialEvent }: { whatsapp?: s
         {STEPS.map((label, i) => (
           <li key={label} className={i === step ? 'is-current' : i < step ? 'is-done' : ''}>
             <span className="evq__dot">{i + 1}</span>
-            <span className="evq__label">{label}</span>
+            <span className="evq__label">{i === last && account ? 'Confirm' : label}</span>
           </li>
         ))}
       </ol>
@@ -328,22 +371,38 @@ export function EventRequirementsForm({ whatsapp, initialEvent }: { whatsapp?: s
         </div>
       </div>
 
-      {/* 5 — contact */}
+      {/* 5 — contact (logged in: just who is sending) */}
       <div hidden={step !== 4} className="evq__step">
-        <div className="form__row">
-          <label className="field">
-            <span className="field__label">Your name *</span>
-            <input name="name" required autoComplete="name" maxLength={100} placeholder="e.g. Priya" />
-          </label>
-          <label className="field">
-            <span className="field__label">WhatsApp / contact number *</span>
-            <input name="phone" required inputMode="tel" autoComplete="tel" placeholder="10-digit mobile" />
-          </label>
-        </div>
-        <label className="field">
-          <span className="field__label">Email *</span>
-          <input name="email" type="email" required autoComplete="email" />
-        </label>
+        {account ? (
+          <div className="evq__account">
+            <p className="evq__account-label">Sending as</p>
+            <p className="evq__account-name">
+              {account.name}
+              {maskPhone(account.phone) && <span className="mono"> · WhatsApp {maskPhone(account.phone)}</span>}
+            </p>
+            <p className="muted">We&apos;ll call or WhatsApp you on this number.</p>
+            <button type="button" className="evq__account-switch" onClick={notYou} disabled={leaving}>
+              {leaving ? 'Logging out…' : 'Not you? Log out'}
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="form__row">
+              <label className="field">
+                <span className="field__label">Your name *</span>
+                <input name="name" required autoComplete="name" maxLength={100} placeholder="e.g. Priya" />
+              </label>
+              <label className="field">
+                <span className="field__label">WhatsApp / contact number *</span>
+                <input name="phone" required inputMode="tel" autoComplete="tel" placeholder="10-digit mobile" />
+              </label>
+            </div>
+            <label className="field">
+              <span className="field__label">Email *</span>
+              <input name="email" type="email" required autoComplete="email" />
+            </label>
+          </>
+        )}
         <label className="field">
           <span className="field__label">Anything else?</span>
           <textarea name="message" rows={3} maxLength={2000} placeholder="Optional — theme, ideas, questions…" />
