@@ -460,7 +460,7 @@ src/
     it (a flash, and a stuck screen in background tabs). Don't add loading screens to cached
     pages. Never add a group-wide one either: a loading screen makes a page stream, and a
     streamed `notFound()` / `redirect()` answers 200 instead of 404 / 307.
-- **Page caching (2026-10-25).** Functions run in `iad1` (Washington) while visitors are in
+- **Page caching (2026-10-25).** Functions ran in `iad1` (Washington) while visitors are in
   India: every per-visit page paid a ~250 ms round trip to the US, plus a 1.5–2 s Payload
   cold start whenever the function had gone idle (PageSpeed measured 1.8 s TTFB on the
   homepage). So the pages that look the same for everyone are **cached pages** (ISR):
@@ -479,8 +479,14 @@ src/
     the marketplace (shortlist hearts from the server).
   - Data a cached page reads without `cachedContent` (e.g. live vendors on the homepage)
     shows up within 5 minutes, not at once.
-  - Moving the functions to Mumbai (`bom1`) only helps if Neon moves near it too; a US
-    database read from Mumbai is slower than both in the US. That's an owner decision.
+  - **Functions run in Singapore (`sin1`, `vercel.json` `regions`) since 2026-10-25**, beside
+    the Neon project ("Zenfest Events Web App", AWS ap-southeast-1 — fixed at creation; a
+    move means a new project + data copy). Before that they ran in `iad1`, so every query
+    crossed the Pacific: one settings read added ~0.2 s, the marketplace took 0.77 s warm.
+    Keep the function region beside Neon's; never `bom1` alone.
+  - `components/NavProgress.tsx` (root layout) draws a gold line from a link click until the
+    next route renders, because per-visit pages show nothing until the server answers. No
+    `loading.tsx` instead (see the homepage-speed note above).
 - **SEO (2026-10-25).** `app/sitemap.ts` (public live pages only, `FEATURES`-aware; live
   vendors and categories with vendors) and `app/robots.ts` sit at the root of `app/`, next to
   both route groups. Every indexable page sets `alternates.canonical` (relative; resolved

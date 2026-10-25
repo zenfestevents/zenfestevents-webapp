@@ -13,6 +13,7 @@ import './game.css'
 import { Header } from '../../components/Header'
 import { Footer } from '../../components/Footer'
 import { MobileCTABar } from '../../components/MobileCTABar'
+import { NavProgress } from '../../components/NavProgress'
 import { getSiteSettings } from '../../lib/getSettings'
 import { hasTestimonials } from '../../lib/testimonials'
 import { aiAvailable } from '../../lib/ai/status'
@@ -78,6 +79,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body>
+        <NavProgress />
         <a className="skip-link" href="#main">
           Skip to content
         </a>
