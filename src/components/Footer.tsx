@@ -48,7 +48,7 @@ export function Footer({ settings, hasTestimonials = false }: { settings: SiteSe
 
           {/* The same groups as the header menu: About Zenfest / Services / Contact. */}
           <div className="site-footer__col">
-            <h4 className="site-footer__heading">About Zenfest</h4>
+            <h2 className="site-footer__heading">About Zenfest</h2>
             <Link href="/gallery">Our Work</Link>
             <Link href="/about">About</Link>
             {hasTestimonials && <Link href="/testimonials">Testimonials</Link>}
@@ -56,7 +56,7 @@ export function Footer({ settings, hasTestimonials = false }: { settings: SiteSe
           </div>
 
           <div className="site-footer__col">
-            <h4 className="site-footer__heading">Services</h4>
+            <h2 className="site-footer__heading">Services</h2>
             <Link href="/services">Services</Link>
             <Link href="/packages">Packages{!FEATURES.packages && <Soon />}</Link>
             <Link href="/enquire">Plan your event</Link>
@@ -76,7 +76,7 @@ export function Footer({ settings, hasTestimonials = false }: { settings: SiteSe
           </div>
 
           <div className="site-footer__col">
-            <h4 className="site-footer__heading">Contact</h4>
+            <h2 className="site-footer__heading">Contact</h2>
             <Link href="/contact">Contact us</Link>
             {branches.map((b, i) => (
               <div key={b.id || i} className="site-footer__branch">

@@ -22,5 +22,12 @@ export async function GET() {
       standing = { runs, tier: s.tier.name, next: s.next?.name ?? null, toNext: s.toNext, progress: s.progress }
     }
   }
-  return NextResponse.json({ kind, name, standing }, { headers: { 'Cache-Control': 'private, no-store' } })
+  // A couple's saved vendors (ids), for hearts on cached pages such as the homepage.
+  const shortlist =
+    kind === 'customer'
+      ? ((user as { shortlist?: (number | { id: number })[] | null }).shortlist ?? []).map((s) =>
+          typeof s === 'object' ? s.id : s,
+        )
+      : []
+  return NextResponse.json({ kind, name, standing, shortlist }, { headers: { 'Cache-Control': 'private, no-store' } })
 }

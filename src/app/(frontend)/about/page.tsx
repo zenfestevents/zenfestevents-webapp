@@ -7,9 +7,11 @@ import { getSiteSettings } from '../../../lib/getSettings'
 import { SeamDivider } from '../../../components/game'
 import { Reveal } from '../../../components/Reveal'
 
-export const dynamic = 'force-dynamic'
+// A cached page (CLAUDE.md, "Page caching"): rebuilt at most every 5 minutes, at once when /admin saves.
+export const revalidate = 300
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/about' },
   title: 'About',
   description:
     'Zenfest Events is a full-service event management company in Tamil Nadu, planning weddings and celebrations in major cities across the state.',
@@ -48,7 +50,7 @@ export default async function AboutPage() {
         <div className="container why-grid">
           {REASONS.map(([title, body], i) => (
             <Reveal key={title} className="why-card" delay={i * 60}>
-              <h3 className="why-card__title">{title}</h3>
+              <h2 className="why-card__title">{title}</h2>
               <p className="muted">{body}</p>
             </Reveal>
           ))}

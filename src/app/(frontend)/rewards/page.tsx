@@ -12,6 +12,7 @@ import { BallDots, TierBadge } from '../../../components/game'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/rewards' },
   title: 'Runs club — rewards for couples and vendors',
   description:
     'Join the Zenfest Runs club: earn runs when you plan, book and invite friends, climb from Debut to Hall of Fame and unlock money off your next event.',

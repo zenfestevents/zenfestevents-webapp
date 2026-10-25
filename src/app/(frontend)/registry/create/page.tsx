@@ -3,9 +3,11 @@ import type { Metadata } from 'next'
 
 import { CreateRegistryForm } from '../../../../components/registry/CreateRegistryForm'
 
-export const dynamic = 'force-dynamic'
+// A cached page (CLAUDE.md, "Page caching"): rebuilt at most every 5 minutes, at once when /admin saves.
+export const revalidate = 300
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/registry/create' },
   title: 'Create a Gift Registry',
   description: 'Set up your free Zenfest gift registry in two minutes.',
 }

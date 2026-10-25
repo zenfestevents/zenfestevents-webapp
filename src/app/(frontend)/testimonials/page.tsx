@@ -8,9 +8,11 @@ import { listTestimonials } from '../../../lib/testimonials'
 import { Stars, TestimonialCard } from '../../../components/TestimonialCard'
 import { LaurelRating } from '../../../components/game'
 
-export const dynamic = 'force-dynamic'
+// A cached page (CLAUDE.md, "Page caching"): rebuilt at most every 5 minutes, at once when /admin saves.
+export const revalidate = 300
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/testimonials' },
   title: 'Testimonials',
   description:
     'What families and businesses across Tamil Nadu say about Zenfest Events — reviews of our weddings, birthdays, baby showers, housewarmings and corporate events.',

@@ -56,12 +56,17 @@ export const metadata: Metadata = {
   },
   description:
     'Full-service event management company in Tamil Nadu — Chennai, Coimbatore, Madurai, Trichy, Salem and beyond. Weddings, birthdays, corporate functions, housewarmings and sports events — décor, catering, photography, DJ and complete packages.',
+  // No og:title / og:description here: pages inherit this object whole (Next merges
+  // metadata shallowly), so a fixed title made every shared link read like the homepage.
+  // Left out, Next fills them from each page's own title and description.
+  // Pages that set their own `openGraph` (polls, vendors, products) replace all of it.
   openGraph: {
-    title: 'Zenfest Events — Event Management Company in Tamil Nadu',
-    description:
-      'Weddings, birthdays, corporate functions and more across Tamil Nadu. See our work and plan your event.',
     type: 'website',
+    siteName: 'Zenfest Events',
+    locale: 'en_IN',
+    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'A wedding reception stage decorated by Zenfest Events' }],
   },
+  twitter: { card: 'summary_large_image' },
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

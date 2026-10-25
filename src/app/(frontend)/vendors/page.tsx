@@ -10,6 +10,7 @@ import { getVendor } from '../../../lib/session'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/vendors' },
   title: 'For Vendors — partner with Zenfest or list on the marketplace',
   description:
     'Two ways to work with Zenfest Events: join our vendor team for the events we plan, or list your business free on the Zenfest Marketplace.',

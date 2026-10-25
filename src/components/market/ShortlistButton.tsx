@@ -4,36 +4,47 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { toggleShortlist } from '../../app/(frontend)/account/actions'
+import { useAccountSession } from './useAccountSession'
 
-/** ♡ / ♥ — saves a vendor to the couple's shortlist; logged-out visitors are sent to log in. */
+/**
+ * ♡ / ♥ — saves a vendor to the couple's shortlist; logged-out visitors are sent to log in.
+ * Without `initial` (cached pages such as the homepage can't read the login), the heart
+ * fills in from the browser's session once it loads; that needs `vendorId`.
+ */
 export function ShortlistButton({
   slug,
-  initial = false,
+  vendorId,
+  initial,
   variant = 'icon',
 }: {
   slug: string
+  vendorId?: number
   initial?: boolean
   variant?: 'icon' | 'button'
 }) {
   const router = useRouter()
-  const [on, setOn] = useState(initial)
+  const session = useAccountSession()
+  // null until the visitor clicks; until then the heart shows what the server or session knows.
+  const [mine, setMine] = useState<boolean | null>(null)
   const [busy, setBusy] = useState(false)
+  const on = mine ?? initial ?? (vendorId !== undefined && Boolean(session?.shortlist?.includes(vendorId)))
 
   async function click(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
+    const was = on
     setBusy(true)
-    setOn((v) => !v)
+    setMine(!was)
     const res = await toggleShortlist(slug).catch(() => null)
     setBusy(false)
     if (!res?.ok) {
-      setOn(initial)
+      setMine(was)
       if (res && 'login' in res && res.login) {
         router.push(`/account/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`)
       }
       return
     }
-    setOn(res.shortlisted)
+    setMine(res.shortlisted)
   }
 
   return (

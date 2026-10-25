@@ -10,6 +10,7 @@ import { DEFAULT_WA_MESSAGE, SITE_FALLBACK, whatsappLink } from '../../../lib/si
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/enquire' },
   title: 'Plan your event — wedding, birthday or baby shower',
   description:
     'Tell Zenfest Events the basics of your wedding, reception, birthday or baby shower — date, place, guests, budget and the services you need — and we will call you back with ideas and a quote.',

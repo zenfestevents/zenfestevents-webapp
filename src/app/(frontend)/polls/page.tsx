@@ -15,6 +15,7 @@ import { FEATURES } from '../../../lib/features'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/polls' },
   title: 'Zenfest Polls — Verified Votes, Real Opinions',
   description:
     'Vote on cricket, cinema, food, lifestyle and the questions everyone in Tamil Nadu is talking about. One person, one vote.',

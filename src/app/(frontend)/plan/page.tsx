@@ -11,6 +11,7 @@ import { getSiteSettings } from '../../../lib/getSettings'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/plan' },
   title: 'Plan your event with Zenfest AI',
   description:
     'Chat with Zenfest AI and its décor, catering, photography and entertainment specialists. Get a draft plan with estimates, confirmed by the Zenfest Events team.',

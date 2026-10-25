@@ -5,9 +5,11 @@ import { whatsappLink, telLink, DEFAULT_WA_MESSAGE, SITE_FALLBACK } from '../../
 import { getSiteSettings } from '../../../lib/getSettings'
 import { InquiryForm } from '../../../components/InquiryForm'
 
-export const dynamic = 'force-dynamic'
+// A cached page (CLAUDE.md, "Page caching"): rebuilt at most every 5 minutes, at once when /admin saves.
+export const revalidate = 300
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/contact' },
   title: 'Contact & Enquiry',
   description:
     'Request a callback from Zenfest Events, or reach us on phone and WhatsApp. Events in major cities across Tamil Nadu; branches at Guduvancheri and Thiruverkadu.',

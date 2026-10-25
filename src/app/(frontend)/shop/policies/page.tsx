@@ -4,9 +4,11 @@ import Link from 'next/link'
 
 import { getSiteSettings } from '../../../../lib/getSettings'
 
-export const dynamic = 'force-dynamic'
+// A cached page (CLAUDE.md, "Page caching"): rebuilt at most every 5 minutes, at once when /admin saves.
+export const revalidate = 300
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/shop/policies' },
   title: 'Shop policies — buying, delivery, returns and complaints',
   description: 'How buying works in the Zenfest Shop: partner stores, Zenfest sellers, delivery, returns and our grievance officer.',
 }

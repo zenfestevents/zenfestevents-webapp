@@ -9,6 +9,7 @@ import { verifyMode } from '../../../../lib/phoneVerification'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/vendors/partner' },
   title: 'Partner with Zenfest — join our vendor team',
   description:
     'Photographers, videographers and bakers: join the Zenfest Events vendor team and work on the weddings and celebrations we plan across Tamil Nadu.',

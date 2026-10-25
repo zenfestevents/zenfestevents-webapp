@@ -54,7 +54,6 @@ npm run payload          # run Payload CLI commands
 src/
   app/(frontend)/
     (home)/page.tsx       Homepage: hero + vendors + featured work + services + testimonials
-    (home)/loading.tsx    Instant screen when Home is clicked (homepage only — see "Homepage speed")
     testimonials/page.tsx Client reviews (most copied from Google) + Google rating/link
     about/page.tsx        About page
     gallery/page.tsx      Gallery (Our Work) — all projects
@@ -447,9 +446,41 @@ src/
     reads cookies inside `cachedContent`.
   - The AI band's query runs only with `FEATURES.ai`; the "any recent project" fallback runs
     alongside the featured query instead of after it.
-  - `(home)/loading.tsx` shows a kolam screen the moment Home is clicked. It lives in the
-    `(home)` route group on purpose: a loading screen makes a page stream, and a streamed
-    `notFound()` / `redirect()` answers 200 instead of 404 / 307 — don't add a group-wide one.
+  - `(home)/loading.tsx` (a kolam screen while Home rendered) was **removed on 2026-10-25**
+    when the homepage became a cached page: clicking Home is now instant, and on a cached
+    page the loading screen still painted first and React swapped the real page in after
+    it (a flash, and a stuck screen in background tabs). Don't add loading screens to cached
+    pages. Never add a group-wide one either: a loading screen makes a page stream, and a
+    streamed `notFound()` / `redirect()` answers 200 instead of 404 / 307.
+- **Page caching (2026-10-25).** Functions run in `iad1` (Washington) while visitors are in
+  India: every per-visit page paid a ~250 ms round trip to the US, plus a 1.5–2 s Payload
+  cold start whenever the function had gone idle (PageSpeed measured 1.8 s TTFB on the
+  homepage). So the pages that look the same for everyone are **cached pages** (ISR):
+  `export const revalidate = 300` instead of `force-dynamic` — Home, About, Contact, Our
+  Work, Services, Testimonials, Packages, Privacy, `/signup`, `/registry`,
+  `/registry/create`, `/shop/policies`. Vercel serves them from its Mumbai edge and rebuilds
+  them in the background at most every 5 minutes; saving in /admin clears them at once,
+  because their reads go through `cachedContent` and the page inherits its tags (that is why
+  Our Work and Services now read through it too). Easy to get wrong:
+  - **A cached page must not read the login, cookies, headers or `searchParams`.** Doing so
+    silently turns it back into a per-visit page (the build's route list shows `ƒ` instead
+    of `○`). The homepage's vendor hearts therefore fill in from the browser:
+    `/account/session` returns the couple's `shortlist`, and `VendorCard` without
+    `shortlisted` lets `ShortlistButton` read it. Pages that must stay per-visit: anything
+    with `verifyMode()` (PhoneVerify), sessions, `searchParams` (`/enquire`'s `?event=`) and
+    the marketplace (shortlist hearts from the server).
+  - Data a cached page reads without `cachedContent` (e.g. live vendors on the homepage)
+    shows up within 5 minutes, not at once.
+  - Moving the functions to Mumbai (`bom1`) only helps if Neon moves near it too; a US
+    database read from Mumbai is slower than both in the US. That's an owner decision.
+- **SEO (2026-10-25).** `app/sitemap.ts` (public live pages only, `FEATURES`-aware; live
+  vendors and categories with vendors) and `app/robots.ts` sit at the root of `app/`, next to
+  both route groups. Every indexable page sets `alternates.canonical` (relative; resolved
+  against `metadataBase`). The root layout's `openGraph` carries only site name, locale and
+  the share image `public/og.jpg` (1200×630, from the hero poster), **no title/description**:
+  metadata merges shallowly, so a fixed og:title made every shared link read like the
+  homepage; left out, Next fills og/twitter title + description from each page's own. The homepage renders LocalBusiness JSON-LD from Site Settings (`lib/seo.ts`) —
+  never add review stars to it (Google ignores self-served ratings).
 - **`/admin/create-first-user` is broken** on Payload 3.88 + Next 16.3.3 — it renders
   a blank page (the view is in the RSC stream but never reaches the DOM; reproduced
   locally against an empty DB under both Turbopack and webpack). Use

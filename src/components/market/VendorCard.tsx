@@ -5,8 +5,11 @@ import type { PublicVendor } from '../../lib/marketplace'
 import { ALL_CHENNAI, rupees, unitLabel } from '../../lib/marketplaceOptions'
 import { ShortlistButton } from './ShortlistButton'
 
-/** A vendor in a results grid: cover, name, service, areas and "from ₹" price. */
-export function VendorCard({ vendor, shortlisted = false }: { vendor: PublicVendor; shortlisted?: boolean }) {
+/**
+ * A vendor in a results grid: cover, name, service, areas and "from ₹" price. Leave
+ * `shortlisted` out on cached pages: the heart then fills in from the browser's session.
+ */
+export function VendorCard({ vendor, shortlisted }: { vendor: PublicVendor; shortlisted?: boolean }) {
   const cheapest = vendor.priceCard.reduce<PublicVendor['priceCard'][number] | null>(
     (min, r) => (min == null || r.price < min.price ? r : min),
     null,
@@ -42,7 +45,7 @@ export function VendorCard({ vendor, shortlisted = false }: { vendor: PublicVend
         </div>
       </Link>
       <div className="mk-card__heart">
-        <ShortlistButton slug={vendor.slug} initial={shortlisted} />
+        <ShortlistButton slug={vendor.slug} vendorId={vendor.id} initial={shortlisted} />
       </div>
     </article>
   )

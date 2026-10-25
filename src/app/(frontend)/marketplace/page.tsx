@@ -14,6 +14,7 @@ import { ComingSoon } from '../../../components/ComingSoon'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/marketplace' },
   title: 'Wedding & Event Vendor Marketplace — Tamil Nadu',
   description:
     'Find photographers, makeup artists, decorators, caterers, cake makers and halls in Tamil Nadu with prices upfront. Every vendor is reviewed by Zenfest.',

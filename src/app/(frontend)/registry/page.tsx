@@ -5,9 +5,11 @@ import type { Metadata } from 'next'
 import { KolamDivider, KolamRosette } from '../../../components/Kolam'
 import { Reveal } from '../../../components/Reveal'
 
-export const dynamic = 'force-dynamic'
+// A cached page (CLAUDE.md, "Page caching"): rebuilt at most every 5 minutes, at once when /admin saves.
+export const revalidate = 300
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/registry' },
   title: 'Free Gift Registry for Weddings & Functions',
   description:
     'Make a free gift registry for your wedding, housewarming, birthday or pooja. Add gifts from Amazon, Flipkart or any shop, plus a shagun fund. Guests claim gifts so nobody buys the same thing twice.',

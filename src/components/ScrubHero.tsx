@@ -495,6 +495,8 @@ export function ScrubHero({
               width={860}
               height={1290}
             />
+            {/* Laptops: the same frame as WebP (230 KB against the JPEG's 400 KB). */}
+            <source type="image/webp" srcSet="/hero/poster.webp" width={1920} height={1080} />
             {/* The poster is the first thing anyone sees, so it outranks the logos and scripts. */}
             <img
               className="scrubhero__poster"

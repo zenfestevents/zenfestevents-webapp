@@ -8,9 +8,11 @@ import { aiAvailable } from '../../../lib/ai/status'
 import { FEATURES } from '../../../lib/features'
 import { getSiteSettings } from '../../../lib/getSettings'
 
-export const dynamic = 'force-dynamic'
+// A cached page (CLAUDE.md, "Page caching"): rebuilt at most every 5 minutes, at once when /admin saves.
+export const revalidate = 300
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/packages' },
   title: 'Packages',
   description:
     'Combined event packages from Zenfest Events — décor, catering, photography and DJ bundled for weddings, birthdays and corporate events.',

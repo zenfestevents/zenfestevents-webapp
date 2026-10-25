@@ -3,22 +3,26 @@ import React from 'react'
 import type { Metadata } from 'next'
 
 import { getPayloadClient } from '../../../lib/payload'
+import { CONTENT_TAGS, cachedContent } from '../../../lib/contentCache'
 import { getSiteSettings } from '../../../lib/getSettings'
 import { whatsappLink, DEFAULT_WA_MESSAGE } from '../../../lib/site'
 import { mediaUrl, mediaAlt } from '../../../lib/media'
 import { GalleryGrid, type GalleryItem } from '../../../components/GalleryGrid'
 import { KolamRosette } from '../../../components/Kolam'
 
-export const dynamic = 'force-dynamic'
+// A cached page (CLAUDE.md, "Page caching"): rebuilt at most every 5 minutes, at once when /admin saves.
+export const revalidate = 300
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/gallery' },
   title: 'Our Work',
   description:
     'Browse past weddings, birthdays, corporate functions, housewarmings and sports events managed by Zenfest Events across Tamil Nadu.',
 }
 
-async function getProjects(): Promise<GalleryItem[]> {
-  try {
+// Cached (lib/contentCache.ts): saving a project in /admin clears it, and this page with it.
+const readProjects = cachedContent(
+  async (): Promise<GalleryItem[]> => {
     const payload = await getPayloadClient()
     const res = await payload.find({ collection: 'projects', depth: 1, limit: 100, sort: '-createdAt' })
     return res.docs.map((p: any): GalleryItem => {
@@ -40,6 +44,14 @@ async function getProjects(): Promise<GalleryItem[]> {
         photos,
       }
     })
+  },
+  'gallery-projects',
+  [CONTENT_TAGS.projects],
+)
+
+async function getProjects(): Promise<GalleryItem[]> {
+  try {
+    return await readProjects()
   } catch {
     return []
   }

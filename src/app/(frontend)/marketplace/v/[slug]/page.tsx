@@ -23,6 +23,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return {
     title: `${vendor.businessName} — ${vendor.service} in Tamil Nadu`,
     description: `${vendor.about.slice(0, 140)}${from}`,
+    alternates: { canonical: `/marketplace/v/${vendor.slug}` },
     openGraph: vendor.cover ? { images: [{ url: vendor.cover.url }] } : undefined,
   }
 }

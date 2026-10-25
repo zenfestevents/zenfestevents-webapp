@@ -8,6 +8,8 @@ export type AccountSession = {
   name: string
   /** Runs club standing, when logged in. */
   standing: { runs: number; tier: string; next: string | null; toNext: number; progress: number } | null
+  /** A couple's shortlisted vendor ids (empty otherwise). */
+  shortlist: number[]
 }
 
 // The header button and the phone bar both ask on every navigation: one request per page.
@@ -19,7 +21,7 @@ function load(path: string) {
       path,
       promise: fetch('/account/session', { cache: 'no-store' })
         .then((r) => r.json() as Promise<AccountSession>)
-        .catch(() => ({ kind: null, name: '', standing: null })),
+        .catch(() => ({ kind: null, name: '', standing: null, shortlist: [] })),
     }
   }
   return shared.promise

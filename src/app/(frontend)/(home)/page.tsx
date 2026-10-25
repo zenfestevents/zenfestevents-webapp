@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import React from 'react'
+import type { Metadata } from 'next'
 
 import { getPayloadClient } from '../../../lib/payload'
 import { CONTENT_TAGS, cachedContent } from '../../../lib/contentCache'
@@ -23,10 +24,14 @@ import { aiAvailable } from '../../../lib/ai/status'
 import { VendorCard } from '../../../components/market/VendorCard'
 import { listVendors, type PublicVendor } from '../../../lib/marketplace'
 import { MARKET_CATEGORIES } from '../../../lib/marketplaceOptions'
-import { getCustomer } from '../../../lib/session'
 import { ANNOUNCE_COMING_SOON, COMING_SOON, FEATURES } from '../../../lib/features'
+import { businessJsonLd, jsonLdText } from '../../../lib/seo'
 
-export const dynamic = 'force-dynamic'
+// A cached page (CLAUDE.md, "Page caching"): rebuilt at most every 5 minutes, at once when /admin saves.
+export const revalidate = 300
+
+// Title and description come from the root layout.
+export const metadata: Metadata = { alternates: { canonical: '/' } }
 
 /** The featured live poll and this visitor's view of it; null when there's none (or the DB is down). */
 async function getHomePoll() {
@@ -62,14 +67,15 @@ async function getHomeData() {
   }
 }
 
-/** Newest live marketplace listings and the visitor's shortlist (empty if the DB is down). */
-async function getHomeMarket(): Promise<{ vendors: PublicVendor[]; saved: Set<number> }> {
+/**
+ * Newest live marketplace listings (empty if the DB is down). The page is cached, so it
+ * never reads the login: each card's heart fills in from the browser's session.
+ */
+async function getHomeMarket(): Promise<PublicVendor[]> {
   try {
-    const [vendors, customer] = await Promise.all([listVendors({ sort: 'new' }), getCustomer()])
-    const saved = new Set((customer?.shortlist ?? []).map((s) => (typeof s === 'object' ? s.id : s)))
-    return { vendors: vendors.slice(0, 4), saved }
+    return (await listVendors({ sort: 'new' })).slice(0, 4)
   } catch {
-    return { vendors: [], saved: new Set() }
+    return []
   }
 }
 
@@ -80,7 +86,7 @@ export default async function HomePage() {
     FEATURES.polls ? getHomePoll() : null,
     // The AI band's specialist list; skipped (one query fewer) while the AI is switched off.
     FEATURES.ai ? getAgentProfiles() : [],
-    FEATURES.marketplace ? getHomeMarket() : { vendors: [], saved: new Set<number>() },
+    FEATURES.marketplace ? getHomeMarket() : [],
     homeTestimonials(),
   ])
   // Switched-off features (lib/features.ts) get one "Coming soon" band instead of their own,
@@ -107,6 +113,9 @@ export default async function HomePage() {
   // while the Shop is off (the registry itself stays live at /registry).
   return (
     <>
+      {/* The business for Google: name, phone, branches, the cities we serve (lib/seo.ts). */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdText(businessJsonLd(settings)) }} />
+
       {/* ---------- HERO: full-bleed scroll-scrubbed reception film ---------- */}
       <ScrubHero
         headline={hero.headline}
@@ -363,11 +372,11 @@ export default async function HomePage() {
               </Link>
             </div>
           </Reveal>
-          {market.vendors.length > 0 && (
+          {market.length > 0 && (
             <div className="home-market__grid">
-              {market.vendors.map((v, i) => (
+              {market.map((v, i) => (
                 <Reveal key={v.id} delay={i * 70}>
-                  <VendorCard vendor={v} shortlisted={market.saved.has(v.id)} />
+                  <VendorCard vendor={v} />
                 </Reveal>
               ))}
             </div>

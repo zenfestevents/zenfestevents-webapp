@@ -4,9 +4,11 @@ import type { Metadata } from 'next'
 import { SignupForm } from '../../../components/SignupForm'
 import { getSiteSettings } from '../../../lib/getSettings'
 
-export const dynamic = 'force-dynamic'
+// A cached page (CLAUDE.md, "Page caching"): rebuilt at most every 5 minutes, at once when /admin saves.
+export const revalidate = 300
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/signup' },
   title: 'Sign Up — ₹100 off',
   description:
     'Sign up with Zenfest Events and get ₹100 off your total bill. Weddings, birthdays, corporate functions and more across Tamil Nadu.',

@@ -13,6 +13,7 @@ import { ComingSoon } from '../../../components/ComingSoon'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/earn' },
   title: 'Earn from Your Event',
   description:
     'Open your wedding or family function in Tamil Nadu to a few curious travellers from abroad and earn from it. Zenfest Events verifies every guest and handles everything.',

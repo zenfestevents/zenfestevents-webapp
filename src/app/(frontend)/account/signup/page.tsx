@@ -14,6 +14,7 @@ import { ComingSoon } from '../../../../components/ComingSoon'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/account/signup' },
   title: 'Create your account',
   description: 'Shortlist vendors, get quotes and plan your event with Zenfest Events.',
 }

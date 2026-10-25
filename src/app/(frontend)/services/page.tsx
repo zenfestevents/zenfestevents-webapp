@@ -3,13 +3,16 @@ import React from 'react'
 import type { Metadata } from 'next'
 
 import { getPayloadClient } from '../../../lib/payload'
+import { CONTENT_TAGS, cachedContent } from '../../../lib/contentCache'
 import { mediaUrl } from '../../../lib/media'
 import { Reveal } from '../../../components/Reveal'
 import { SeamDivider } from '../../../components/game'
 
-export const dynamic = 'force-dynamic'
+// A cached page (CLAUDE.md, "Page caching"): rebuilt at most every 5 minutes, at once when /admin saves.
+export const revalidate = 300
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/services' },
   title: 'Services',
   description:
     'Decoration, catering, photography, DJ and complete event coordination from Zenfest Events, across Tamil Nadu.',
@@ -23,12 +26,20 @@ const FALLBACK = [
   { title: 'Complete coordination', description: 'One team managing vendors, timeline and the day itself end to end.' },
 ]
 
+// Cached (lib/contentCache.ts): saving a service in /admin clears it, and this page with it.
+const readServices = cachedContent(
+  async () => {
+    const payload = await getPayloadClient()
+    return (await payload.find({ collection: 'services', depth: 1, limit: 50, sort: 'order' })).docs
+  },
+  'services-page',
+  [CONTENT_TAGS.services],
+)
+
 export default async function ServicesPage() {
   let services: any[] = []
   try {
-    const payload = await getPayloadClient()
-    const res = await payload.find({ collection: 'services', depth: 1, limit: 50, sort: 'order' })
-    services = res.docs
+    services = await readServices()
   } catch {
     services = []
   }

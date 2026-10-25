@@ -18,12 +18,20 @@ type Params = Promise<{ category: string }>
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { category } = await params
-  if (category === 'all') return { title: 'All vendors — Zenfest marketplace' }
+  if (category === 'all') {
+    return {
+      title: 'All vendors — Zenfest marketplace',
+      description:
+        'Every wedding and event vendor on the Zenfest marketplace across Tamil Nadu — photographers, makeup artists, decorators, caterers, cake makers and halls, with prices upfront.',
+      alternates: { canonical: '/marketplace/all' },
+    }
+  }
   if (!isCategory(category)) return {}
   const blurb = MARKET_CATEGORIES.find(([v]) => v === category)?.[2] ?? ''
   return {
     title: `${categoryLabel(category)} in Tamil Nadu — prices & availability`,
     description: `${blurb}. Compare ${categoryLabel(category).toLowerCase()} vendors in Tamil Nadu with prices upfront, checked by Zenfest Events.`,
+    alternates: { canonical: `/marketplace/${category}` },
   }
 }
 
