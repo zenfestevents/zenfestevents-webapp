@@ -9,7 +9,7 @@ import { VendorCard } from '../../../../components/market/VendorCard'
 import { listVendors, type VendorFilters } from '../../../../lib/marketplace'
 import { MARKET_AREAS, MARKET_CATEGORIES, categoryLabel, isCategory, rupees } from '../../../../lib/marketplaceOptions'
 import { getCustomer } from '../../../../lib/session'
-import { FEATURES } from '../../../../lib/features'
+import { FEATURES, MARKETPLACE_SOON } from '../../../../lib/features'
 import { ComingSoon } from '../../../../components/ComingSoon'
 
 export const dynamic = 'force-dynamic'
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 const SORTS = ['recommended', 'price-low', 'price-high', 'new'] as const
 
 export default async function CategoryPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
-  if (!FEATURES.marketplace) return <ComingSoon feature="marketplace" />
+  if (!FEATURES.marketplace || MARKETPLACE_SOON) return <ComingSoon feature="marketplace" />
   const { category } = await params
   const sp = await searchParams
   const cat = param(sp.cat)

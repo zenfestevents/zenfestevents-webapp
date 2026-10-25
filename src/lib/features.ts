@@ -5,7 +5,7 @@ export const FEATURES = {
   /** Zenfest AI planner (/plan, bubble, homepage band). Also needs AI_API_KEY + Site Settings. */
   ai: false,
   /** Vendor marketplace (/marketplace/*) and the vendor/couple sign-ups that feed it. */
-  marketplace: false,
+  marketplace: true,
   /** "Earn from events" hosts programme (/earn). */
   earn: false,
   /** Public polls (/polls/*, homepage band) and the registry's family polls tabs. */
@@ -27,9 +27,10 @@ export const FEATURES = {
 export const ANNOUNCE_COMING_SOON = false
 
 /**
- * The marketplace is open (vendors can sign up and list) but has no live vendors yet, so its
- * menu link carries a "Soon" tag. Nothing is hidden. Set to false once enough vendors are
- * live to show off (owner, 2026-10-25).
+ * The couples' side of the marketplace (/marketplace, its categories and vendor pages) shows
+ * "Coming soon" until each service has 15–20 live vendors (owner, 2026-10-25). Everything else
+ * under FEATURES.marketplace stays on: vendor and couple sign-up and login, dashboards, Runs
+ * club, Refer & earn. The menu, footer and homepage mark it "Soon". Set to false to launch.
  */
 export const MARKETPLACE_SOON = true
 

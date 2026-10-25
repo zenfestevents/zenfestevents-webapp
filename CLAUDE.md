@@ -393,9 +393,13 @@ src/
 ## Current state (things that are deliberate, not oversights)
 - **Feature switches (`lib/features.ts`, 2026-10-14).** The owner trimmed the site to what
   is live: `FEATURES = { ai, marketplace, earn, polls }`, all `false` then.
-  `marketplace` was `true` on 2026-10-24 only; **off again since 2026-10-25** (owner: launch
-  once each service has 15–20 vendors; until then vendors join through `/vendors/partner`).
-  `MARKETPLACE_SOON` (a "Soon" tag on the menu link) only matters while it is on. Off means the code
+  **`marketplace` is `true` since 2026-10-24** (vendor + couple sign-up and login, dashboards,
+  Runs club, Refer & earn). **Only the couples' side is "Coming soon" (`MARKETPLACE_SOON`,
+  owner 2026-10-25: launch once each service has 15–20 vendors):** `/marketplace`, its
+  categories and vendor pages show `<ComingSoon>`, the menu/footer link carries "Soon", the
+  homepage band says "Coming soon" with "Plan your event" instead of "Browse", and the sitemap
+  leaves them out. Never switch `FEATURES.marketplace` off to hide the marketplace — that also
+  removes every vendor and couple login (it did, by mistake, on 2026-10-25). Off means the code
   stays and: AI / Marketplace / Earn pages render `<ComingSoon feature=…>` (`/plan`,
   `/marketplace/*`, `/earn`, `/vendors/marketplace`, and the vendor + couple sign-up /
   complete-signup pages — `signUp` / `completeGoogleSignUp` refuse server-side too); poll

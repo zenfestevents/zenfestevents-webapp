@@ -9,7 +9,7 @@ import { ShortlistButton } from '../../../../../components/market/ShortlistButto
 import { dayKey, getPublicVendor } from '../../../../../lib/marketplace'
 import { ALL_CHENNAI, rupees, unitLabel } from '../../../../../lib/marketplaceOptions'
 import { getCustomer } from '../../../../../lib/session'
-import { FEATURES } from '../../../../../lib/features'
+import { FEATURES, MARKETPLACE_SOON } from '../../../../../lib/features'
 import { ComingSoon } from '../../../../../components/ComingSoon'
 
 export const dynamic = 'force-dynamic'
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 }
 
 export default async function VendorPage({ params }: { params: Params }) {
-  if (!FEATURES.marketplace) return <ComingSoon feature="marketplace" />
+  if (!FEATURES.marketplace || MARKETPLACE_SOON) return <ComingSoon feature="marketplace" />
   const { slug } = await params
   const [vendor, customer] = await Promise.all([getPublicVendor(slug), getCustomer()])
   if (!vendor) notFound()

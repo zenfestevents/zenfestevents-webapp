@@ -24,7 +24,7 @@ import { aiAvailable } from '../../../lib/ai/status'
 import { VendorCard } from '../../../components/market/VendorCard'
 import { listVendors, type PublicVendor } from '../../../lib/marketplace'
 import { MARKET_CATEGORIES } from '../../../lib/marketplaceOptions'
-import { ANNOUNCE_COMING_SOON, COMING_SOON, FEATURES } from '../../../lib/features'
+import { ANNOUNCE_COMING_SOON, COMING_SOON, FEATURES, MARKETPLACE_SOON } from '../../../lib/features'
 import { businessJsonLd, jsonLdText } from '../../../lib/seo'
 
 // A cached page (CLAUDE.md, "Page caching"): rebuilt at most every 5 minutes, at once when /admin saves.
@@ -86,7 +86,7 @@ export default async function HomePage() {
     FEATURES.polls ? getHomePoll() : null,
     // The AI band's specialist list; skipped (one query fewer) while the AI is switched off.
     FEATURES.ai ? getAgentProfiles() : [],
-    FEATURES.marketplace ? getHomeMarket() : [],
+    FEATURES.marketplace && !MARKETPLACE_SOON ? getHomeMarket() : [],
     homeTestimonials(),
   ])
   // Switched-off features (lib/features.ts) get one "Coming soon" band instead of their own,
@@ -348,7 +348,7 @@ export default async function HomePage() {
       <section className="section band-soft home-market">
         <div className="container home-market__inner">
           <Reveal className="home-market__intro">
-            <p className="eyebrow">Zenfest marketplace</p>
+            <p className="eyebrow">Zenfest marketplace{MARKETPLACE_SOON && ' · Coming soon'}</p>
             <h2 className="display-l">
               Book vendors <span className="accent">directly</span>
             </h2>
@@ -364,8 +364,9 @@ export default async function HomePage() {
               ))}
             </ul>
             <div className="btn-row">
-              <Link className="btn btn--primary" href="/marketplace">
-                Browse the marketplace
+              {/* While the couples' side is "Coming soon", the team plans it instead. */}
+              <Link className="btn btn--primary" href={MARKETPLACE_SOON ? '/enquire' : '/marketplace'}>
+                {MARKETPLACE_SOON ? 'Plan your event' : 'Browse the marketplace'}
               </Link>
               <Link className="home-market__vendor-link" href="/vendors/marketplace">
                 Are you a vendor? List free →

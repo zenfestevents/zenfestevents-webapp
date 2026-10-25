@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 
-import { ANNOUNCE_COMING_SOON, FEATURES } from '../lib/features'
+import { ANNOUNCE_COMING_SOON, FEATURES, MARKETPLACE_SOON } from '../lib/features'
 import { MAJOR_CITIES, SITE_FALLBACK, telLink, whatsappLink, DEFAULT_WA_MESSAGE, type SiteSettings } from '../lib/site'
 import { SeamDivider } from './game'
 
@@ -66,7 +66,7 @@ export function Footer({ settings, hasTestimonials = false }: { settings: SiteSe
                 ANNOUNCE_COMING_SOON; polls are hidden either way. */}
             {(FEATURES.ai || ANNOUNCE_COMING_SOON) && <Link href="/plan">Zenfest AI planner{!FEATURES.ai && <Soon />}</Link>}
             {(FEATURES.marketplace || ANNOUNCE_COMING_SOON) && (
-              <Link href="/marketplace">Vendor marketplace{!FEATURES.marketplace && <Soon />}</Link>
+              <Link href="/marketplace">Vendor marketplace{(!FEATURES.marketplace || MARKETPLACE_SOON) && <Soon />}</Link>
             )}
             {(FEATURES.earn || ANNOUNCE_COMING_SOON) && <Link href="/earn">Earn from events{!FEATURES.earn && <Soon />}</Link>}
             {FEATURES.polls && <Link href="/polls">Polls</Link>}

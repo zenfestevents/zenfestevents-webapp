@@ -8,7 +8,7 @@ import { VendorCard } from '../../../components/market/VendorCard'
 import { categoryCounts, listVendors } from '../../../lib/marketplace'
 import { MARKET_CATEGORIES } from '../../../lib/marketplaceOptions'
 import { getCustomer } from '../../../lib/session'
-import { FEATURES } from '../../../lib/features'
+import { FEATURES, MARKETPLACE_SOON } from '../../../lib/features'
 import { ComingSoon } from '../../../components/ComingSoon'
 
 export const dynamic = 'force-dynamic'
@@ -28,7 +28,7 @@ const WHY = [
 ] as const
 
 export default async function MarketplacePage() {
-  if (!FEATURES.marketplace) return <ComingSoon feature="marketplace" />
+  if (!FEATURES.marketplace || MARKETPLACE_SOON) return <ComingSoon feature="marketplace" />
   const [counts, latest, customer] = await Promise.all([categoryCounts(), listVendors({ sort: 'new' }), getCustomer()])
   const saved = new Set((customer?.shortlist ?? []).map((s) => (typeof s === 'object' ? s.id : s)))
   const total = Object.values(counts).reduce((a, b) => a + b, 0)

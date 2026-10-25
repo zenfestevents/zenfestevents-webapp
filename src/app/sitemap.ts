@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-import { FEATURES } from '../lib/features'
+import { FEATURES, MARKETPLACE_SOON } from '../lib/features'
 import { categoryCounts, listVendors } from '../lib/marketplace'
 import { SITE_URL } from '../lib/seo'
 import { hasTestimonials } from '../lib/testimonials'
@@ -22,10 +22,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   })
 
   const none: Record<string, number> = {}
+  // While the couples' side is "Coming soon" its pages are left out of the sitemap.
+  const browse = FEATURES.marketplace && !MARKETPLACE_SOON
   const [reviews, counts, vendors] = await Promise.all([
     hasTestimonials().catch(() => false),
-    FEATURES.marketplace ? categoryCounts().catch(() => none) : none,
-    FEATURES.marketplace ? listVendors({ sort: 'new' }).catch(() => []) : [],
+    browse ? categoryCounts().catch(() => none) : none,
+    browse ? listVendors({ sort: 'new' }).catch(() => []) : [],
   ])
 
   return [
@@ -41,7 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     page('/registry', 0.5),
     ...(FEATURES.marketplace
       ? [
-          page('/marketplace', 0.8, 'daily'),
+          ...(browse ? [page('/marketplace', 0.8, 'daily')] : []),
           // Only categories with live vendors: an empty listing page is thin content.
           ...Object.entries(counts)
             .filter(([, n]) => n > 0)
