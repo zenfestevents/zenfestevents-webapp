@@ -24,6 +24,18 @@ const nextConfig: NextConfig = {
       { source: '/:path*', has: fromPolls, destination: `${to}/polls`, permanent: true },
     ]
   },
+  // The hero film/stills and the logos keep fixed names, so Vercel serves them with
+  // max-age=0 and every visit re-asks for each one. Let browsers keep them for a week
+  // (then use the old copy while checking, for a day): returning visitors get them
+  // without a round trip. Replacing one under the same name reaches them within a week;
+  // a new file name reaches everyone at once.
+  async headers() {
+    const week = [{ key: 'Cache-Control', value: 'public, max-age=604800, stale-while-revalidate=86400' }]
+    return [
+      { source: '/hero/:path*', headers: week },
+      { source: '/brand/:path*', headers: week },
+    ]
+  },
   images: {
     localPatterns: [
       {

@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import { FEATURES } from '../lib/features'
 import { SITE_FALLBACK } from '../lib/site'
-import { AiLink } from './ai/ChatLauncher'
+import { AiLink } from './ai/AiLink'
 import { KolamRosette } from './Kolam'
 import { SeamDivider } from './game'
 

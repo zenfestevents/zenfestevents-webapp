@@ -6,7 +6,7 @@ import React from 'react'
 
 import { VENDORS_HREF } from '../lib/features'
 import { DEFAULT_WA_MESSAGE, SITE_FALLBACK, whatsappLink, type SiteSettings } from '../lib/site'
-import { hidesChatLauncher } from './ai/ChatLauncher'
+import { hidesChatLauncher } from './ai/AiLink'
 import { useAccountSession } from './market/useAccountSession'
 
 /**

@@ -17,8 +17,7 @@ import { getSiteSettings } from '../../lib/getSettings'
 import { hasTestimonials } from '../../lib/testimonials'
 import { aiAvailable } from '../../lib/ai/status'
 import { getAgentProfiles } from '../../lib/ai/knowledge'
-import { ZenfestAIProvider } from '../../components/ai/ZenfestAIProvider'
-import { ChatLauncher } from '../../components/ai/ChatLauncher'
+import { AiShell } from '../../components/ai/AiShell'
 
 const display = Oswald({
   weight: ['400', '500', '600', '700'],
@@ -82,7 +81,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <a className="skip-link" href="#main">
           Skip to content
         </a>
-        <ZenfestAIProvider
+        <AiShell
           enabled={ai}
           agents={agents}
           greeting={settings.ai?.greeting || ''}
@@ -93,8 +92,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <main id="main">{children}</main>
           <Footer settings={settings} hasTestimonials={testimonials} />
           <MobileCTABar settings={settings} />
-          <ChatLauncher />
-        </ZenfestAIProvider>
+        </AiShell>
       </body>
     </html>
   )

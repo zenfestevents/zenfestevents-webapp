@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { ANNOUNCE_COMING_SOON, COMING_SOON, FEATURES, VENDORS_HREF } from '../lib/features'
 import { DEFAULT_WA_MESSAGE, MAJOR_CITIES, SITE_FALLBACK, whatsappLink, type SiteSettings } from '../lib/site'
-import { AiLink } from './ai/ChatLauncher'
+import { AiLink } from './ai/AiLink'
 import { Ticker } from './game'
 import { AccountButton } from './market/AccountButton'
 

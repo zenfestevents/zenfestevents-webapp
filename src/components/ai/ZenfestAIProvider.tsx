@@ -4,65 +4,19 @@
 // page changes and is shared by the desktop panel, the phone full-screen view and
 // /plan. Talks to POST /plan/chat (NDJSON stream) and the Server Actions in
 // app/(frontend)/plan/actions.ts.
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { loadChat, startChat } from '../../app/(frontend)/plan/actions'
 import type { IntakeDetails } from '../../lib/ai/intake'
 import type { AgentProfile, ChatItem, StreamEvent } from '../../lib/ai/types'
+import { ZenfestAICtx, type SavedChat, type Session, type ZenfestAIContext } from './context'
+
+export { useZenfestAI, useZenfestAIOptional, type SavedChat, type ZenfestAIContext } from './context'
 
 const STORE_KEY = 'zenfest-ai-chat'
 /** This browser's recent chats, so "New chat" never loses an old one. */
 const HISTORY_KEY = 'zenfest-ai-chats'
 const HISTORY_MAX = 10
-
-type Session = { conversationId: string; token: string }
-export type SavedChat = Session & { title: string; updatedAt: number }
-
-export type ZenfestAIContext = {
-  enabled: boolean
-  greeting: string
-  whatsapp: string
-  phone: string
-  isOpen: boolean
-  open: (prefill?: string) => void
-  close: () => void
-  items: ChatItem[]
-  busy: boolean
-  /** Specialists working right now, e.g. ["🎨 Zenfest Décor"]. */
-  working: string[]
-  draft: string
-  setDraft: (v: string) => void
-  send: (text: string) => Promise<void>
-  session: Session | null
-  contactDone: string | null
-  markContactDone: (message: string) => void
-  reset: () => void
-  /** Loads the stored chat (once); /plan calls it on mount. */
-  restore: () => Promise<void>
-  /** Specialists the intake form offers as services. */
-  agents: AgentProfile[]
-  /** Text typed in the homepage band before the form was filled in (goes into its notes). */
-  intakeNote: string
-  /** Sends the intake form, opens the chat and lets Zenfest reply first. Returns an error message or null. */
-  startWithIntake: (intake: IntakeDetails & { consent: boolean; company?: string }) => Promise<string | null>
-  /** The last intake sent from this page (prefills name/phone after "New chat"). */
-  lastIntake: IntakeDetails | null
-  /** This browser's recent chats, newest first. */
-  history: SavedChat[]
-  /** Opens one of `history`. Returns an error message or null. */
-  switchTo: (conversationId: string) => Promise<string | null>
-}
-
-const Ctx = createContext<ZenfestAIContext | null>(null)
-
-export function useZenfestAI(): ZenfestAIContext {
-  const v = useContext(Ctx)
-  if (!v) throw new Error('useZenfestAI must be used inside ZenfestAIProvider')
-  return v
-}
-
-/** Like useZenfestAI, but null outside the provider (for optional entry points). */
-export const useZenfestAIOptional = () => useContext(Ctx)
 
 function readSession(): Session | null {
   try {
@@ -417,5 +371,5 @@ export function ZenfestAIProvider(props: {
     ],
   )
 
-  return <Ctx.Provider value={value}>{props.children}</Ctx.Provider>
+  return <ZenfestAICtx.Provider value={value}>{props.children}</ZenfestAICtx.Provider>
 }

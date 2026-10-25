@@ -3,17 +3,14 @@
 // Zenfest AI on every page. Desktop (≥900px): a gold bubble bottom-right that opens a
 // side panel. Phones: no bubble (it would cover content and the bottom bar) — the
 // bar's "Ask Zenfest AI" button opens the same chat full-screen. Both hidden on the
-// registry pages and on /plan, which shows the chat itself.
-import Link from 'next/link'
+// registry pages and on /plan, which shows the chat itself. Loaded only while the AI is
+// on (AiShell.tsx); the links that open it are in AiLink.tsx.
 import { usePathname } from 'next/navigation'
 import React, { useEffect } from 'react'
 
+import { hidesChatLauncher } from './AiLink'
+import { useZenfestAI } from './context'
 import { ZenfestChat } from './ZenfestChat'
-import { useZenfestAI, useZenfestAIOptional } from './ZenfestAIProvider'
-
-/** Paths with their own sticky UI, or the full-page chat. */
-export const hidesChatLauncher = (pathname: string) =>
-  pathname === '/plan' || pathname.startsWith('/r/') || pathname.startsWith('/dashboard/')
 
 export function ChatLauncher() {
   const { enabled, isOpen, open, close } = useZenfestAI()
@@ -56,43 +53,5 @@ export function ChatLauncher() {
         </div>
       )}
     </>
-  )
-}
-
-/**
- * A link that opens the Zenfest AI chat in place (panel or full-screen) and falls
- * back to a normal link: /plan without JavaScript, /enquire when the AI is off.
- */
-export function AiLink(props: {
-  className?: string
-  children: React.ReactNode
-  /** Shown instead (linking to /enquire) when Zenfest AI is switched off; `false` hides the link. */
-  fallback?: React.ReactNode
-  prefill?: string
-  /** Runs before the chat opens, e.g. to close the phone menu. */
-  onOpen?: () => void
-}) {
-  const ai = useZenfestAIOptional()
-  if (!ai?.enabled) {
-    if (props.fallback === false) return null
-    return (
-      <Link className={props.className} href="/enquire">
-        {props.fallback ?? props.children}
-      </Link>
-    )
-  }
-  return (
-    <a
-      className={props.className}
-      href="/plan"
-      onClick={(e) => {
-        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
-        e.preventDefault()
-        props.onOpen?.()
-        ai.open(props.prefill)
-      }}
-    >
-      {props.children}
-    </a>
   )
 }

@@ -342,6 +342,11 @@ src/
   titles baked in), so locally "Photos do the talking" shows those cards. Production's
   Neon DB has none, so the live site shows the automatic "Coming soon" panel until real
   projects are added in the live `/admin`.
+- **Replacing a picture in `public/hero/` or `public/brand/`? Give the new file a new name**
+  (e.g. `poster-mobile-860-v2.avif`) and update every place that uses it (`srcSet`s, the
+  build scripts' output names). Browsers keep those folders for a week (`headers()` in
+  `next.config.ts`, owner 2026-10-25), so a file swapped under the same name reaches
+  returning visitors only after up to a week. Photos uploaded in `/admin` are not affected.
 - **Hero video assets** live in `public/hero/` (`scrub.mp4`, `poster.jpg`,
   `frames/frame_001..090.webp`); masters stay untracked at the repo root. Regenerate from
   `hero_master.mp4` (1920×1080):
