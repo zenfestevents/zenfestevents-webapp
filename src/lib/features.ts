@@ -5,7 +5,7 @@ export const FEATURES = {
   /** Zenfest AI planner (/plan, bubble, homepage band). Also needs AI_API_KEY + Site Settings. */
   ai: false,
   /** Vendor marketplace (/marketplace/*) and the vendor/couple sign-ups that feed it. */
-  marketplace: true,
+  marketplace: false,
   /** "Earn from events" hosts programme (/earn). */
   earn: false,
   /** Public polls (/polls/*, homepage band) and the registry's family polls tabs. */
@@ -25,6 +25,13 @@ export const FEATURES = {
  * pages still show "Coming soon" if someone has the URL.
  */
 export const ANNOUNCE_COMING_SOON = false
+
+/**
+ * The marketplace is open (vendors can sign up and list) but has no live vendors yet, so its
+ * menu link carries a "Soon" tag. Nothing is hidden. Set to false once enough vendors are
+ * live to show off (owner, 2026-10-25).
+ */
+export const MARKETPLACE_SOON = true
 
 /**
  * Where "For vendors" links go. While the marketplace is closed there is only one way to

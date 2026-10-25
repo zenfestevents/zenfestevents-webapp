@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import { ANNOUNCE_COMING_SOON, COMING_SOON, FEATURES, VENDORS_HREF } from '../lib/features'
+import { ANNOUNCE_COMING_SOON, COMING_SOON, FEATURES, MARKETPLACE_SOON, VENDORS_HREF } from '../lib/features'
 import { DEFAULT_WA_MESSAGE, MAJOR_CITIES, SITE_FALLBACK, whatsappLink, type SiteSettings } from '../lib/site'
 import { AiLink } from './ai/AiLink'
 import { Ticker } from './game'
@@ -30,7 +30,9 @@ const isGroup = (e: NavEntry): e is NavGroup => 'items' in e
  */
 function buildNav(hasTestimonials: boolean): NavEntry[] {
   return [
-    ...(FEATURES.marketplace ? [{ href: '/marketplace', label: 'Marketplace', group: 'Book vendors' }] : []),
+    ...(FEATURES.marketplace
+      ? [{ href: '/marketplace', label: 'Marketplace', group: 'Book vendors', soon: MARKETPLACE_SOON }]
+      : []),
     {
       label: 'About Zenfest',
       items: [
@@ -224,6 +226,7 @@ export function Header({ settings, hasTestimonials = false }: { settings: SiteSe
                 className={`site-nav__link ${isActive(pathname, entry) ? 'is-active' : ''}`}
               >
                 {entry.label}
+                {entry.soon && <span className="site-nav__soon">Soon</span>}
               </Link>
             ),
           )}

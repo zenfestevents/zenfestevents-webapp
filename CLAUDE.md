@@ -393,8 +393,9 @@ src/
 ## Current state (things that are deliberate, not oversights)
 - **Feature switches (`lib/features.ts`, 2026-10-14).** The owner trimmed the site to what
   is live: `FEATURES = { ai, marketplace, earn, polls }`, all `false` then.
-  **`marketplace` is `true` since 2026-10-24** (owner: open vendor sign-up, the marketplace
-  and couple login now; everything else stays hidden). Off means the code
+  `marketplace` was `true` on 2026-10-24 only; **off again since 2026-10-25** (owner: launch
+  once each service has 15–20 vendors; until then vendors join through `/vendors/partner`).
+  `MARKETPLACE_SOON` (a "Soon" tag on the menu link) only matters while it is on. Off means the code
   stays and: AI / Marketplace / Earn pages render `<ComingSoon feature=…>` (`/plan`,
   `/marketplace/*`, `/earn`, `/vendors/marketplace`, and the vendor + couple sign-up /
   complete-signup pages — `signUp` / `completeGoogleSignUp` refuse server-side too); poll
@@ -495,6 +496,11 @@ src/
   metadata merges shallowly, so a fixed og:title made every shared link read like the
   homepage; left out, Next fills og/twitter title + description from each page's own. The homepage renders LocalBusiness JSON-LD from Site Settings (`lib/seo.ts`) —
   never add review stars to it (Google ignores self-served ratings).
+- **Live `/admin` was blank (fixed 2026-10-25):** the Vercel Blob plugin adds an admin
+  provider (`VercelBlobClientUploadHandler`), and Payload renders nothing under a provider
+  missing from `importMap.js`. The plugin used to be added only when `BLOB_READ_WRITE_TOKEN`
+  was set, so the locally generated map never had it. It is now always registered
+  (`enabled` follows the token) — keep it that way, or regenerate the map with the token set.
 - **`/admin/create-first-user` is broken** on Payload 3.88 + Next 16.3.3 — it renders
   a blank page (the view is in the RSC stream but never reaches the DOM; reproduced
   locally against an empty DB under both Turbopack and webpack). Use

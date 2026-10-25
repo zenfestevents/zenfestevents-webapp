@@ -144,17 +144,16 @@ export default buildConfig({
     : undefined,
   plugins: [
     // Store uploaded media in Vercel Blob when a token is present (production);
-    // otherwise Payload uses the local filesystem (local dev).
-    ...(process.env.BLOB_READ_WRITE_TOKEN
-      ? [
-          vercelBlobStorage({
-            enabled: true,
-            // Vendor uploads (FSSAI certificates) stay behind Payload's access
-            // control: they're served via /api, not straight from the Blob URL.
-            collections: { media: true, 'vendor-uploads': true, 'vendor-media': true },
-            token: process.env.BLOB_READ_WRITE_TOKEN,
-          }),
-        ]
-      : []),
+    // otherwise Payload uses the local filesystem (local dev). The plugin is registered
+    // either way: it adds an admin provider that must be in the import map, and a map
+    // generated without it left the live admin blank (every page under the provider
+    // renders nothing when its component is missing).
+    vercelBlobStorage({
+      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+      // Vendor uploads (FSSAI certificates) stay behind Payload's access
+      // control: they're served via /api, not straight from the Blob URL.
+      collections: { media: true, 'vendor-uploads': true, 'vendor-media': true },
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+    }),
   ],
 })
