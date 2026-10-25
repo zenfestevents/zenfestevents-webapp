@@ -1,6 +1,7 @@
 import { APIError, type CollectionBeforeChangeHook, type CollectionConfig } from 'payload'
 
-import { anyone, authenticated, isAdminField } from '../access'
+import { anyone } from '../access'
+import { adminHidden, canManageField, canView, canWork, ownerOnly } from '../access/roles'
 import { linkVendorApplication } from '../hooks/linkVendorApplication'
 import { applicationRuns, stampApplicationReferral } from '../hooks/runsClub'
 import { notifySubmission } from '../hooks/notifySubmission'
@@ -43,17 +44,19 @@ const requireCakeBasics: CollectionBeforeChangeHook = ({ data, operation }) => {
 /** Vendor enrollment submissions. Public can create; only admin can manage. */
 export const VendorApplications: CollectionConfig = {
   slug: 'vendor-applications',
-  labels: { singular: 'Vendor Application', plural: 'Vendor Applications' },
+  labels: { singular: 'Vendor application', plural: 'Vendor applications' },
   access: {
+    read: canView,
     create: anyone,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    update: canWork,
+    delete: ownerOnly,
   },
   admin: {
+    group: 'Vendors',
     useAsTitle: 'name',
     defaultColumns: ['name', 'vendorType', 'phone', 'city', 'status', 'createdAt'],
-    description: 'Vendors who want to work with Zenfest Events.',
+    description: 'Vendors who want to work with Zenfest. Open one, check the details and call them. A Manager or the Owner then sets “Status” to Approved or Rejected.',
+    hidden: adminHidden('vendor-applications'),
   },
   defaultSort: '-createdAt',
   hooks: {
@@ -307,7 +310,7 @@ export const VendorApplications: CollectionConfig = {
       type: 'text',
       label: 'Invited by',
       index: true,
-      access: { create: isAdminField, update: isAdminField },
+      access: { create: canManageField, update: canManageField },
       admin: { position: 'sidebar', readOnly: true, description: 'c:<id> = couple, v:<id> = vendor.' },
     },
     {
@@ -320,7 +323,13 @@ export const VendorApplications: CollectionConfig = {
         { label: 'Approved', value: 'approved' },
         { label: 'Rejected', value: 'rejected' },
       ],
-      admin: { position: 'sidebar' },
+      // Approving a vendor is a Manager's call.
+      access: { update: canManageField },
+      admin: {
+        position: 'sidebar',
+        description: 'Only a Manager or the Owner can approve or reject.',
+        components: { Cell: '/components/admin/StatusPill#StatusPill' },
+      },
     },
   ],
 }

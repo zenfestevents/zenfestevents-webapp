@@ -1,3 +1,4 @@
+import { adminHidden, canView, canWork, hasRole, ownerOnly } from '../access/roles'
 import type {
   CollectionAfterChangeHook,
   CollectionBeforeChangeHook,
@@ -5,7 +6,6 @@ import type {
   PayloadRequest,
 } from 'payload'
 
-import { authenticated } from '../access'
 import { parseYmdKey, todayIst } from '../lib/occasions/dates'
 import { OCCASION_TYPES, REMINDER_CHANNELS, REMINDER_STATUSES } from '../lib/occasions/options'
 import { createLeadForReminder, runDailyReminders } from '../lib/occasions/server'
@@ -57,7 +57,7 @@ const updateContact: CollectionAfterChangeHook = async ({ doc, previousDoc, req 
 async function cron(req: PayloadRequest) {
   const secret = process.env.CRON_SECRET
   const bearer = req.headers.get('authorization') === `Bearer ${secret}`
-  const isStaff = req.user?.collection === 'users'
+  const isStaff = hasRole(req.user, 'viewer')
   if (!(secret && bearer) && !isStaff) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
   const q = req.searchParams
@@ -80,20 +80,20 @@ async function cron(req: PayloadRequest) {
  */
 export const Reminders: CollectionConfig = {
   slug: 'reminders',
-  labels: { singular: 'Reminder', plural: 'Reminders' },
+  labels: { singular: 'Wish', plural: 'Wishes to send' },
   access: {
-    create: authenticated,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    read: canView,
+    create: canWork,
+    update: canWork,
+    delete: ownerOnly,
   },
   admin: {
-    group: 'Occasion Reminders',
+    group: 'Birthdays & anniversaries',
     useAsTitle: 'title',
     defaultColumns: ['contactName', 'phone', 'milestone', 'occurrenceDate', 'status', 'assignedTo'],
     listSearchableFields: ['title', 'contactName', 'phone'],
-    description:
-      'Upcoming occasions to pitch. Click the WhatsApp number to open the ready message (it is marked Sent), then update the status when they reply.',
+    description: 'Wishes that are due. Tap the WhatsApp number to open the ready message, send it, then set what they said.',
+    hidden: adminHidden('reminders'),
   },
   defaultSort: '-dueDate',
   indexes: [{ fields: ['occasionId', 'occurrenceYear'], unique: true }],

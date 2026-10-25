@@ -48,7 +48,7 @@ async function run() {
 
   const user = await payload.create({
     collection: 'users',
-    data: { email, password, name },
+    data: { email, password, name, role: 'owner' },
   })
 
   console.log(`${target}: created admin user ${user.email}. Sign in at /admin/login.`)

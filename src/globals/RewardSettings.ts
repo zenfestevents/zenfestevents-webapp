@@ -1,6 +1,6 @@
 import type { ArrayField, GlobalConfig } from 'payload'
 
-import { isAdmin } from '../access'
+import { canManage, canView } from '../access/roles'
 import {
   AWARD_REASONS,
   DEFAULT_COUPLE_TIERS,
@@ -40,10 +40,10 @@ const tiers = (name: string, label: string, defaults: RewardTier[]): ArrayField 
  */
 export const RewardSettings: GlobalConfig = {
   slug: 'reward-settings',
-  label: 'Runs Club Settings',
+  label: 'Runs club settings',
   access: {
-    read: isAdmin,
-    update: isAdmin,
+    read: canView,
+    update: canManage,
   },
   admin: {
     group: 'Rewards',

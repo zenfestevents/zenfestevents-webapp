@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { isAdmin } from '../access'
+import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
 import { enquiryRuns } from '../hooks/runsClub'
 import { ENQUIRY_STATUSES, EVENT_TYPES, toOptionList } from '../lib/marketplaceOptions'
 
@@ -12,12 +12,18 @@ import { ENQUIRY_STATUSES, EVENT_TYPES, toOptionList } from '../lib/marketplaceO
 export const Enquiries: CollectionConfig = {
   slug: 'enquiries',
   labels: { singular: 'Marketplace Enquiry', plural: 'Marketplace Enquiries' },
-  access: { read: isAdmin, create: isAdmin, update: isAdmin, delete: isAdmin },
+  access: {
+    read: canView,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
+  },
   admin: {
     group: 'Marketplace',
     useAsTitle: 'summary',
     defaultColumns: ['summary', 'vendor', 'customer', 'eventDate', 'status', 'updatedAt'],
     description: 'Quote requests couples sent to vendors through the marketplace.',
+    hidden: adminHidden('enquiries'),
   },
   defaultSort: '-updatedAt',
   hooks: { afterChange: [enquiryRuns] },

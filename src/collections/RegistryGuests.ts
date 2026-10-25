@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access'
+import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
 import { GUEST_SIDES, RSVP_OPTIONS, toOptions } from '../lib/registryOptions'
 
 /** A host's invite list and RSVPs, managed from the registry dashboard. */
@@ -8,15 +8,16 @@ export const RegistryGuests: CollectionConfig = {
   slug: 'registry-guests',
   labels: { singular: 'Invited guest', plural: 'Invited guests' },
   access: {
-    create: authenticated,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    read: canView,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
   admin: {
     group: 'Gift Registry',
     useAsTitle: 'name',
     defaultColumns: ['name', 'phone', 'event', 'rsvp', 'count'],
+    hidden: adminHidden('registry-guests'),
   },
   defaultSort: 'name',
   fields: [

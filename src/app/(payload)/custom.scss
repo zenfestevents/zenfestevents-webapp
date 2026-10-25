@@ -161,18 +161,29 @@ h1,
   border-right-color: rgba(217, 178, 76, 0.16);
 }
 
+// Group headings read as words, not shouted labels: sentence case, gold, a little
+// larger (the team includes people new to admin screens; Notion-style calm sidebar).
+.nav-group {
+  margin-bottom: 14px;
+}
+
 .nav-group__toggle,
 .nav-group__label {
-  color: rgba(217, 178, 76, 0.78);
-  font-size: 11px;
+  color: var(--zf-gold);
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .nav__link {
-  color: rgba(251, 247, 238, 0.78);
+  margin-inline: -10px;
+  padding-inline: 10px 30px;
   border-radius: var(--style-radius-s);
+  color: rgba(251, 247, 238, 0.82);
+  font-size: 15px;
+  line-height: 34px;
+  text-decoration: none;
   transition:
     color 180ms var(--zf-ease),
     background-color 180ms var(--zf-ease);
@@ -180,12 +191,92 @@ h1,
   &:hover,
   &:focus-visible {
     color: var(--zf-gold-bright);
-    background-color: rgba(217, 178, 76, 0.07);
+    background-color: rgba(217, 178, 76, 0.08);
+    text-decoration: none;
   }
 }
 
+// The open page: a gold bar and a soft gold wash (Linear-style clear "you are here").
+.nav__link:has(.nav__link-indicator) {
+  padding-inline-start: 10px;
+  color: var(--zf-gold-bright);
+  background-color: rgba(217, 178, 76, 0.12);
+}
+
 .nav__link-indicator {
+  inset-inline-start: 0;
+  height: 18px;
+  width: 3px;
   background: var(--zf-gold);
+}
+
+/* ---------- Help text and lists: easy to read ---------- */
+
+.field-description,
+.view-description {
+  color: var(--theme-elevation-600);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.table td {
+  padding-block: 14px;
+  font-size: 14.5px;
+}
+
+/* Status pills in lists (components/admin/StatusPill.tsx), Airtable-style */
+
+.zf-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.zf-pill--wait {
+  background: rgba(217, 178, 76, 0.2);
+  color: var(--zf-gold-text);
+}
+
+.zf-pill--work {
+  background: rgba(64, 120, 196, 0.14);
+  color: #2b5c9e;
+}
+
+.zf-pill--done {
+  background: rgba(30, 174, 90, 0.15);
+  color: #17733f;
+}
+
+.zf-pill--stop {
+  background: rgba(196, 64, 52, 0.14);
+  color: #a3352b;
+}
+
+.zf-pill--off {
+  background: var(--theme-elevation-100);
+  color: var(--theme-elevation-600);
+}
+
+html[data-theme='dark'] {
+  .zf-pill--wait {
+    color: var(--zf-gold-bright);
+  }
+
+  .zf-pill--work {
+    color: #9cc1f2;
+  }
+
+  .zf-pill--done {
+    color: #7fd9a3;
+  }
+
+  .zf-pill--stop {
+    color: #f0a39b;
+  }
 }
 
 // The menu's open/close button sits on the ink menu while it is open.
@@ -248,6 +339,128 @@ h1,
     box-shadow:
       inset 0 0 0 1px var(--zf-gold-deep),
       0 10px 24px -18px rgba(90, 64, 17, 0.55);
+  }
+}
+
+/* ---------- "Today" board (components/admin/TodayBoard.tsx) ---------- */
+
+.zf-today {
+  margin: 0 0 2.5rem;
+  display: grid;
+  gap: 16px;
+}
+
+.zf-today__title {
+  margin: 0;
+  font-family: var(--zf-font-display);
+  font-size: clamp(24px, 2.6vw, 32px);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--theme-elevation-1000);
+}
+
+.zf-today__role {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--theme-elevation-600);
+
+  strong {
+    color: var(--theme-elevation-900);
+  }
+}
+
+.zf-today__cards {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+.zf-today__card {
+  display: grid;
+  gap: 4px;
+  height: 100%;
+  padding: 18px 20px 20px;
+  border-radius: 12px;
+  background: var(--theme-elevation-50);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    box-shadow 200ms var(--zf-ease),
+    transform 200ms var(--zf-ease);
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: inset 0 0 0 1px var(--zf-gold-deep);
+  }
+}
+
+// Something is waiting: the card turns ink with a gold number, like the site's bands.
+.zf-today__card--due {
+  background: var(--zf-band-ink);
+  color: var(--zf-jasmine);
+
+  .zf-today__count {
+    color: var(--zf-gold);
+  }
+
+  .zf-today__label {
+    color: var(--zf-jasmine);
+  }
+
+  .zf-today__hint {
+    color: rgba(251, 247, 238, 0.7);
+  }
+}
+
+.zf-today__count {
+  font-family: var(--zf-font-display);
+  font-size: 40px;
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--theme-elevation-400);
+}
+
+.zf-today__label {
+  margin-top: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--theme-elevation-900);
+}
+
+.zf-today__hint {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--theme-elevation-550);
+}
+
+.zf-today__help {
+  border-radius: 12px;
+  background: var(--theme-elevation-0);
+  box-shadow: inset 0 0 0 1px var(--theme-elevation-100);
+  padding: 4px 18px;
+
+  summary {
+    padding: 12px 0;
+    font-weight: 600;
+    font-size: 14.5px;
+    cursor: pointer;
+    color: var(--theme-elevation-800);
+  }
+
+  &[open] {
+    padding-bottom: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zf-today__card {
+    transition: none;
   }
 }
 

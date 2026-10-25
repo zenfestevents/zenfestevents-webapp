@@ -1,17 +1,24 @@
 import type { CollectionConfig } from 'payload'
 
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { adminHidden, canManage, ownerOnly } from '../access/roles'
+
 
 export const Media: CollectionConfig = {
   slug: 'media',
-  labels: { singular: 'Photo / Image', plural: 'Photos & Images' },
+  labels: { singular: 'Photo', plural: 'Photos' },
   access: {
     read: anyone,
-    create: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
-  admin: { useAsTitle: 'alt', description: 'Upload gallery and site images here.' },
+  admin: {
+    group: 'Website',
+    useAsTitle: 'alt',
+    description: 'Photos used on the website. Upload them here, then pick them in “Our work” or “Services”.',
+    hidden: adminHidden('media'),
+  },
   upload: {
     mimeTypes: ['image/*'],
     focalPoint: true,

@@ -1,6 +1,7 @@
 import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 
-import { adminOrSelf, isAdmin, isAdminField } from '../access'
+import { adminOrSelf } from '../access'
+import { adminHidden, canManage, canManageField, canViewField, ownerOnly } from '../access/roles'
 import { assignReferralCode, vendorRuns } from '../hooks/runsClub'
 import {
   CATEGORY_OPTIONS,
@@ -31,20 +32,20 @@ const setStartingPrice: CollectionBeforeChangeHook = ({ data }) => {
  */
 export const Vendors: CollectionConfig = {
   slug: 'vendors',
-  labels: { singular: 'Vendor', plural: 'Vendors' },
+  labels: { singular: 'Vendor account', plural: 'Vendor accounts' },
   auth: accountAuth({ reset: '/vendors/reset-password', verify: '/vendors/verify-email' }),
   access: {
     read: adminOrSelf('vendors'),
-    create: isAdmin,
-    update: isAdmin,
-    delete: isAdmin,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
   admin: {
-    group: 'Marketplace',
+    group: 'Vendors',
     useAsTitle: 'businessName',
     defaultColumns: ['businessName', 'category', 'listingStatus', 'phone', 'updatedAt'],
-    description:
-      'Vendor accounts and their marketplace listings. Set "Listing status" to Live to publish one.',
+    description: 'Vendors who log in to the website with WhatsApp. A Manager or the Owner sets “Listing status” to Live to show a listing.',
+    hidden: adminHidden('vendors'),
   },
   defaultSort: '-updatedAt',
   hooks: { beforeChange: [setStartingPrice, assignReferralCode], afterChange: [vendorRuns] },
@@ -67,7 +68,7 @@ export const Vendors: CollectionConfig = {
       unique: true,
       index: true,
       label: 'Google account ID',
-      access: { create: isAdminField, read: isAdminField, update: isAdminField },
+      access: { create: canManageField, read: canViewField, update: canManageField },
       admin: { position: 'sidebar', readOnly: true, description: 'Set when they sign in with Google.' },
     },
     {
@@ -76,7 +77,7 @@ export const Vendors: CollectionConfig = {
       type: 'number',
       defaultValue: 0,
       label: 'Runs',
-      access: { create: isAdminField, update: isAdminField },
+      access: { create: canManageField, update: canManageField },
       admin: { position: 'sidebar', readOnly: true, description: 'Runs club total. Add a Runs entry to change it.' },
     },
     {
@@ -85,7 +86,7 @@ export const Vendors: CollectionConfig = {
       type: 'text',
       unique: true,
       index: true,
-      access: { create: isAdminField, update: isAdminField },
+      access: { create: canManageField, update: canManageField },
       admin: { position: 'sidebar', readOnly: true },
     },
     {
@@ -95,7 +96,7 @@ export const Vendors: CollectionConfig = {
       type: 'text',
       label: 'Invited by',
       index: true,
-      access: { create: isAdminField, update: isAdminField },
+      access: { create: canManageField, update: canManageField },
       admin: { position: 'sidebar', readOnly: true, description: 'c:<id> = couple, v:<id> = vendor.' },
     },
     { name: 'category', type: 'select', required: true, options: CATEGORY_OPTIONS },
@@ -167,14 +168,14 @@ export const Vendors: CollectionConfig = {
       required: true,
       defaultValue: 'draft',
       options: toOptionList(LISTING_STATUSES),
-      access: { update: isAdminField },
-      admin: { position: 'sidebar' },
+      access: { update: canManageField },
+      admin: { position: 'sidebar', components: { Cell: '/components/admin/StatusPill#StatusPill' } },
     },
     {
       name: 'reviewNote',
       type: 'textarea',
       label: 'Note to the vendor',
-      access: { update: isAdminField },
+      access: { update: canManageField },
       admin: {
         position: 'sidebar',
         description: 'Shown on their dashboard — e.g. what to fix when you set "Needs changes".',

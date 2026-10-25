@@ -1,6 +1,6 @@
 import type { CollectionConfig, PayloadRequest } from 'payload'
 
-import { authenticated } from '../access'
+import { adminHidden, canView, canWork, hasRole, ownerOnly, type Role } from '../access/roles'
 import { sendText } from '../lib/whatsapp/cloud'
 import { toWaNumber } from '../lib/whatsapp/phone'
 
@@ -13,23 +13,23 @@ const DAY_MS = 24 * 60 * 60 * 1000
  */
 export const WhatsAppContacts: CollectionConfig = {
   slug: 'whatsapp-contacts',
-  labels: { singular: 'WhatsApp Contact', plural: 'WhatsApp Contacts' },
+  labels: { singular: 'Chat', plural: 'Chats & contacts' },
   access: {
-    create: authenticated,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    read: canView,
+    create: canWork,
+    update: canWork,
+    delete: ownerOnly,
   },
   admin: {
     group: 'WhatsApp',
     useAsTitle: 'name',
     defaultColumns: ['name', 'phone', 'optIn', 'lastInboundAt', 'tags'],
     listSearchableFields: ['name', 'phone', 'tags'],
-    description:
-      'People on the WhatsApp Cloud API number. Promotions go only to "Opted in"; anyone who replies STOP is switched to "Opted out" automatically.',
     components: {
       beforeListTable: ['/components/admin/whatsapp/ImportContacts#ImportContacts'],
     },
+    description: 'Everyone on our WhatsApp number. Open a person to read the chat and reply. Offers go only to “Opted in” people; anyone who replies STOP is moved to “Opted out” automatically.',
+    hidden: adminHidden('whatsapp-contacts'),
   },
   defaultSort: '-lastInboundAt',
   hooks: {
@@ -101,7 +101,7 @@ export const WhatsAppContacts: CollectionConfig = {
 }
 
 const json = (body: unknown, status = 200) => Response.json(body, { status })
-const isStaff = (req: PayloadRequest) => req.user?.collection === 'users'
+const isStaff = (req: PayloadRequest, min: Role = 'viewer') => hasRole(req.user, min)
 
 async function readJson(req: PayloadRequest): Promise<Record<string, unknown>> {
   try {
@@ -117,7 +117,7 @@ async function readJson(req: PayloadRequest): Promise<Record<string, unknown>> {
  * Existing numbers are updated, never switched back from "Opted out".
  */
 async function importContacts(req: PayloadRequest) {
-  if (!isStaff(req)) return json({ error: 'Not allowed.' }, 403)
+  if (!isStaff(req, 'manager')) return json({ error: 'Only a Manager or the Owner can import contacts.' }, 403)
   const body = await readJson(req)
   const lines = String(body.text ?? '').split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
   if (!lines.length) return json({ error: 'Paste at least one line.' }, 400)
@@ -180,7 +180,7 @@ function mergeTags(current: string | null | undefined, extra: string) {
 
 /** POST /:id/reply { text } — a free-form reply, allowed within 24 h of their last message. */
 async function reply(req: PayloadRequest) {
-  if (!isStaff(req)) return json({ error: 'Not allowed.' }, 403)
+  if (!isStaff(req, 'team')) return json({ error: 'Viewers can read chats but not reply.' }, 403)
   const id = req.routeParams?.id as string
   const text = String((await readJson(req)).text ?? '').trim()
   if (!text) return json({ error: 'Type a message first.' }, 400)

@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { adminHidden, canManage, ownerOnly } from '../access/roles'
 import { slugField } from '../fields/slug'
 
 /** Combined service packages the client can browse and enquire about. */
@@ -9,13 +10,16 @@ export const Packages: CollectionConfig = {
   labels: { singular: 'Package', plural: 'Packages' },
   access: {
     read: anyone,
-    create: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
   admin: {
+    group: 'Website',
     useAsTitle: 'title',
     defaultColumns: ['title', 'priceNote', 'featured', 'order'],
+    description: 'Ready-made packages (not shown on the website yet).',
+    hidden: adminHidden('packages'),
   },
   defaultSort: 'order',
   fields: [

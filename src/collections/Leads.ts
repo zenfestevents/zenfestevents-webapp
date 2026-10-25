@@ -1,14 +1,12 @@
 import type { CollectionConfig } from 'payload'
 
-import { anyone, authenticated, isAdminField } from '../access'
+import { anyone } from '../access'
+import { adminHidden, canView, canViewField, canWork, canWorkField, ownerOnly } from '../access/roles'
 import { ALL_SERVICES, EXTRA_SHOOTS } from '../lib/eventRequirements'
 import { notifySubmission } from '../hooks/notifySubmission'
 import { syncLeadToContacts } from '../hooks/syncOccasionFromWebsite'
 import { leadRuns, stampLeadAccounts } from '../hooks/runsClub'
 import { tierSummary } from '../lib/rewards'
-
-/** Field-level: only signed-in admins (the Local API used by Zenfest AI bypasses access). */
-const adminOnly = isAdminField
 
 /** A text hasMany limited to a known list (a list, not an enum, so adding one needs no migration). */
 const oneOf =
@@ -24,17 +22,19 @@ const SHOOTS = new Set<string>(EXTRA_SHOOTS.map(([v]) => v))
 /** Inquiry-form submissions. Public can create; only admin can read/manage. */
 export const Leads: CollectionConfig = {
   slug: 'leads',
-  labels: { singular: 'Lead / Enquiry', plural: 'Leads & Enquiries' },
+  labels: { singular: 'Enquiry', plural: 'Enquiries' },
   access: {
+    read: canView,
     create: anyone,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    update: canWork,
+    delete: ownerOnly,
   },
   admin: {
+    group: 'Clients',
     useAsTitle: 'name',
     defaultColumns: ['name', 'phone', 'eventType', 'eventDate', 'status', 'createdAt'],
-    description: 'Enquiries submitted through the website. Call these back.',
+    description: 'People who asked for an event on the website. Call each one, then change “Status”: New → Contacted → Quoted → Booked.',
+    hidden: adminHidden('leads'),
   },
   defaultSort: '-createdAt',
   hooks: {
@@ -161,7 +161,7 @@ export const Leads: CollectionConfig = {
       name: 'aiPlan',
       type: 'textarea',
       label: 'Zenfest AI plan',
-      access: { create: adminOnly, update: adminOnly },
+      access: { create: canWorkField, update: canWorkField },
       admin: {
         readOnly: true,
         condition: (data) => Boolean(data?.aiPlan),
@@ -189,7 +189,7 @@ export const Leads: CollectionConfig = {
         { label: 'Booked', value: 'booked' },
         { label: 'Closed', value: 'closed' },
       ],
-      admin: { position: 'sidebar' },
+      admin: { position: 'sidebar', components: { Cell: '/components/admin/StatusPill#StatusPill' } },
     },
     {
       name: 'source',
@@ -204,7 +204,7 @@ export const Leads: CollectionConfig = {
       type: 'relationship',
       relationTo: 'customers',
       label: 'Couple account',
-      access: { create: adminOnly, read: adminOnly, update: adminOnly },
+      access: { create: canWorkField, read: canViewField, update: canWorkField },
       admin: { position: 'sidebar', readOnly: true, description: 'Set when a logged-in couple sent this.' },
     },
     {
@@ -213,7 +213,7 @@ export const Leads: CollectionConfig = {
       type: 'text',
       virtual: true,
       label: 'Runs club tier',
-      access: { create: () => false, read: adminOnly, update: () => false },
+      access: { create: () => false, read: canViewField, update: () => false },
       admin: {
         position: 'sidebar',
         readOnly: true,
@@ -236,7 +236,7 @@ export const Leads: CollectionConfig = {
       name: 'referredBy',
       type: 'text',
       label: 'Referred by',
-      access: { create: adminOnly, read: adminOnly, update: adminOnly },
+      access: { create: canWorkField, read: canViewField, update: canWorkField },
       admin: { position: 'sidebar', readOnly: true, description: 'c:<id> = couple, v:<id> = vendor.' },
     },
   ],

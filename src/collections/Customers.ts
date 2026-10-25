@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminOrSelf, isAdmin, isAdminField } from '../access'
+import { adminOrSelf } from '../access'
+import { adminHidden, canManage, canManageField, canViewField, ownerOnly } from '../access/roles'
 import { assignReferralCode, customerRuns } from '../hooks/runsClub'
 import { accountAuth } from './accountAuth'
 
@@ -11,19 +12,20 @@ import { accountAuth } from './accountAuth'
  */
 export const Customers: CollectionConfig = {
   slug: 'customers',
-  labels: { singular: 'Customer', plural: 'Customers' },
+  labels: { singular: 'Client account', plural: 'Client accounts' },
   auth: accountAuth({ reset: '/account/reset-password', verify: '/account/verify-email' }),
   access: {
     read: adminOrSelf('customers'),
-    create: isAdmin,
-    update: isAdmin,
-    delete: isAdmin,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
   admin: {
-    group: 'Marketplace',
+    group: 'Clients',
     useAsTitle: 'name',
     defaultColumns: ['name', 'email', 'phone', 'eventDate', 'createdAt'],
-    description: 'Couples and families with a Zenfest account.',
+    description: 'Couples and families who made an account on the website. Usually nothing to do here.',
+    hidden: adminHidden('customers'),
   },
   defaultSort: '-createdAt',
   hooks: { beforeChange: [assignReferralCode], afterChange: [customerRuns] },
@@ -44,7 +46,7 @@ export const Customers: CollectionConfig = {
       unique: true,
       index: true,
       label: 'Google account ID',
-      access: { create: isAdminField, read: isAdminField, update: isAdminField },
+      access: { create: canManageField, read: canViewField, update: canManageField },
       admin: { position: 'sidebar', readOnly: true, description: 'Set when they sign in with Google.' },
     },
     {
@@ -53,7 +55,7 @@ export const Customers: CollectionConfig = {
       type: 'number',
       defaultValue: 0,
       label: 'Runs',
-      access: { create: isAdminField, update: isAdminField },
+      access: { create: canManageField, update: canManageField },
       admin: { position: 'sidebar', readOnly: true, description: 'Runs club total. Add a Runs entry to change it.' },
     },
     {
@@ -62,7 +64,7 @@ export const Customers: CollectionConfig = {
       type: 'text',
       unique: true,
       index: true,
-      access: { create: isAdminField, update: isAdminField },
+      access: { create: canManageField, update: canManageField },
       admin: { position: 'sidebar', readOnly: true },
     },
     {
@@ -72,7 +74,7 @@ export const Customers: CollectionConfig = {
       type: 'text',
       label: 'Invited by',
       index: true,
-      access: { create: isAdminField, update: isAdminField },
+      access: { create: canManageField, update: canManageField },
       admin: { position: 'sidebar', readOnly: true, description: 'c:<id> = couple, v:<id> = vendor.' },
     },
     { name: 'city', type: 'text', label: 'Area / city' },

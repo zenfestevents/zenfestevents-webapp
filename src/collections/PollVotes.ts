@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access'
+import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
+
 
 /**
  * One row per vote. "One person, one vote" is the compound unique index on
@@ -12,15 +13,16 @@ export const PollVotes: CollectionConfig = {
   slug: 'poll-votes',
   labels: { singular: 'Vote', plural: 'Votes' },
   access: {
-    create: authenticated,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    read: canView,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
   lockDocuments: false,
   admin: {
     group: 'Polls',
     defaultColumns: ['poll', 'optionId', 'voter', 'verified', 'createdAt'],
+    hidden: adminHidden('poll-votes'),
   },
   defaultSort: '-createdAt',
   indexes: [{ fields: ['poll', 'voterKey'], unique: true }],

@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { adminHidden, canView, canWork, ownerOnly } from '../access/roles'
 import { notifySubmission } from '../hooks/notifySubmission'
 import { syncSignupToContacts } from '../hooks/syncOccasionFromWebsite'
 
@@ -14,16 +15,17 @@ export const Signups: CollectionConfig = {
   slug: 'signups',
   labels: { singular: 'Sign-up', plural: 'Sign-ups' },
   access: {
+    read: canView,
     create: anyone,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    update: canWork,
+    delete: ownerOnly,
   },
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'phone', 'birthday', 'planningEvent', 'status', 'createdAt'],
     description:
       'People who signed up for the ₹100-off offer. Honour the discount when quoting.',
+    hidden: adminHidden('signups'),
   },
   defaultSort: '-createdAt',
   hooks: {

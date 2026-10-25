@@ -1,20 +1,22 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access'
+import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
+
 
 /** One row per visitor sent to a partner store from a registry or the shop — affiliate click tracking. */
 export const RegistryClicks: CollectionConfig = {
   slug: 'registry-clicks',
   labels: { singular: 'Store click', plural: 'Store clicks' },
   access: {
-    create: authenticated,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    read: canView,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
   admin: {
     group: 'Gift Registry',
     defaultColumns: ['merchant', 'product', 'item', 'event', 'affiliated', 'createdAt'],
+    hidden: adminHidden('registry-clicks'),
   },
   defaultSort: '-createdAt',
   fields: [

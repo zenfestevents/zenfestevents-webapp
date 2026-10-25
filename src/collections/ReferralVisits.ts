@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { isAdmin } from '../access'
+import { adminHidden, ownerOnly } from '../access/roles'
+
 
 /**
  * "Opened your link": one row per browser per inviter, written by /invite/<code>
@@ -12,10 +13,10 @@ export const ReferralVisits: CollectionConfig = {
   slug: 'referral-visits',
   labels: { singular: 'Invite link visit', plural: 'Invite link visits' },
   access: {
-    create: isAdmin,
-    read: isAdmin,
-    update: isAdmin,
-    delete: isAdmin,
+    read: ownerOnly,
+    create: ownerOnly,
+    update: ownerOnly,
+    delete: ownerOnly,
   },
   lockDocuments: false,
   admin: {
@@ -23,6 +24,7 @@ export const ReferralVisits: CollectionConfig = {
     useAsTitle: 'referrer',
     defaultColumns: ['referrer', 'audience', 'createdAt'],
     description: 'Someone opened an invite link. Anonymous: only who shared the link and when.',
+    hidden: adminHidden('referral-visits', 'owner'),
   },
   defaultSort: '-createdAt',
   indexes: [{ fields: ['referrer', 'visitor'], unique: true }],

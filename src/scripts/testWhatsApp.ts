@@ -251,9 +251,15 @@ await check('delivery ticks only move forward (read is not undone by a late "del
 console.log('\n3. Import, campaigns and staff replies')
 
 const staffEmail = 'whatsapp-test@example.test'
-const staff =
-  (await payload.find({ collection: 'users', where: { email: { equals: staffEmail } }, overrideAccess: true })).docs[0] ??
-  (await payload.create({ collection: 'users', data: { email: staffEmail, password: crypto.randomUUID() } as never, overrideAccess: true }))
+// A Manager: importing contacts and sending campaigns are Manager jobs (access/roles.ts).
+const found = (await payload.find({ collection: 'users', where: { email: { equals: staffEmail } }, overrideAccess: true })).docs[0]
+const staff = found
+  ? await payload.update({ collection: 'users', id: found.id, data: { role: 'manager', active: true }, overrideAccess: true })
+  : await payload.create({
+      collection: 'users',
+      data: { email: staffEmail, password: crypto.randomUUID(), role: 'manager' } as never,
+      overrideAccess: true,
+    })
 const endpoint = (slug: 'whatsapp-campaigns' | 'whatsapp-contacts', path: string) =>
   (payload.collections[slug].config.endpoints || []).find((e) => e.path === path)!.handler
 async function call(slug: 'whatsapp-campaigns' | 'whatsapp-contacts', path: string, routeParams: Record<string, unknown>, body?: unknown) {

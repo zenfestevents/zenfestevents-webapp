@@ -1,6 +1,6 @@
 import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 
-import { isAdmin } from '../access'
+import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
 import { slugify } from '../lib/formCheck'
 import { LISTING_STATUSES, toOptionList } from '../lib/marketplaceOptions'
 import {
@@ -29,16 +29,17 @@ export const Products: CollectionConfig = {
   slug: 'products',
   labels: { singular: 'Product', plural: 'Products' },
   access: {
-    read: isAdmin,
-    create: isAdmin,
-    update: isAdmin,
-    delete: isAdmin,
+    read: canView,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
   admin: {
     group: 'Shop',
     useAsTitle: 'title',
     defaultColumns: ['title', 'source', 'price', 'status', 'updatedAt'],
     description: 'Event products in the Zenfest Shop. Set "Status" to Live to show one on the site.',
+    hidden: adminHidden('products'),
   },
   defaultSort: 'sortOrder',
   hooks: { beforeChange: [fillDerived] },

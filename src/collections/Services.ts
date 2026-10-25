@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { adminHidden, canManage, ownerOnly } from '../access/roles'
 import { slugField } from '../fields/slug'
 import { CONTENT_TAGS } from '../lib/contentCache'
 import { revalidateCollection } from '../hooks/revalidateContent'
@@ -12,13 +13,16 @@ export const Services: CollectionConfig = {
   labels: { singular: 'Service', plural: 'Services' },
   access: {
     read: anyone,
-    create: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
   admin: {
+    group: 'Website',
     useAsTitle: 'title',
     defaultColumns: ['title', 'featured', 'order'],
+    description: 'The services shown on the website.',
+    hidden: adminHidden('services'),
   },
   defaultSort: 'order',
   fields: [

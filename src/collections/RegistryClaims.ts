@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access'
+import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
+
 
 /**
  * "I'll gift this" claims. The unique index on `item` is what makes a claim
@@ -15,16 +16,17 @@ export const RegistryClaims: CollectionConfig = {
   slug: 'registry-claims',
   labels: { singular: 'Gift claim', plural: 'Gift claims' },
   access: {
-    create: authenticated,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    read: canView,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
   admin: {
     group: 'Gift Registry',
     useAsTitle: 'guestName',
     defaultColumns: ['guestName', 'item', 'event', 'mode', 'createdAt'],
     description: 'Delete a claim to make the gift available again.',
+    hidden: adminHidden('registry-claims'),
   },
   defaultSort: '-createdAt',
   fields: [

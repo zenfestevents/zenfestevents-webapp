@@ -1,22 +1,25 @@
 import type { CollectionConfig } from 'payload'
 
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { adminHidden, canManage, ownerOnly } from '../access/roles'
 import { slugField } from '../fields/slug'
 
 /** Event types: Weddings, Birthdays, Corporate, Housewarmings, Sports, etc. */
 export const Categories: CollectionConfig = {
   slug: 'categories',
-  labels: { singular: 'Event Type', plural: 'Event Types' },
+  labels: { singular: 'Event type', plural: 'Event types' },
   access: {
     read: anyone,
-    create: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
   admin: {
+    group: 'Website',
     useAsTitle: 'title',
     defaultColumns: ['title', 'order'],
-    description: 'Categories used to organise the gallery and packages.',
+    description: 'Kinds of events (Wedding, Birthday…) used to sort the gallery.',
+    hidden: adminHidden('categories'),
   },
   defaultSort: 'order',
   fields: [

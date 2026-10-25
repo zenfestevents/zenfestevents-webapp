@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { adminHidden, canManage, ownerOnly } from '../access/roles'
 import { slugField } from '../fields/slug'
 import { CONTENT_TAGS } from '../lib/contentCache'
 import { revalidateCollection } from '../hooks/revalidateContent'
@@ -12,17 +13,19 @@ import { revalidateCollection } from '../hooks/revalidateContent'
 export const Projects: CollectionConfig = {
   slug: 'projects',
   hooks: revalidateCollection(CONTENT_TAGS.projects),
-  labels: { singular: 'Gallery Project', plural: 'Gallery (Our Work)' },
+  labels: { singular: 'Our work item', plural: 'Our work (gallery)' },
   access: {
     read: anyone,
-    create: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
   admin: {
+    group: 'Website',
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'branch', 'featured'],
-    description: 'Your past events. Clients decide based on these photos.',
+    description: 'Past events shown on the website. Clients decide based on these photos.',
+    hidden: adminHidden('projects'),
   },
   defaultSort: '-createdAt',
   fields: [

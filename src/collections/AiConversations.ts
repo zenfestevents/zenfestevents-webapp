@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access'
+import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
+
 
 /**
  * Zenfest AI chats (lib/ai/*, /plan/chat). Admin-only over REST: the chat route and
@@ -12,16 +13,17 @@ export const AiConversations: CollectionConfig = {
   slug: 'ai-conversations',
   labels: { singular: 'AI chat', plural: 'Zenfest AI chats' },
   access: {
-    create: authenticated,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    read: canView,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
   admin: {
     group: 'Zenfest AI',
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'turns', 'lead', 'updatedAt'],
     description: 'Every Zenfest AI conversation. Open one to read what the customer and the agents said.',
+    hidden: adminHidden('ai-conversations'),
   },
   defaultSort: '-updatedAt',
   fields: [

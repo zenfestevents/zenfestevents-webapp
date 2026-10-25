@@ -15,6 +15,7 @@ import * as migration_20261022_172310_testimonials from './20261022_172310_testi
 import * as migration_20261022_172311_google_reviews from './20261022_172311_google_reviews';
 import * as migration_20261024_061243_runs_club from './20261024_061243_runs_club';
 import * as migration_20261024_075645_referrals from './20261024_075645_referrals';
+import * as migration_20261025_152046_team_roles from './20261025_152046_team_roles';
 
 export const migrations = [
   {
@@ -100,6 +101,11 @@ export const migrations = [
   {
     up: migration_20261024_075645_referrals.up,
     down: migration_20261024_075645_referrals.down,
-    name: '20261024_075645_referrals'
+    name: '20261024_075645_referrals',
+  },
+  {
+    up: migration_20261025_152046_team_roles.up,
+    down: migration_20261025_152046_team_roles.down,
+    name: '20261025_152046_team_roles'
   },
 ];

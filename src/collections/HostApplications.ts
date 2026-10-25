@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { adminHidden, canView, canWork, ownerOnly } from '../access/roles'
 import { notifySubmission } from '../hooks/notifySubmission'
 import {
   HOST_CITIES,
@@ -24,16 +25,17 @@ export const HostApplications: CollectionConfig = {
   slug: 'host-applications',
   labels: { singular: 'Host application', plural: 'Host applications' },
   access: {
+    read: canView,
     create: anyone,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    update: canWork,
+    delete: ownerOnly,
   },
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'phone', 'eventType', 'eventDate', 'city', 'status', 'createdAt'],
     description:
       'Families who want to host foreign guests at their event (/earn). Verify the family before listing.',
+    hidden: adminHidden('host-applications'),
   },
   defaultSort: '-createdAt',
   hooks: {

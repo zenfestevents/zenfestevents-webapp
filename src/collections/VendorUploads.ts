@@ -1,6 +1,8 @@
 import { APIError, type CollectionConfig } from 'payload'
 
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
+
 
 /** Largest file a vendor can upload. Also Airtable's attachment-upload limit is 5 MB. */
 export const VENDOR_UPLOAD_MAX_BYTES = 4 * 1024 * 1024
@@ -12,18 +14,19 @@ export const VENDOR_UPLOAD_MAX_BYTES = 4 * 1024 * 1024
  */
 export const VendorUploads: CollectionConfig = {
   slug: 'vendor-uploads',
-  labels: { singular: 'Vendor Upload', plural: 'Vendor Uploads' },
+  labels: { singular: 'Vendor document', plural: 'Vendor documents' },
   access: {
+    read: canView,
     create: anyone,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    update: canManage,
+    delete: ownerOnly,
   },
   admin: {
+    group: 'Vendors',
     useAsTitle: 'filename',
     defaultColumns: ['filename', 'kind', 'createdAt'],
-    description: 'FSSAI certificates and menu cards sent with vendor applications.',
-    group: 'System',
+    description: 'Documents vendors sent with their application (FSSAI certificate, menu card).',
+    hidden: adminHidden('vendor-uploads'),
   },
   upload: {
     mimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'application/pdf'],

@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { canManage } from '../access/roles'
 import { CONTENT_TAGS } from '../lib/contentCache'
 import { revalidateGlobal } from '../hooks/revalidateContent'
 
@@ -8,12 +9,15 @@ import { revalidateGlobal } from '../hooks/revalidateContent'
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
   hooks: { afterChange: [revalidateGlobal(CONTENT_TAGS.settings)] },
-  label: 'Site Settings',
+  label: 'Website settings',
   access: {
     read: anyone,
-    update: authenticated,
+    update: canManage,
   },
-  admin: { description: 'Contact details, branches and homepage text.' },
+  admin: {
+    group: 'Website',
+    description: 'Phone numbers, branches and homepage text shown on the website. Only a Manager or the Owner can change these.',
+  },
   fields: [
     {
       type: 'group',

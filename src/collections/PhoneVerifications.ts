@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from 'crypto'
 import type { CollectionConfig, PayloadRequest } from 'payload'
 
-import { authenticated } from '../access'
+import { adminHidden, ownerOnly } from '../access/roles'
 import { cloudConfigured, sendText } from '../lib/whatsapp/cloud'
 import type { WebhookBody } from '../lib/whatsapp/events'
 import { findOrCreateContact, recordWebhook } from '../lib/whatsapp/inbox'
@@ -29,18 +29,19 @@ import {
  */
 export const PhoneVerifications: CollectionConfig = {
   slug: 'phone-verifications',
-  labels: { singular: 'Phone Verification', plural: 'Phone Verifications' },
+  labels: { singular: 'Phone check', plural: 'Phone checks' },
   access: {
     create: () => false,
-    read: authenticated,
+    read: ownerOnly,
     update: () => false,
-    delete: authenticated,
+    delete: ownerOnly,
   },
   admin: {
+    group: 'System',
     useAsTitle: 'phone',
     defaultColumns: ['phone', 'status', 'purpose', 'createdAt'],
-    description: 'WhatsApp phone checks from the website forms. Created automatically.',
-    group: 'System',
+    description: 'Automatic WhatsApp number checks from the website forms. Nothing to do here.',
+    hidden: adminHidden('phone-verifications', 'owner'),
   },
   defaultSort: '-createdAt',
   fields: [

@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access'
+import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
 import { ITEM_TYPES, toOptions } from '../lib/registryOptions'
 
 /**
@@ -12,15 +12,16 @@ export const RegistryItems: CollectionConfig = {
   slug: 'registry-items',
   labels: { singular: 'Registry gift', plural: 'Registry gifts' },
   access: {
-    create: authenticated,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    read: canView,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
   admin: {
     group: 'Gift Registry',
     useAsTitle: 'title',
     defaultColumns: ['title', 'event', 'itemType', 'price', 'merchant', 'createdAt'],
+    hidden: adminHidden('registry-items'),
   },
   defaultSort: 'sortOrder',
   fields: [

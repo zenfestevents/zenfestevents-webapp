@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { adminHidden, canView, canWork, ownerOnly } from '../access/roles'
 import { notifySubmission } from '../hooks/notifySubmission'
 import { LEAD_EVENT_TYPES, toOptions } from '../lib/registryOptions'
 
@@ -13,16 +14,17 @@ export const RegistryLeads: CollectionConfig = {
   slug: 'registry-leads',
   labels: { singular: 'Registry lead', plural: 'Registry leads' },
   access: {
+    read: canView,
     create: anyone,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    update: canWork,
+    delete: ownerOnly,
   },
   admin: {
     group: 'Gift Registry',
     useAsTitle: 'name',
     defaultColumns: ['name', 'phone', 'eventType', 'tentativeDate', 'city', 'referringEvent', 'status', 'createdAt'],
     description: 'Guests who tapped “Plan with Zenfest” on someone’s registry. Call or WhatsApp them.',
+    hidden: adminHidden('registry-leads'),
   },
   defaultSort: '-createdAt',
   hooks: {

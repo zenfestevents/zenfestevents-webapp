@@ -221,7 +221,32 @@ src/
   reuses Payload's dark mapping). Fonts: Hanken Grotesk body, Oswald headings (Google Fonts
   import there). Logo/icon: `components/admin/BrandGraphics.tsx` (plain `<img>` — `next/image`
   only allows `/api/media/file/**`). Custom admin components use `zf-*` classes from that file,
-  not inline styles.
+  not inline styles. The menu groups are plain words in daily-work order (Clients · Vendors ·
+  WhatsApp · Birthdays & anniversaries · Website · Rewards · Team · System): Payload orders groups
+  by first appearance, so the `collections` array in `payload.config.ts` sets it. Home screen =
+  `TodayBoard` (jobs waiting, per role) then `UpcomingOccasions`; status selects use the
+  `StatusPill` list cell. Every list has a one-line plain-English `admin.description` — keep it.
+- **Admin team roles (`access/roles.ts`, owner 2026-10-25).** Each `users` login has a `role`:
+  **Owner** (everything, Team, deleting) · **Manager** (approves vendor applications / listings /
+  reviews, edits the website and settings, sends WhatsApp campaigns, imports contacts) · **Team
+  member** (works enquiries, replies on WhatsApp, wishes; default for new people) · **Viewer**
+  (looks only). Easy to get wrong:
+  - **Never use `authenticated` / `isAdmin` on new collections**; pick `canView` / `canWork` /
+    `canManage` / `ownerOnly` (and the `…Field` twins for approval fields). Delete is `ownerOnly`
+    everywhere, which also removes Payload's Delete button for everyone else.
+  - Every role check also requires `active !== false` ("Can log in"): untick it when someone leaves
+    instead of deleting them (`beforeLogin` refuses, `access.admin` locks the panel). The last
+    active Owner can't be demoted, switched off or deleted (`keepAnOwner` in `Users.ts`).
+  - Only the Owner sees Team (`hiddenBelow('owner')`); others edit their own name/password from
+    the account menu. Runs history, invite visits and phone checks are Owner-only too.
+  - **Hidden for now: `ADMIN_HIDDEN`** in `access/roles.ts` (gift registry, polls, Zenfest AI,
+    shop, host applications, ₹100 sign-ups, marketplace enquiries). `admin.hidden` removes them
+    from the menu *and* their admin pages (404); the data, REST API and website keep working (the
+    public registry is still live). Delete a slug from the set to bring a list back.
+  - The `20261025_152046_team_roles` migration made every existing login an **Owner**; a local
+    SQLite push gives existing rows the default `team` instead — set them with SQL.
+    `npm run create:admin` makes an Owner. `npm run test:roles` (local SQLite) checks every role;
+    `-- --keep` leaves `role-<role>@test.invalid` logins (password in the script) to try by hand.
 - **Styling:** plain CSS design system. Tokens live in `styles.css`; component/section
   styles in `parts.css`. Use the existing CSS variables and class prefixes; avoid
   adding a CSS framework.

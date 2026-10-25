@@ -1,6 +1,6 @@
 import type { GlobalConfig } from 'payload'
 
-import { authenticated } from '../access'
+import { canManage, canView } from '../access/roles'
 import { DEFAULT_CLIENT_MESSAGE, DEFAULT_LEAD_MESSAGE, MESSAGE_PLACEHOLDERS } from '../lib/occasions/message'
 import { DEFAULT_LEAD_DAYS, OCCASION_TYPES } from '../lib/occasions/options'
 
@@ -11,14 +11,14 @@ import { DEFAULT_LEAD_DAYS, OCCASION_TYPES } from '../lib/occasions/options'
  */
 export const ReminderSettings: GlobalConfig = {
   slug: 'reminder-settings',
-  label: 'Reminder Settings',
+  label: 'Wish settings',
   access: {
-    read: authenticated,
-    update: authenticated,
+    read: canView,
+    update: canManage,
   },
   admin: {
-    group: 'Occasion Reminders',
-    description: 'How early reminders are created, the WhatsApp message text and the daily email.',
+    group: 'Birthdays & anniversaries',
+    description: 'How early wishes are created, the WhatsApp message text and the daily email. Only a Manager or the Owner can change these.',
   },
   fields: [
     {

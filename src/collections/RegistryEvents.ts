@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access'
+import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
 import { notifySubmission } from '../hooks/notifySubmission'
 import { REGISTRY_EVENT_TYPES, SLUG_PATTERN, toOptions } from '../lib/registryOptions'
 
@@ -15,16 +15,17 @@ export const RegistryEvents: CollectionConfig = {
   slug: 'registry-events',
   labels: { singular: 'Registry', plural: 'Registries' },
   access: {
-    create: authenticated,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    read: canView,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
   admin: {
     group: 'Gift Registry',
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'eventType', 'eventDate', 'hostName', 'hostPhone', 'createdAt'],
     description: 'Gift registries made by families at /registry. Every new one is also a warm lead.',
+    hidden: adminHidden('registry-events'),
   },
   defaultSort: '-createdAt',
   hooks: {

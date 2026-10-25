@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access'
+import { adminHidden, canView, ownerOnly } from '../access/roles'
+
 
 /**
  * Every message on the WhatsApp Cloud API number, both ways. Incoming ones and
@@ -9,19 +10,20 @@ import { authenticated } from '../access'
  */
 export const WhatsAppMessages: CollectionConfig = {
   slug: 'whatsapp-messages',
-  labels: { singular: 'WhatsApp Message', plural: 'WhatsApp Messages' },
+  labels: { singular: 'Message', plural: 'All messages' },
   access: {
     create: () => false,
-    read: authenticated,
+    read: canView,
     update: () => false,
-    delete: authenticated,
+    delete: ownerOnly,
   },
   admin: {
     group: 'WhatsApp',
     useAsTitle: 'text',
     defaultColumns: ['at', 'direction', 'phone', 'contact', 'text', 'status'],
     listSearchableFields: ['phone', 'text'],
-    description: 'Messages to and from the WhatsApp Cloud API number. Open a WhatsApp Contact to read a whole chat and reply.',
+    description: 'Every message sent and received, newest first. To reply, open the person in “Chats & contacts”.',
+    hidden: adminHidden('whatsapp-messages'),
   },
   defaultSort: '-at',
   fields: [

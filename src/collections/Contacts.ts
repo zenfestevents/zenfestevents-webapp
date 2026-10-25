@@ -1,6 +1,6 @@
 import type { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 
-import { authenticated } from '../access'
+import { adminHidden, canView, canWork, ownerOnly } from '../access/roles'
 import { todayIst } from '../lib/occasions/dates'
 import { toWaNumber } from '../lib/occasions/message'
 import { BRANCHES, CONTACT_SOURCES, OCCASION_TYPES, RELATIONSHIPS } from '../lib/occasions/options'
@@ -55,20 +55,20 @@ const syncReminders: CollectionAfterChangeHook = async ({ doc, previousDoc, req,
  */
 export const Contacts: CollectionConfig = {
   slug: 'contacts',
-  labels: { singular: 'Contact', plural: 'Contacts' },
+  labels: { singular: 'Person', plural: 'People & dates' },
   access: {
-    create: authenticated,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    read: canView,
+    create: canWork,
+    update: canWork,
+    delete: ownerOnly,
   },
   admin: {
-    group: 'Occasion Reminders',
+    group: 'Birthdays & anniversaries',
     useAsTitle: 'name',
     defaultColumns: ['name', 'phone', 'relationship', 'nextOccasionDate', 'source', 'verified'],
     listSearchableFields: ['name', 'phone', 'notes'],
-    description:
-      'Clients and leads whose birthdays and anniversaries we remember. Add the person once, then all their occasions below — reminders are created automatically before each date.',
+    description: 'Past clients and enquiries whose birthdays and anniversaries we remember. Add the person once with their dates; wishes are created automatically before each date.',
+    hidden: adminHidden('contacts'),
   },
   defaultSort: 'nextOccasionDate',
   hooks: {

@@ -63,25 +63,36 @@ export type SupportedTimezones =
 
 export interface Config {
   auth: {
-    users: UserAuthOperations;
-    vendors: VendorAuthOperations;
     customers: CustomerAuthOperations;
+    vendors: VendorAuthOperations;
+    users: UserAuthOperations;
   };
   blocks: {};
   collections: {
-    users: User;
-    media: Media;
-    categories: Category;
+    leads: Lead;
+    customers: Customer;
+    'vendor-applications': VendorApplication;
+    vendors: Vendor;
+    'vendor-media': VendorMedia;
+    'vendor-uploads': VendorUpload;
+    'whatsapp-contacts': WhatsappContact;
+    'whatsapp-messages': WhatsappMessage;
+    'whatsapp-campaigns': WhatsappCampaign;
+    contacts: Contact;
+    reminders: Reminder;
+    projects: Project;
     services: Service;
     packages: Package;
-    projects: Project;
     testimonials: Testimonial;
-    leads: Lead;
-    signups: Signup;
-    'vendor-applications': VendorApplication;
+    media: Media;
+    categories: Category;
+    runs: Run;
+    'referral-visits': ReferralVisit;
+    users: User;
     'phone-verifications': PhoneVerification;
-    'vendor-uploads': VendorUpload;
+    signups: Signup;
     'host-applications': HostApplication;
+    enquiries: Enquiry;
     'registry-events': RegistryEvent;
     'registry-items': RegistryItem;
     'registry-claims': RegistryClaim;
@@ -92,18 +103,7 @@ export interface Config {
     'poll-votes': PollVote;
     'poll-voters': PollVoter;
     'ai-conversations': AiConversation;
-    vendors: Vendor;
-    customers: Customer;
-    'vendor-media': VendorMedia;
-    enquiries: Enquiry;
     products: Product;
-    contacts: Contact;
-    reminders: Reminder;
-    'whatsapp-contacts': WhatsappContact;
-    'whatsapp-messages': WhatsappMessage;
-    'whatsapp-campaigns': WhatsappCampaign;
-    runs: Run;
-    'referral-visits': ReferralVisit;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -115,19 +115,30 @@ export interface Config {
     };
   };
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
-    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    leads: LeadsSelect<false> | LeadsSelect<true>;
+    customers: CustomersSelect<false> | CustomersSelect<true>;
+    'vendor-applications': VendorApplicationsSelect<false> | VendorApplicationsSelect<true>;
+    vendors: VendorsSelect<false> | VendorsSelect<true>;
+    'vendor-media': VendorMediaSelect<false> | VendorMediaSelect<true>;
+    'vendor-uploads': VendorUploadsSelect<false> | VendorUploadsSelect<true>;
+    'whatsapp-contacts': WhatsappContactsSelect<false> | WhatsappContactsSelect<true>;
+    'whatsapp-messages': WhatsappMessagesSelect<false> | WhatsappMessagesSelect<true>;
+    'whatsapp-campaigns': WhatsappCampaignsSelect<false> | WhatsappCampaignsSelect<true>;
+    contacts: ContactsSelect<false> | ContactsSelect<true>;
+    reminders: RemindersSelect<false> | RemindersSelect<true>;
+    projects: ProjectsSelect<false> | ProjectsSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     packages: PackagesSelect<false> | PackagesSelect<true>;
-    projects: ProjectsSelect<false> | ProjectsSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
-    leads: LeadsSelect<false> | LeadsSelect<true>;
-    signups: SignupsSelect<false> | SignupsSelect<true>;
-    'vendor-applications': VendorApplicationsSelect<false> | VendorApplicationsSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    runs: RunsSelect<false> | RunsSelect<true>;
+    'referral-visits': ReferralVisitsSelect<false> | ReferralVisitsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'phone-verifications': PhoneVerificationsSelect<false> | PhoneVerificationsSelect<true>;
-    'vendor-uploads': VendorUploadsSelect<false> | VendorUploadsSelect<true>;
+    signups: SignupsSelect<false> | SignupsSelect<true>;
     'host-applications': HostApplicationsSelect<false> | HostApplicationsSelect<true>;
+    enquiries: EnquiriesSelect<false> | EnquiriesSelect<true>;
     'registry-events': RegistryEventsSelect<false> | RegistryEventsSelect<true>;
     'registry-items': RegistryItemsSelect<false> | RegistryItemsSelect<true>;
     'registry-claims': RegistryClaimsSelect<false> | RegistryClaimsSelect<true>;
@@ -138,18 +149,7 @@ export interface Config {
     'poll-votes': PollVotesSelect<false> | PollVotesSelect<true>;
     'poll-voters': PollVotersSelect<false> | PollVotersSelect<true>;
     'ai-conversations': AiConversationsSelect<false> | AiConversationsSelect<true>;
-    vendors: VendorsSelect<false> | VendorsSelect<true>;
-    customers: CustomersSelect<false> | CustomersSelect<true>;
-    'vendor-media': VendorMediaSelect<false> | VendorMediaSelect<true>;
-    enquiries: EnquiriesSelect<false> | EnquiriesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
-    contacts: ContactsSelect<false> | ContactsSelect<true>;
-    reminders: RemindersSelect<false> | RemindersSelect<true>;
-    'whatsapp-contacts': WhatsappContactsSelect<false> | WhatsappContactsSelect<true>;
-    'whatsapp-messages': WhatsappMessagesSelect<false> | WhatsappMessagesSelect<true>;
-    'whatsapp-campaigns': WhatsappCampaignsSelect<false> | WhatsappCampaignsSelect<true>;
-    runs: RunsSelect<false> | RunsSelect<true>;
-    'referral-visits': ReferralVisitsSelect<false> | ReferralVisitsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -160,26 +160,26 @@ export interface Config {
   };
   fallbackLocale: null;
   globals: {
-    'site-settings': SiteSetting;
     'reminder-settings': ReminderSetting;
+    'site-settings': SiteSetting;
     'reward-settings': RewardSetting;
   };
   globalsSelect: {
-    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'reminder-settings': ReminderSettingsSelect<false> | ReminderSettingsSelect<true>;
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'reward-settings': RewardSettingsSelect<false> | RewardSettingsSelect<true>;
   };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User | Vendor | Customer;
+  user: Customer | Vendor | User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
   };
 }
-export interface UserAuthOperations {
+export interface CustomerAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -215,7 +215,7 @@ export interface VendorAuthOperations {
     password: string;
   };
 }
-export interface CustomerAuthOperations {
+export interface UserAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -234,310 +234,7 @@ export interface CustomerAuthOperations {
   };
 }
 /**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * Upload gallery and site images here.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  /**
-   * Shown to screen readers and if the image fails to load.
-   */
-  alt: string;
-  caption?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    card?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    feature?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    og?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
-}
-/**
- * Categories used to organise the gallery and packages.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: number;
-  title: string;
-  /**
-   * URL identifier. Leave blank to auto-generate from the title.
-   */
-  slug?: string | null;
-  description?: string | null;
-  /**
-   * Optional cover image for this event type.
-   */
-  image?: (number | null) | Media;
-  /**
-   * Lower numbers show first.
-   */
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "services".
- */
-export interface Service {
-  id: number;
-  title: string;
-  /**
-   * URL identifier. Leave blank to auto-generate from the title.
-   */
-  slug?: string | null;
-  /**
-   * One short line shown on cards.
-   */
-  summary?: string | null;
-  description?: string | null;
-  image?: (number | null) | Media;
-  /**
-   * Turn this on to give Zenfest AI a specialist for this service. It only knows what you enter below, so fill in options and price ranges.
-   */
-  ai?: {
-    enabled?: boolean | null;
-    /**
-     * Shown to customers, e.g. "Zenfest Décor".
-     */
-    agentName?: string | null;
-    /**
-     * e.g. 🎨
-     */
-    agentEmoji?: string | null;
-    /**
-     * How this specialist talks and what it is expert in (a few lines).
-     */
-    persona?: string | null;
-    /**
-     * What customers can choose. The AI may only recommend these.
-     */
-    options?:
-      | {
-          name: string;
-          unit: 'event' | 'plate' | 'hour' | 'person';
-          description?: string | null;
-          priceMin?: number | null;
-          priceMax?: number | null;
-          minQty?: number | null;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Facts and limits the AI must respect, e.g. "Minimum 100 plates", "No outdoor fireworks".
-     */
-    rules?: string | null;
-    faqs?:
-      | {
-          question: string;
-          answer: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  /**
-   * Highlight on the home page.
-   */
-  featured?: boolean | null;
-  /**
-   * Lower numbers show first.
-   */
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "packages".
- */
-export interface Package {
-  id: number;
-  title: string;
-  /**
-   * URL identifier. Leave blank to auto-generate from the title.
-   */
-  slug?: string | null;
-  /**
-   * Short one-liner.
-   */
-  tagline?: string | null;
-  image?: (number | null) | Media;
-  /**
-   * Which event types this package suits.
-   */
-  idealFor?: (number | Category)[] | null;
-  includedServices?: (number | Service)[] | null;
-  /**
-   * Bullet points shown on the package card.
-   */
-  highlights?:
-    | {
-        item: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * e.g. "Starting from ₹75,000" or "Custom quote". Optional.
-   */
-  priceNote?: string | null;
-  /**
-   * Highlight on the home page.
-   */
-  featured?: boolean | null;
-  /**
-   * Lower numbers show first.
-   */
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Your past events. Clients decide based on these photos.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "projects".
- */
-export interface Project {
-  id: number;
-  title: string;
-  /**
-   * URL identifier. Leave blank to auto-generate from the title.
-   */
-  slug?: string | null;
-  /**
-   * Event type — used for gallery filtering.
-   */
-  category: number | Category;
-  /**
-   * Main image shown in the gallery grid.
-   */
-  coverImage: number | Media;
-  /**
-   * All photos for this event (shown in the lightbox).
-   */
-  photos?: (number | Media)[] | null;
-  description?: string | null;
-  branch?: ('guduvancheri' | 'thiruverkadu') | null;
-  location?: string | null;
-  date?: string | null;
-  /**
-   * Show on the home page.
-   */
-  featured?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Client reviews shown on the website. Copy them exactly as written. Untick "Published" to hide one.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "testimonials".
- */
-export interface Testimonial {
-  id: number;
-  /**
-   * As it appears on Google. The site shows the first name and an initial.
-   */
-  name: string;
-  rating: number;
-  text: string;
-  eventType?:
-    | (
-        | 'wedding'
-        | 'engagement'
-        | 'birthday'
-        | 'babyshower'
-        | 'puberty'
-        | 'housewarming'
-        | 'corporate'
-        | 'opening'
-        | 'sports'
-        | 'other'
-      )
-    | null;
-  /**
-   * When it was written (for imported Google reviews, worked out from "2 months ago").
-   */
-  date?: string | null;
-  source: 'google' | 'direct';
-  published?: boolean | null;
-  /**
-   * Show on the home page (the first three are used).
-   */
-  featured?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Enquiries submitted through the website. Call these back.
+ * People who asked for an event on the website. Call each one, then change “Status”: New → Contacted → Quoted → Booked.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "leads".
@@ -663,7 +360,7 @@ export interface AiConversation {
   createdAt: string;
 }
 /**
- * Couples and families with a Zenfest account.
+ * Couples and families who made an account on the website. Usually nothing to do here.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "customers".
@@ -712,7 +409,7 @@ export interface Customer {
   collection: 'customers';
 }
 /**
- * Vendor accounts and their marketplace listings. Set "Listing status" to Live to publish one.
+ * Vendors who log in to the website with WhatsApp. A Manager or the Owner sets “Listing status” to Live to show a listing.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "vendors".
@@ -808,6 +505,8 @@ export interface Vendor {
   collection: 'vendors';
 }
 /**
+ * Photos vendors uploaded for their listing.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "vendor-media".
  */
@@ -854,7 +553,7 @@ export interface VendorMedia {
   };
 }
 /**
- * Vendors who want to work with Zenfest Events.
+ * Vendors who want to work with Zenfest. Open one, check the details and call them. A Manager or the Owner then sets “Status” to Approved or Rejected.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "vendor-applications".
@@ -934,12 +633,15 @@ export interface VendorApplication {
    * c:<id> = couple, v:<id> = vendor.
    */
   referredBy?: string | null;
+  /**
+   * Only a Manager or the Owner can approve or reject.
+   */
   status?: ('new' | 'reviewing' | 'approved' | 'rejected') | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * FSSAI certificates and menu cards sent with vendor applications.
+ * Documents vendors sent with their application (FSSAI certificate, menu card).
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "vendor-uploads".
@@ -958,6 +660,280 @@ export interface VendorUpload {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * Everyone on our WhatsApp number. Open a person to read the chat and reply. Offers go only to “Opted in” people; anyone who replies STOP is moved to “Opted out” automatically.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "whatsapp-contacts".
+ */
+export interface WhatsappContact {
+  id: number;
+  name?: string | null;
+  /**
+   * Country code + number, e.g. 919840012345. A 10-digit Indian number gets 91 added.
+   */
+  phone: string;
+  optIn: 'yes' | 'unknown' | 'no';
+  optInSource?: string | null;
+  optInAt?: string | null;
+  optedOutAt?: string | null;
+  /**
+   * Free replies are allowed for 24 hours after this.
+   */
+  lastInboundAt?: string | null;
+  /**
+   * Comma-separated, e.g. "wedding, chennai". A campaign can target one tag.
+   */
+  tags?: string | null;
+  source?: string | null;
+  lead?: (number | null) | Lead;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Every message sent and received, newest first. To reply, open the person in “Chats & contacts”.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "whatsapp-messages".
+ */
+export interface WhatsappMessage {
+  id: number;
+  direction: 'in' | 'out';
+  phone: string;
+  contact?: (number | null) | WhatsappContact;
+  type?: string | null;
+  text?: string | null;
+  waMessageId?: string | null;
+  status?: ('received' | 'sent' | 'delivered' | 'read' | 'failed') | null;
+  error?: string | null;
+  campaign?: (number | null) | WhatsappCampaign;
+  sentBy?: (number | null) | User;
+  at: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * One approved message sent to many opted-in people at once. Meta charges about ₹1 per person. Only a Manager or the Owner can send.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "whatsapp-campaigns".
+ */
+export interface WhatsappCampaign {
+  id: number;
+  /**
+   * For you, e.g. "Diwali Night Fest – early bird".
+   */
+  name: string;
+  /**
+   * Exactly as approved in WhatsApp Manager, e.g. event_promo_v1.
+   */
+  template: string;
+  /**
+   * The template language: en, en_US, ta, hi …
+   */
+  language: string;
+  /**
+   * Only if the template has an image header.
+   */
+  headerImage?: (number | null) | Media;
+  /**
+   * One row per {{1}}, {{2}} … in the template, in order. Write {name} to put in each person's name (or "there" if we don't know it).
+   */
+  params?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Leave blank to send to every opted-in contact.
+   */
+  audienceTag?: string | null;
+  status?: ('draft' | 'sending' | 'done') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Photos used on the website. Upload them here, then pick them in “Our work” or “Services”.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  /**
+   * Shown to screen readers and if the image fails to load.
+   */
+  alt: string;
+  caption?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    feature?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    og?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * Your team’s logins for this admin. Add a person, give them a role, and share their email + password with them. When someone leaves, untick “Can log in”.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  name?: string | null;
+  phone?: string | null;
+  /**
+   * What this person is allowed to do. Only the Owner can change it.
+   */
+  role: 'owner' | 'manager' | 'team' | 'viewer';
+  /**
+   * Untick when someone leaves. Their name stays on the work they did.
+   */
+  active?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * Past clients and enquiries whose birthdays and anniversaries we remember. Add the person once with their dates; wishes are created automatically before each date.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contacts".
+ */
+export interface Contact {
+  id: number;
+  name: string;
+  /**
+   * Saved as 91XXXXXXXXXX. Each number can be added only once — search before adding.
+   */
+  phone: string;
+  relationship: 'client' | 'lead' | 'cold';
+  source: 'whatsapp' | 'phone_call' | 'walk_in' | 'referral' | 'past_event_import' | 'website_lead' | 'website_signup';
+  /**
+   * Every yearly date for this person or family: their birthday, wedding, children, housewarming…
+   */
+  occasions?:
+    | {
+        type:
+          | 'birthday'
+          | 'kid_birthday'
+          | 'wedding_anniversary'
+          | 'engagement_anniversary'
+          | 'housewarming_anniversary'
+          | 'corporate_annual'
+          | 'other';
+        /**
+         * The wedding / birth / event date. Year unknown? Pick any year and untick below.
+         */
+        date: string;
+        /**
+         * Blank = the contact. Else as it should read: "Aarav", "Priya & Karthik".
+         */
+        personName?: string | null;
+        /**
+         * e.g. "company anniversary", "shop opening anniversary".
+         */
+        label?: string | null;
+        /**
+         * Blank = the default in Reminder Settings.
+         */
+        leadTimeDays?: number | null;
+        /**
+         * Needed to say "5th anniversary".
+         */
+        yearKnown?: boolean | null;
+        eventWithUs?: boolean | null;
+        active?: boolean | null;
+        /**
+         * Worked out automatically.
+         */
+        nextDate?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Anything that helps the pitch: budget, likes, last event.
+   */
+  notes?: string | null;
+  email?: string | null;
+  altPhone?: string | null;
+  nextOccasionDate?: string | null;
+  /**
+   * Website contacts arrive unverified (typed by the visitor). Tick after confirming on a call/chat.
+   */
+  verified?: boolean | null;
+  tier?: ('regular' | 'vip') | null;
+  /**
+   * Their reminders are assigned to this person.
+   */
+  owner?: (number | null) | User;
+  branch?: ('guduvancheri' | 'thiruverkadu' | 'any') | null;
+  language?: ('en' | 'ta') | null;
+  /**
+   * They asked us to stop. No more reminders are created.
+   */
+  doNotContact?: boolean | null;
+  websiteLead?: (number | null) | Lead;
+  websiteSignup?: (number | null) | Signup;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * People who signed up for the ₹100-off offer. Honour the discount when quoting.
@@ -982,7 +958,345 @@ export interface Signup {
   createdAt: string;
 }
 /**
- * WhatsApp phone checks from the website forms. Created automatically.
+ * Wishes that are due. Tap the WhatsApp number to open the ready message, send it, then set what they said.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reminders".
+ */
+export interface Reminder {
+  id: number;
+  title?: string | null;
+  contactName?: string | null;
+  phone?: string | null;
+  milestone?: string | null;
+  occurrenceDate?: string | null;
+  dueDate?: string | null;
+  /**
+   * Edit before sending if you like — the WhatsApp link uses this text.
+   */
+  message?: string | null;
+  outcomeNotes?: string | null;
+  status:
+    'pending' | 'sent' | 'replied' | 'interested' | 'booked' | 'not_interested' | 'skipped' | 'missed' | 'opted_out';
+  channel?: ('wa_manual' | 'wa_api' | 'call') | null;
+  assignedTo?: (number | null) | User;
+  /**
+   * Created automatically on Interested / Booked.
+   */
+  lead?: (number | null) | Lead;
+  sentAt?: string | null;
+  sentBy?: (number | null) | User;
+  contact: number | Contact;
+  occasionType?:
+    | (
+        | 'birthday'
+        | 'kid_birthday'
+        | 'wedding_anniversary'
+        | 'engagement_anniversary'
+        | 'housewarming_anniversary'
+        | 'corporate_annual'
+        | 'other'
+      )
+    | null;
+  occasionId: string;
+  occurrenceYear: number;
+  nthYear?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Past events shown on the website. Clients decide based on these photos.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: number;
+  title: string;
+  /**
+   * URL identifier. Leave blank to auto-generate from the title.
+   */
+  slug?: string | null;
+  /**
+   * Event type — used for gallery filtering.
+   */
+  category: number | Category;
+  /**
+   * Main image shown in the gallery grid.
+   */
+  coverImage: number | Media;
+  /**
+   * All photos for this event (shown in the lightbox).
+   */
+  photos?: (number | Media)[] | null;
+  description?: string | null;
+  branch?: ('guduvancheri' | 'thiruverkadu') | null;
+  location?: string | null;
+  date?: string | null;
+  /**
+   * Show on the home page.
+   */
+  featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Kinds of events (Wedding, Birthday…) used to sort the gallery.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  title: string;
+  /**
+   * URL identifier. Leave blank to auto-generate from the title.
+   */
+  slug?: string | null;
+  description?: string | null;
+  /**
+   * Optional cover image for this event type.
+   */
+  image?: (number | null) | Media;
+  /**
+   * Lower numbers show first.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * The services shown on the website.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: number;
+  title: string;
+  /**
+   * URL identifier. Leave blank to auto-generate from the title.
+   */
+  slug?: string | null;
+  /**
+   * One short line shown on cards.
+   */
+  summary?: string | null;
+  description?: string | null;
+  image?: (number | null) | Media;
+  /**
+   * Turn this on to give Zenfest AI a specialist for this service. It only knows what you enter below, so fill in options and price ranges.
+   */
+  ai?: {
+    enabled?: boolean | null;
+    /**
+     * Shown to customers, e.g. "Zenfest Décor".
+     */
+    agentName?: string | null;
+    /**
+     * e.g. 🎨
+     */
+    agentEmoji?: string | null;
+    /**
+     * How this specialist talks and what it is expert in (a few lines).
+     */
+    persona?: string | null;
+    /**
+     * What customers can choose. The AI may only recommend these.
+     */
+    options?:
+      | {
+          name: string;
+          unit: 'event' | 'plate' | 'hour' | 'person';
+          description?: string | null;
+          priceMin?: number | null;
+          priceMax?: number | null;
+          minQty?: number | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Facts and limits the AI must respect, e.g. "Minimum 100 plates", "No outdoor fireworks".
+     */
+    rules?: string | null;
+    faqs?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
+   * Highlight on the home page.
+   */
+  featured?: boolean | null;
+  /**
+   * Lower numbers show first.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Ready-made packages (not shown on the website yet).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "packages".
+ */
+export interface Package {
+  id: number;
+  title: string;
+  /**
+   * URL identifier. Leave blank to auto-generate from the title.
+   */
+  slug?: string | null;
+  /**
+   * Short one-liner.
+   */
+  tagline?: string | null;
+  image?: (number | null) | Media;
+  /**
+   * Which event types this package suits.
+   */
+  idealFor?: (number | Category)[] | null;
+  includedServices?: (number | Service)[] | null;
+  /**
+   * Bullet points shown on the package card.
+   */
+  highlights?:
+    | {
+        item: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. "Starting from ₹75,000" or "Custom quote". Optional.
+   */
+  priceNote?: string | null;
+  /**
+   * Highlight on the home page.
+   */
+  featured?: boolean | null;
+  /**
+   * Lower numbers show first.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Client reviews shown on the website. Copy them exactly as written. Untick “Published” to hide one.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials".
+ */
+export interface Testimonial {
+  id: number;
+  /**
+   * As it appears on Google. The site shows the first name and an initial.
+   */
+  name: string;
+  rating: number;
+  text: string;
+  eventType?:
+    | (
+        | 'wedding'
+        | 'engagement'
+        | 'birthday'
+        | 'babyshower'
+        | 'puberty'
+        | 'housewarming'
+        | 'corporate'
+        | 'opening'
+        | 'sports'
+        | 'other'
+      )
+    | null;
+  /**
+   * When it was written (for imported Google reviews, worked out from "2 months ago").
+   */
+  date?: string | null;
+  source: 'google' | 'direct';
+  /**
+   * Ticked = shown on the website. Only a Manager or the Owner can change it.
+   */
+  published?: boolean | null;
+  /**
+   * Show on the home page (the first three are used).
+   */
+  featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Every award of runs. To give a bonus or correct a total, add a row with reason "Added by the Zenfest team".
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "runs".
+ */
+export interface Run {
+  id: number;
+  account:
+    | {
+        relationTo: 'customers';
+        value: number | Customer;
+      }
+    | {
+        relationTo: 'vendors';
+        value: number | Vendor;
+      };
+  /**
+   * c:<id> for a couple, v:<id> for a vendor. Filled in automatically.
+   */
+  accountKey?: string | null;
+  /**
+   * Negative takes runs away.
+   */
+  amount: number;
+  reason:
+    | 'joined'
+    | 'profile'
+    | 'enquiry'
+    | 'booking'
+    | 'referral'
+    | 'referral_signup'
+    | 'referral_vendor'
+    | 'welcome'
+    | 'listing_live'
+    | 'vendor_reply'
+    | 'vendor_booking'
+    | 'manual';
+  /**
+   * What it was for, e.g. lead:42 or enquiry:7.
+   */
+  source?: string | null;
+  note?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Someone opened an invite link. Anonymous: only who shared the link and when.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referral-visits".
+ */
+export interface ReferralVisit {
+  id: number;
+  /**
+   * Who shared the link: c:<id> = couple, v:<id> = vendor.
+   */
+  referrer: string;
+  /**
+   * Anonymous browser id.
+   */
+  visitor: string;
+  audience: 'client' | 'vendor';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Automatic WhatsApp number checks from the website forms. Nothing to do here.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "phone-verifications".
@@ -1052,6 +1366,37 @@ export interface HostApplication {
    */
   payoutNotes?: string | null;
   source?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Quote requests couples sent to vendors through the marketplace.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enquiries".
+ */
+export interface Enquiry {
+  id: number;
+  summary?: string | null;
+  customer: number | Customer;
+  vendor: number | Vendor;
+  eventType?: ('wedding' | 'engagement' | 'reception' | 'birthday' | 'housewarming' | 'corporate' | 'other') | null;
+  eventDate?: string | null;
+  guests?: number | null;
+  area?: string | null;
+  budget?: number | null;
+  message?: string | null;
+  status: 'new' | 'replied' | 'quoted' | 'booked' | 'declined' | 'closed';
+  unreadFor?: ('vendor' | 'customer') | null;
+  thread?:
+    | {
+        from: 'vendor' | 'customer';
+        text: string;
+        quote?: number | null;
+        at: string;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1327,328 +1672,6 @@ export interface PollVoter {
   createdAt: string;
 }
 /**
- * Quote requests couples sent to vendors through the marketplace.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "enquiries".
- */
-export interface Enquiry {
-  id: number;
-  summary?: string | null;
-  customer: number | Customer;
-  vendor: number | Vendor;
-  eventType?: ('wedding' | 'engagement' | 'reception' | 'birthday' | 'housewarming' | 'corporate' | 'other') | null;
-  eventDate?: string | null;
-  guests?: number | null;
-  area?: string | null;
-  budget?: number | null;
-  message?: string | null;
-  status: 'new' | 'replied' | 'quoted' | 'booked' | 'declined' | 'closed';
-  unreadFor?: ('vendor' | 'customer') | null;
-  thread?:
-    | {
-        from: 'vendor' | 'customer';
-        text: string;
-        quote?: number | null;
-        at: string;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Clients and leads whose birthdays and anniversaries we remember. Add the person once, then all their occasions below — reminders are created automatically before each date.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "contacts".
- */
-export interface Contact {
-  id: number;
-  name: string;
-  /**
-   * Saved as 91XXXXXXXXXX. Each number can be added only once — search before adding.
-   */
-  phone: string;
-  relationship: 'client' | 'lead' | 'cold';
-  source: 'whatsapp' | 'phone_call' | 'walk_in' | 'referral' | 'past_event_import' | 'website_lead' | 'website_signup';
-  /**
-   * Every yearly date for this person or family: their birthday, wedding, children, housewarming…
-   */
-  occasions?:
-    | {
-        type:
-          | 'birthday'
-          | 'kid_birthday'
-          | 'wedding_anniversary'
-          | 'engagement_anniversary'
-          | 'housewarming_anniversary'
-          | 'corporate_annual'
-          | 'other';
-        /**
-         * The wedding / birth / event date. Year unknown? Pick any year and untick below.
-         */
-        date: string;
-        /**
-         * Blank = the contact. Else as it should read: "Aarav", "Priya & Karthik".
-         */
-        personName?: string | null;
-        /**
-         * e.g. "company anniversary", "shop opening anniversary".
-         */
-        label?: string | null;
-        /**
-         * Blank = the default in Reminder Settings.
-         */
-        leadTimeDays?: number | null;
-        /**
-         * Needed to say "5th anniversary".
-         */
-        yearKnown?: boolean | null;
-        eventWithUs?: boolean | null;
-        active?: boolean | null;
-        /**
-         * Worked out automatically.
-         */
-        nextDate?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Anything that helps the pitch: budget, likes, last event.
-   */
-  notes?: string | null;
-  email?: string | null;
-  altPhone?: string | null;
-  nextOccasionDate?: string | null;
-  /**
-   * Website contacts arrive unverified (typed by the visitor). Tick after confirming on a call/chat.
-   */
-  verified?: boolean | null;
-  tier?: ('regular' | 'vip') | null;
-  /**
-   * Their reminders are assigned to this person.
-   */
-  owner?: (number | null) | User;
-  branch?: ('guduvancheri' | 'thiruverkadu' | 'any') | null;
-  language?: ('en' | 'ta') | null;
-  /**
-   * They asked us to stop. No more reminders are created.
-   */
-  doNotContact?: boolean | null;
-  websiteLead?: (number | null) | Lead;
-  websiteSignup?: (number | null) | Signup;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Upcoming occasions to pitch. Click the WhatsApp number to open the ready message (it is marked Sent), then update the status when they reply.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "reminders".
- */
-export interface Reminder {
-  id: number;
-  title?: string | null;
-  contactName?: string | null;
-  phone?: string | null;
-  milestone?: string | null;
-  occurrenceDate?: string | null;
-  dueDate?: string | null;
-  /**
-   * Edit before sending if you like — the WhatsApp link uses this text.
-   */
-  message?: string | null;
-  outcomeNotes?: string | null;
-  status:
-    'pending' | 'sent' | 'replied' | 'interested' | 'booked' | 'not_interested' | 'skipped' | 'missed' | 'opted_out';
-  channel?: ('wa_manual' | 'wa_api' | 'call') | null;
-  assignedTo?: (number | null) | User;
-  /**
-   * Created automatically on Interested / Booked.
-   */
-  lead?: (number | null) | Lead;
-  sentAt?: string | null;
-  sentBy?: (number | null) | User;
-  contact: number | Contact;
-  occasionType?:
-    | (
-        | 'birthday'
-        | 'kid_birthday'
-        | 'wedding_anniversary'
-        | 'engagement_anniversary'
-        | 'housewarming_anniversary'
-        | 'corporate_annual'
-        | 'other'
-      )
-    | null;
-  occasionId: string;
-  occurrenceYear: number;
-  nthYear?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * People on the WhatsApp Cloud API number. Promotions go only to "Opted in"; anyone who replies STOP is switched to "Opted out" automatically.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "whatsapp-contacts".
- */
-export interface WhatsappContact {
-  id: number;
-  name?: string | null;
-  /**
-   * Country code + number, e.g. 919840012345. A 10-digit Indian number gets 91 added.
-   */
-  phone: string;
-  optIn: 'yes' | 'unknown' | 'no';
-  optInSource?: string | null;
-  optInAt?: string | null;
-  optedOutAt?: string | null;
-  /**
-   * Free replies are allowed for 24 hours after this.
-   */
-  lastInboundAt?: string | null;
-  /**
-   * Comma-separated, e.g. "wedding, chennai". A campaign can target one tag.
-   */
-  tags?: string | null;
-  source?: string | null;
-  lead?: (number | null) | Lead;
-  notes?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Messages to and from the WhatsApp Cloud API number. Open a WhatsApp Contact to read a whole chat and reply.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "whatsapp-messages".
- */
-export interface WhatsappMessage {
-  id: number;
-  direction: 'in' | 'out';
-  phone: string;
-  contact?: (number | null) | WhatsappContact;
-  type?: string | null;
-  text?: string | null;
-  waMessageId?: string | null;
-  status?: ('received' | 'sent' | 'delivered' | 'read' | 'failed') | null;
-  error?: string | null;
-  campaign?: (number | null) | WhatsappCampaign;
-  sentBy?: (number | null) | User;
-  at: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Send an approved WhatsApp template to opted-in contacts. Each template message is charged by Meta (about ₹1 in India); replies are free.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "whatsapp-campaigns".
- */
-export interface WhatsappCampaign {
-  id: number;
-  /**
-   * For you, e.g. "Diwali Night Fest – early bird".
-   */
-  name: string;
-  /**
-   * Exactly as approved in WhatsApp Manager, e.g. event_promo_v1.
-   */
-  template: string;
-  /**
-   * The template language: en, en_US, ta, hi …
-   */
-  language: string;
-  /**
-   * Only if the template has an image header.
-   */
-  headerImage?: (number | null) | Media;
-  /**
-   * One row per {{1}}, {{2}} … in the template, in order. Write {name} to put in each person's name (or "there" if we don't know it).
-   */
-  params?:
-    | {
-        value: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Leave blank to send to every opted-in contact.
-   */
-  audienceTag?: string | null;
-  status?: ('draft' | 'sending' | 'done') | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Every award of runs. To give a bonus or correct a total, add a row with reason "Added by the Zenfest team".
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "runs".
- */
-export interface Run {
-  id: number;
-  account:
-    | {
-        relationTo: 'customers';
-        value: number | Customer;
-      }
-    | {
-        relationTo: 'vendors';
-        value: number | Vendor;
-      };
-  /**
-   * c:<id> for a couple, v:<id> for a vendor. Filled in automatically.
-   */
-  accountKey?: string | null;
-  /**
-   * Negative takes runs away.
-   */
-  amount: number;
-  reason:
-    | 'joined'
-    | 'profile'
-    | 'enquiry'
-    | 'booking'
-    | 'referral'
-    | 'referral_signup'
-    | 'referral_vendor'
-    | 'welcome'
-    | 'listing_live'
-    | 'vendor_reply'
-    | 'vendor_booking'
-    | 'manual';
-  /**
-   * What it was for, e.g. lead:42 or enquiry:7.
-   */
-  source?: string | null;
-  note?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Someone opened an invite link. Anonymous: only who shared the link and when.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "referral-visits".
- */
-export interface ReferralVisit {
-  id: number;
-  /**
-   * Who shared the link: c:<id> = couple, v:<id> = vendor.
-   */
-  referrer: string;
-  /**
-   * Anonymous browser id.
-   */
-  visitor: string;
-  audience: 'client' | 'vendor';
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -1673,16 +1696,52 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: number | User;
+        relationTo: 'leads';
+        value: number | Lead;
       } | null)
     | ({
-        relationTo: 'media';
-        value: number | Media;
+        relationTo: 'customers';
+        value: number | Customer;
       } | null)
     | ({
-        relationTo: 'categories';
-        value: number | Category;
+        relationTo: 'vendor-applications';
+        value: number | VendorApplication;
+      } | null)
+    | ({
+        relationTo: 'vendors';
+        value: number | Vendor;
+      } | null)
+    | ({
+        relationTo: 'vendor-media';
+        value: number | VendorMedia;
+      } | null)
+    | ({
+        relationTo: 'vendor-uploads';
+        value: number | VendorUpload;
+      } | null)
+    | ({
+        relationTo: 'whatsapp-contacts';
+        value: number | WhatsappContact;
+      } | null)
+    | ({
+        relationTo: 'whatsapp-messages';
+        value: number | WhatsappMessage;
+      } | null)
+    | ({
+        relationTo: 'whatsapp-campaigns';
+        value: number | WhatsappCampaign;
+      } | null)
+    | ({
+        relationTo: 'contacts';
+        value: number | Contact;
+      } | null)
+    | ({
+        relationTo: 'reminders';
+        value: number | Reminder;
+      } | null)
+    | ({
+        relationTo: 'projects';
+        value: number | Project;
       } | null)
     | ({
         relationTo: 'services';
@@ -1693,36 +1752,36 @@ export interface PayloadLockedDocument {
         value: number | Package;
       } | null)
     | ({
-        relationTo: 'projects';
-        value: number | Project;
-      } | null)
-    | ({
         relationTo: 'testimonials';
         value: number | Testimonial;
       } | null)
     | ({
-        relationTo: 'leads';
-        value: number | Lead;
+        relationTo: 'media';
+        value: number | Media;
       } | null)
     | ({
-        relationTo: 'signups';
-        value: number | Signup;
+        relationTo: 'categories';
+        value: number | Category;
       } | null)
     | ({
-        relationTo: 'vendor-applications';
-        value: number | VendorApplication;
+        relationTo: 'users';
+        value: number | User;
       } | null)
     | ({
         relationTo: 'phone-verifications';
         value: number | PhoneVerification;
       } | null)
     | ({
-        relationTo: 'vendor-uploads';
-        value: number | VendorUpload;
+        relationTo: 'signups';
+        value: number | Signup;
       } | null)
     | ({
         relationTo: 'host-applications';
         value: number | HostApplication;
+      } | null)
+    | ({
+        relationTo: 'enquiries';
+        value: number | Enquiry;
       } | null)
     | ({
         relationTo: 'registry-events';
@@ -1757,58 +1816,22 @@ export interface PayloadLockedDocument {
         value: number | AiConversation;
       } | null)
     | ({
-        relationTo: 'vendors';
-        value: number | Vendor;
-      } | null)
-    | ({
-        relationTo: 'customers';
-        value: number | Customer;
-      } | null)
-    | ({
-        relationTo: 'vendor-media';
-        value: number | VendorMedia;
-      } | null)
-    | ({
-        relationTo: 'enquiries';
-        value: number | Enquiry;
-      } | null)
-    | ({
         relationTo: 'products';
         value: number | Product;
-      } | null)
-    | ({
-        relationTo: 'contacts';
-        value: number | Contact;
-      } | null)
-    | ({
-        relationTo: 'reminders';
-        value: number | Reminder;
-      } | null)
-    | ({
-        relationTo: 'whatsapp-contacts';
-        value: number | WhatsappContact;
-      } | null)
-    | ({
-        relationTo: 'whatsapp-messages';
-        value: number | WhatsappMessage;
-      } | null)
-    | ({
-        relationTo: 'whatsapp-campaigns';
-        value: number | WhatsappCampaign;
       } | null);
   globalSlug?: string | null;
   user:
     | {
-        relationTo: 'users';
-        value: number | User;
+        relationTo: 'customers';
+        value: number | Customer;
       }
     | {
         relationTo: 'vendors';
         value: number | Vendor;
       }
     | {
-        relationTo: 'customers';
-        value: number | Customer;
+        relationTo: 'users';
+        value: number | User;
       };
   updatedAt: string;
   createdAt: string;
@@ -1821,16 +1844,16 @@ export interface PayloadPreference {
   id: number;
   user:
     | {
-        relationTo: 'users';
-        value: number | User;
+        relationTo: 'customers';
+        value: number | Customer;
       }
     | {
         relationTo: 'vendors';
         value: number | Vendor;
       }
     | {
-        relationTo: 'customers';
-        value: number | Customer;
+        relationTo: 'users';
+        value: number | User;
       };
   key?: string | null;
   value?:
@@ -1858,10 +1881,57 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "leads_select".
  */
-export interface UsersSelect<T extends boolean = true> {
+export interface LeadsSelect<T extends boolean = true> {
   name?: T;
+  phone?: T;
+  email?: T;
+  eventType?: T;
+  eventDate?: T;
+  branch?: T;
+  message?: T;
+  requirements?:
+    | T
+    | {
+        weddingParts?: T;
+        startTime?: T;
+        location?: T;
+        services?: T;
+        receptionServices?: T;
+        weddingServices?: T;
+        extraShoots?: T;
+        birthdayFor?: T;
+        birthdaySurprise?: T;
+        guestCount?: T;
+        budget?: T;
+      };
+  aiPlan?: T;
+  aiConversation?: T;
+  status?: T;
+  source?: T;
+  customer?: T;
+  customerTier?: T;
+  referredBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers_select".
+ */
+export interface CustomersSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
+  phoneVerified?: T;
+  googleId?: T;
+  runs?: T;
+  referralCode?: T;
+  referredBy?: T;
+  city?: T;
+  eventDate?: T;
+  shortlist?: T;
+  marketingConsent?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1869,6 +1939,8 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1878,6 +1950,428 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vendor-applications_select".
+ */
+export interface VendorApplicationsSelect<T extends boolean = true> {
+  name?: T;
+  businessName?: T;
+  vendorType?: T;
+  otherService?: T;
+  photography?:
+    | T
+    | {
+        coverage?: T;
+        specialty?: T;
+        rates?:
+          | T
+          | {
+              service?: T;
+              sessionPrice?: T;
+              camera?: T;
+              id?: T;
+            };
+        editing?: T;
+      };
+  cake?:
+    | T
+    | {
+        flavours?:
+          | T
+          | {
+              flavour?: T;
+              ratePerKg?: T;
+              id?: T;
+            };
+        menu?: T;
+        egglessCharge?: T;
+        egglessUnit?: T;
+        wheatCharge?: T;
+        wheatUnit?: T;
+        tier2kgCharge?: T;
+        tier3kgCharge?: T;
+        tierUnit?: T;
+        customCharge?: T;
+        customUnit?: T;
+        minOrder?: T;
+        leadNormalDays?: T;
+        leadCustomDays?: T;
+        fssaiNumber?: T;
+        fssaiCertificate?: T;
+        deliveryRadiusKm?: T;
+        deliveryRates?: T;
+        venueServing?: T;
+      };
+  phone?: T;
+  phoneVerified?: T;
+  phoneVerification?: T;
+  email?: T;
+  city?: T;
+  portfolioUrl?: T;
+  message?: T;
+  vendor?: T;
+  referredBy?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vendors_select".
+ */
+export interface VendorsSelect<T extends boolean = true> {
+  name?: T;
+  businessName?: T;
+  slug?: T;
+  phone?: T;
+  phoneVerified?: T;
+  googleId?: T;
+  runs?: T;
+  referralCode?: T;
+  referredBy?: T;
+  category?: T;
+  otherService?: T;
+  areas?: T;
+  about?: T;
+  priceCard?:
+    | T
+    | {
+        item?: T;
+        unit?: T;
+        price?: T;
+        gstIncluded?: T;
+        note?: T;
+        id?: T;
+      };
+  startingPrice?: T;
+  cover?: T;
+  gallery?: T;
+  instagram?: T;
+  languages?: T;
+  blockedDates?:
+    | T
+    | {
+        date?: T;
+        note?: T;
+        id?: T;
+      };
+  application?: T;
+  listingStatus?: T;
+  reviewNote?: T;
+  submittedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vendor-media_select".
+ */
+export interface VendorMediaSelect<T extends boolean = true> {
+  vendor?: T;
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        feature?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vendor-uploads_select".
+ */
+export interface VendorUploadsSelect<T extends boolean = true> {
+  kind?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "whatsapp-contacts_select".
+ */
+export interface WhatsappContactsSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
+  optIn?: T;
+  optInSource?: T;
+  optInAt?: T;
+  optedOutAt?: T;
+  lastInboundAt?: T;
+  tags?: T;
+  source?: T;
+  lead?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "whatsapp-messages_select".
+ */
+export interface WhatsappMessagesSelect<T extends boolean = true> {
+  direction?: T;
+  phone?: T;
+  contact?: T;
+  type?: T;
+  text?: T;
+  waMessageId?: T;
+  status?: T;
+  error?: T;
+  campaign?: T;
+  sentBy?: T;
+  at?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "whatsapp-campaigns_select".
+ */
+export interface WhatsappCampaignsSelect<T extends boolean = true> {
+  name?: T;
+  template?: T;
+  language?: T;
+  headerImage?: T;
+  params?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  audienceTag?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contacts_select".
+ */
+export interface ContactsSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
+  relationship?: T;
+  source?: T;
+  occasions?:
+    | T
+    | {
+        type?: T;
+        date?: T;
+        personName?: T;
+        label?: T;
+        leadTimeDays?: T;
+        yearKnown?: T;
+        eventWithUs?: T;
+        active?: T;
+        nextDate?: T;
+        id?: T;
+      };
+  notes?: T;
+  email?: T;
+  altPhone?: T;
+  nextOccasionDate?: T;
+  verified?: T;
+  tier?: T;
+  owner?: T;
+  branch?: T;
+  language?: T;
+  doNotContact?: T;
+  websiteLead?: T;
+  websiteSignup?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reminders_select".
+ */
+export interface RemindersSelect<T extends boolean = true> {
+  title?: T;
+  contactName?: T;
+  phone?: T;
+  milestone?: T;
+  occurrenceDate?: T;
+  dueDate?: T;
+  message?: T;
+  outcomeNotes?: T;
+  status?: T;
+  channel?: T;
+  assignedTo?: T;
+  lead?: T;
+  sentAt?: T;
+  sentBy?: T;
+  contact?: T;
+  occasionType?: T;
+  occasionId?: T;
+  occurrenceYear?: T;
+  nthYear?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects_select".
+ */
+export interface ProjectsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  category?: T;
+  coverImage?: T;
+  photos?: T;
+  description?: T;
+  branch?: T;
+  location?: T;
+  date?: T;
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services_select".
+ */
+export interface ServicesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  summary?: T;
+  description?: T;
+  image?: T;
+  ai?:
+    | T
+    | {
+        enabled?: T;
+        agentName?: T;
+        agentEmoji?: T;
+        persona?: T;
+        options?:
+          | T
+          | {
+              name?: T;
+              unit?: T;
+              description?: T;
+              priceMin?: T;
+              priceMax?: T;
+              minQty?: T;
+              id?: T;
+            };
+        rules?: T;
+        faqs?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+      };
+  featured?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "packages_select".
+ */
+export interface PackagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  tagline?: T;
+  image?: T;
+  idealFor?: T;
+  includedServices?: T;
+  highlights?:
+    | T
+    | {
+        item?: T;
+        id?: T;
+      };
+  priceNote?: T;
+  featured?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials_select".
+ */
+export interface TestimonialsSelect<T extends boolean = true> {
+  name?: T;
+  rating?: T;
+  text?: T;
+  eventType?: T;
+  date?: T;
+  source?: T;
+  published?: T;
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1957,137 +2451,67 @@ export interface CategoriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "services_select".
+ * via the `definition` "runs_select".
  */
-export interface ServicesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  summary?: T;
-  description?: T;
-  image?: T;
-  ai?:
-    | T
-    | {
-        enabled?: T;
-        agentName?: T;
-        agentEmoji?: T;
-        persona?: T;
-        options?:
-          | T
-          | {
-              name?: T;
-              unit?: T;
-              description?: T;
-              priceMin?: T;
-              priceMax?: T;
-              minQty?: T;
-              id?: T;
-            };
-        rules?: T;
-        faqs?:
-          | T
-          | {
-              question?: T;
-              answer?: T;
-              id?: T;
-            };
-      };
-  featured?: T;
-  order?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "packages_select".
- */
-export interface PackagesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  tagline?: T;
-  image?: T;
-  idealFor?: T;
-  includedServices?: T;
-  highlights?:
-    | T
-    | {
-        item?: T;
-        id?: T;
-      };
-  priceNote?: T;
-  featured?: T;
-  order?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "projects_select".
- */
-export interface ProjectsSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  category?: T;
-  coverImage?: T;
-  photos?: T;
-  description?: T;
-  branch?: T;
-  location?: T;
-  date?: T;
-  featured?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "testimonials_select".
- */
-export interface TestimonialsSelect<T extends boolean = true> {
-  name?: T;
-  rating?: T;
-  text?: T;
-  eventType?: T;
-  date?: T;
+export interface RunsSelect<T extends boolean = true> {
+  account?: T;
+  accountKey?: T;
+  amount?: T;
+  reason?: T;
   source?: T;
-  published?: T;
-  featured?: T;
+  note?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "leads_select".
+ * via the `definition` "referral-visits_select".
  */
-export interface LeadsSelect<T extends boolean = true> {
+export interface ReferralVisitsSelect<T extends boolean = true> {
+  referrer?: T;
+  visitor?: T;
+  audience?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
   name?: T;
   phone?: T;
+  role?: T;
+  active?: T;
+  updatedAt?: T;
+  createdAt?: T;
   email?: T;
-  eventType?: T;
-  eventDate?: T;
-  branch?: T;
-  message?: T;
-  requirements?:
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
     | T
     | {
-        weddingParts?: T;
-        startTime?: T;
-        location?: T;
-        services?: T;
-        receptionServices?: T;
-        weddingServices?: T;
-        extraShoots?: T;
-        birthdayFor?: T;
-        birthdaySurprise?: T;
-        guestCount?: T;
-        budget?: T;
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
       };
-  aiPlan?: T;
-  aiConversation?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "phone-verifications_select".
+ */
+export interface PhoneVerificationsSelect<T extends boolean = true> {
+  phone?: T;
+  code?: T;
+  token?: T;
   status?: T;
-  source?: T;
-  customer?: T;
-  customerTier?: T;
-  referredBy?: T;
+  purpose?: T;
+  expiresAt?: T;
+  verifiedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2109,105 +2533,6 @@ export interface SignupsSelect<T extends boolean = true> {
   source?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "vendor-applications_select".
- */
-export interface VendorApplicationsSelect<T extends boolean = true> {
-  name?: T;
-  businessName?: T;
-  vendorType?: T;
-  otherService?: T;
-  photography?:
-    | T
-    | {
-        coverage?: T;
-        specialty?: T;
-        rates?:
-          | T
-          | {
-              service?: T;
-              sessionPrice?: T;
-              camera?: T;
-              id?: T;
-            };
-        editing?: T;
-      };
-  cake?:
-    | T
-    | {
-        flavours?:
-          | T
-          | {
-              flavour?: T;
-              ratePerKg?: T;
-              id?: T;
-            };
-        menu?: T;
-        egglessCharge?: T;
-        egglessUnit?: T;
-        wheatCharge?: T;
-        wheatUnit?: T;
-        tier2kgCharge?: T;
-        tier3kgCharge?: T;
-        tierUnit?: T;
-        customCharge?: T;
-        customUnit?: T;
-        minOrder?: T;
-        leadNormalDays?: T;
-        leadCustomDays?: T;
-        fssaiNumber?: T;
-        fssaiCertificate?: T;
-        deliveryRadiusKm?: T;
-        deliveryRates?: T;
-        venueServing?: T;
-      };
-  phone?: T;
-  phoneVerified?: T;
-  phoneVerification?: T;
-  email?: T;
-  city?: T;
-  portfolioUrl?: T;
-  message?: T;
-  vendor?: T;
-  referredBy?: T;
-  status?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "phone-verifications_select".
- */
-export interface PhoneVerificationsSelect<T extends boolean = true> {
-  phone?: T;
-  code?: T;
-  token?: T;
-  status?: T;
-  purpose?: T;
-  expiresAt?: T;
-  verifiedAt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "vendor-uploads_select".
- */
-export interface VendorUploadsSelect<T extends boolean = true> {
-  kind?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2234,6 +2559,34 @@ export interface HostApplicationsSelect<T extends boolean = true> {
   status?: T;
   payoutNotes?: T;
   source?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enquiries_select".
+ */
+export interface EnquiriesSelect<T extends boolean = true> {
+  summary?: T;
+  customer?: T;
+  vendor?: T;
+  eventType?: T;
+  eventDate?: T;
+  guests?: T;
+  area?: T;
+  budget?: T;
+  message?: T;
+  status?: T;
+  unreadFor?: T;
+  thread?:
+    | T
+    | {
+        from?: T;
+        text?: T;
+        quote?: T;
+        at?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2437,185 +2790,6 @@ export interface AiConversationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "vendors_select".
- */
-export interface VendorsSelect<T extends boolean = true> {
-  name?: T;
-  businessName?: T;
-  slug?: T;
-  phone?: T;
-  phoneVerified?: T;
-  googleId?: T;
-  runs?: T;
-  referralCode?: T;
-  referredBy?: T;
-  category?: T;
-  otherService?: T;
-  areas?: T;
-  about?: T;
-  priceCard?:
-    | T
-    | {
-        item?: T;
-        unit?: T;
-        price?: T;
-        gstIncluded?: T;
-        note?: T;
-        id?: T;
-      };
-  startingPrice?: T;
-  cover?: T;
-  gallery?: T;
-  instagram?: T;
-  languages?: T;
-  blockedDates?:
-    | T
-    | {
-        date?: T;
-        note?: T;
-        id?: T;
-      };
-  application?: T;
-  listingStatus?: T;
-  reviewNote?: T;
-  submittedAt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  _verified?: T;
-  _verificationToken?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customers_select".
- */
-export interface CustomersSelect<T extends boolean = true> {
-  name?: T;
-  phone?: T;
-  phoneVerified?: T;
-  googleId?: T;
-  runs?: T;
-  referralCode?: T;
-  referredBy?: T;
-  city?: T;
-  eventDate?: T;
-  shortlist?: T;
-  marketingConsent?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  _verified?: T;
-  _verificationToken?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "vendor-media_select".
- */
-export interface VendorMediaSelect<T extends boolean = true> {
-  vendor?: T;
-  alt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-  sizes?:
-    | T
-    | {
-        thumbnail?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        card?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        feature?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-      };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "enquiries_select".
- */
-export interface EnquiriesSelect<T extends boolean = true> {
-  summary?: T;
-  customer?: T;
-  vendor?: T;
-  eventType?: T;
-  eventDate?: T;
-  guests?: T;
-  area?: T;
-  budget?: T;
-  message?: T;
-  status?: T;
-  unreadFor?: T;
-  thread?:
-    | T
-    | {
-        from?: T;
-        text?: T;
-        quote?: T;
-        at?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
@@ -2640,154 +2814,6 @@ export interface ProductsSelect<T extends boolean = true> {
   dispatchDays?: T;
   stock?: T;
   returnPolicy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "contacts_select".
- */
-export interface ContactsSelect<T extends boolean = true> {
-  name?: T;
-  phone?: T;
-  relationship?: T;
-  source?: T;
-  occasions?:
-    | T
-    | {
-        type?: T;
-        date?: T;
-        personName?: T;
-        label?: T;
-        leadTimeDays?: T;
-        yearKnown?: T;
-        eventWithUs?: T;
-        active?: T;
-        nextDate?: T;
-        id?: T;
-      };
-  notes?: T;
-  email?: T;
-  altPhone?: T;
-  nextOccasionDate?: T;
-  verified?: T;
-  tier?: T;
-  owner?: T;
-  branch?: T;
-  language?: T;
-  doNotContact?: T;
-  websiteLead?: T;
-  websiteSignup?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "reminders_select".
- */
-export interface RemindersSelect<T extends boolean = true> {
-  title?: T;
-  contactName?: T;
-  phone?: T;
-  milestone?: T;
-  occurrenceDate?: T;
-  dueDate?: T;
-  message?: T;
-  outcomeNotes?: T;
-  status?: T;
-  channel?: T;
-  assignedTo?: T;
-  lead?: T;
-  sentAt?: T;
-  sentBy?: T;
-  contact?: T;
-  occasionType?: T;
-  occasionId?: T;
-  occurrenceYear?: T;
-  nthYear?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "whatsapp-contacts_select".
- */
-export interface WhatsappContactsSelect<T extends boolean = true> {
-  name?: T;
-  phone?: T;
-  optIn?: T;
-  optInSource?: T;
-  optInAt?: T;
-  optedOutAt?: T;
-  lastInboundAt?: T;
-  tags?: T;
-  source?: T;
-  lead?: T;
-  notes?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "whatsapp-messages_select".
- */
-export interface WhatsappMessagesSelect<T extends boolean = true> {
-  direction?: T;
-  phone?: T;
-  contact?: T;
-  type?: T;
-  text?: T;
-  waMessageId?: T;
-  status?: T;
-  error?: T;
-  campaign?: T;
-  sentBy?: T;
-  at?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "whatsapp-campaigns_select".
- */
-export interface WhatsappCampaignsSelect<T extends boolean = true> {
-  name?: T;
-  template?: T;
-  language?: T;
-  headerImage?: T;
-  params?:
-    | T
-    | {
-        value?: T;
-        id?: T;
-      };
-  audienceTag?: T;
-  status?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "runs_select".
- */
-export interface RunsSelect<T extends boolean = true> {
-  account?: T;
-  accountKey?: T;
-  amount?: T;
-  reason?: T;
-  source?: T;
-  note?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "referral-visits_select".
- */
-export interface ReferralVisitsSelect<T extends boolean = true> {
-  referrer?: T;
-  visitor?: T;
-  audience?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2832,7 +2858,66 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
- * Contact details, branches and homepage text.
+ * How early wishes are created, the WhatsApp message text and the daily email. Only a Manager or the Owner can change these.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reminder-settings".
+ */
+export interface ReminderSetting {
+  id: number;
+  leadDays?: {
+    birthday?: number | null;
+    kid_birthday?: number | null;
+    wedding_anniversary?: number | null;
+    engagement_anniversary?: number | null;
+    housewarming_anniversary?: number | null;
+    corporate_annual?: number | null;
+    other?: number | null;
+  };
+  /**
+   * Placeholders: {name} {whose} {milestone} {date} {days} (and {whose_cap} to start a sentence). {whose} is "your" or e.g. "Aarav's". Changing these affects new reminders only.
+   */
+  messages?: {
+    /**
+     * Blank = the default shown.
+     */
+    client?: string | null;
+    /**
+     * Blank = the default shown.
+     */
+    lead?: string | null;
+    overrides?:
+      | {
+          occasionType:
+            | 'birthday'
+            | 'kid_birthday'
+            | 'wedding_anniversary'
+            | 'engagement_anniversary'
+            | 'housewarming_anniversary'
+            | 'corporate_annual'
+            | 'other';
+          audience: 'any' | 'client' | 'lead';
+          message: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  digest?: {
+    enabled?: boolean | null;
+    /**
+     * Comma-separated emails. Blank = LEAD_NOTIFICATION_EMAIL.
+     */
+    recipients?: string | null;
+  };
+  /**
+   * When on, every new website enquiry (event date) and sign-up (birthday) becomes an unverified contact. Leave off until the site has real customers.
+   */
+  ingestWebsite?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Phone numbers, branches and homepage text shown on the website. Only a Manager or the Owner can change these.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings".
@@ -2900,65 +2985,6 @@ export interface SiteSetting {
   createdAt?: string | null;
 }
 /**
- * How early reminders are created, the WhatsApp message text and the daily email.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "reminder-settings".
- */
-export interface ReminderSetting {
-  id: number;
-  leadDays?: {
-    birthday?: number | null;
-    kid_birthday?: number | null;
-    wedding_anniversary?: number | null;
-    engagement_anniversary?: number | null;
-    housewarming_anniversary?: number | null;
-    corporate_annual?: number | null;
-    other?: number | null;
-  };
-  /**
-   * Placeholders: {name} {whose} {milestone} {date} {days} (and {whose_cap} to start a sentence). {whose} is "your" or e.g. "Aarav's". Changing these affects new reminders only.
-   */
-  messages?: {
-    /**
-     * Blank = the default shown.
-     */
-    client?: string | null;
-    /**
-     * Blank = the default shown.
-     */
-    lead?: string | null;
-    overrides?:
-      | {
-          occasionType:
-            | 'birthday'
-            | 'kid_birthday'
-            | 'wedding_anniversary'
-            | 'engagement_anniversary'
-            | 'housewarming_anniversary'
-            | 'corporate_annual'
-            | 'other';
-          audience: 'any' | 'client' | 'lead';
-          message: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  digest?: {
-    enabled?: boolean | null;
-    /**
-     * Comma-separated emails. Blank = LEAD_NOTIFICATION_EMAIL.
-     */
-    recipients?: string | null;
-  };
-  /**
-   * When on, every new website enquiry (event date) and sign-up (birthday) becomes an unverified contact. Leave off until the site has real customers.
-   */
-  ingestWebsite?: boolean | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
  * How many runs each action earns and what each tier unlocks. 0 switches an action off.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3003,6 +3029,47 @@ export interface RewardSetting {
     | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reminder-settings_select".
+ */
+export interface ReminderSettingsSelect<T extends boolean = true> {
+  leadDays?:
+    | T
+    | {
+        birthday?: T;
+        kid_birthday?: T;
+        wedding_anniversary?: T;
+        engagement_anniversary?: T;
+        housewarming_anniversary?: T;
+        corporate_annual?: T;
+        other?: T;
+      };
+  messages?:
+    | T
+    | {
+        client?: T;
+        lead?: T;
+        overrides?:
+          | T
+          | {
+              occasionType?: T;
+              audience?: T;
+              message?: T;
+              id?: T;
+            };
+      };
+  digest?:
+    | T
+    | {
+        enabled?: T;
+        recipients?: T;
+      };
+  ingestWebsite?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3055,47 +3122,6 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         googleCount?: T;
       };
   eventsDelivered?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "reminder-settings_select".
- */
-export interface ReminderSettingsSelect<T extends boolean = true> {
-  leadDays?:
-    | T
-    | {
-        birthday?: T;
-        kid_birthday?: T;
-        wedding_anniversary?: T;
-        engagement_anniversary?: T;
-        housewarming_anniversary?: T;
-        corporate_annual?: T;
-        other?: T;
-      };
-  messages?:
-    | T
-    | {
-        client?: T;
-        lead?: T;
-        overrides?:
-          | T
-          | {
-              occasionType?: T;
-              audience?: T;
-              message?: T;
-              id?: T;
-            };
-      };
-  digest?:
-    | T
-    | {
-        enabled?: T;
-        recipients?: T;
-      };
-  ingestWebsite?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

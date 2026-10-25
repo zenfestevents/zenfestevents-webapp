@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access'
+import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
+
 
 /**
  * People who voted on public polls, one row per phone number. A marketing list
@@ -11,10 +12,10 @@ export const PollVoters: CollectionConfig = {
   slug: 'poll-voters',
   labels: { singular: 'Voter', plural: 'Voters' },
   access: {
-    create: authenticated,
-    read: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    read: canView,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
   lockDocuments: false,
   admin: {
@@ -22,6 +23,7 @@ export const PollVoters: CollectionConfig = {
     useAsTitle: 'phone',
     defaultColumns: ['phone', 'phoneVerified', 'marketingConsent', 'votes', 'lastVotedAt', 'createdAt'],
     description: 'Only contact people with “Agreed to updates” ticked.',
+    hidden: adminHidden('poll-voters'),
   },
   defaultSort: '-lastVotedAt',
   fields: [

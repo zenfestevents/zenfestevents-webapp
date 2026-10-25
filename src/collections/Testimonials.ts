@@ -1,6 +1,6 @@
 import type { Access, CollectionConfig } from 'payload'
 
-import { authenticated } from '../access'
+import { adminHidden, canManage, canManageField, ownerOnly } from '../access/roles'
 import { CONTENT_TAGS } from '../lib/contentCache'
 import { revalidateCollection } from '../hooks/revalidateContent'
 import { TESTIMONIAL_EVENTS } from '../lib/testimonialOptions'
@@ -17,18 +17,19 @@ const readPublished: Access = ({ req }) =>
 export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
   hooks: revalidateCollection(CONTENT_TAGS.testimonials),
-  labels: { singular: 'Testimonial', plural: 'Testimonials' },
+  labels: { singular: 'Review', plural: 'Reviews' },
   access: {
     read: readPublished,
-    create: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    create: canManage,
+    update: canManage,
+    delete: ownerOnly,
   },
   admin: {
+    group: 'Website',
     useAsTitle: 'name',
     defaultColumns: ['name', 'rating', 'eventType', 'published', 'featured'],
-    description:
-      'Client reviews shown on the website. Copy them exactly as written. Untick "Published" to hide one.',
+    description: 'Client reviews shown on the website. Copy them exactly as written. Untick “Published” to hide one.',
+    hidden: adminHidden('testimonials'),
   },
   defaultSort: '-date',
   fields: [
@@ -66,7 +67,13 @@ export const Testimonials: CollectionConfig = {
       ],
       admin: { position: 'sidebar' },
     },
-    { name: 'published', type: 'checkbox', defaultValue: true, admin: { position: 'sidebar' } },
+    {
+      name: 'published',
+      type: 'checkbox',
+      defaultValue: true,
+      access: { update: canManageField },
+      admin: { position: 'sidebar', description: 'Ticked = shown on the website. Only a Manager or the Owner can change it.' },
+    },
     {
       name: 'featured',
       type: 'checkbox',
