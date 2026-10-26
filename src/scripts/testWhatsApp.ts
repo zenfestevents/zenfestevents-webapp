@@ -206,11 +206,14 @@ await check('STOP / START words are recognised (and ordinary text is not)', asyn
   assert.equal(optCommand('stop by tomorrow?'), null)
 })
 
-await check('Vaasal login messages are split off and everything else stays', async () => {
+await check('property-app (Vaasal / 64 Sqft) login messages are split off and everything else stays', async () => {
   assert.ok(isVaasalLogin('Vaasal login code: 123456'))
   assert.ok(isVaasalLogin('வாசல் உள்நுழைவுக் குறியீடு: 123456'))
   assert.ok(!isVaasalLogin('Is Vaasal open on Sunday?'))
   assert.ok(!isVaasalLogin('ZENFEST VERIFY 123456'))
+  assert.ok(isVaasalLogin('64 Sqft login code: 123456'))
+  assert.ok(isVaasalLogin('64 Sqft உள்நுழைவுக் குறியீடு: 123456'))
+  assert.ok(!isVaasalLogin('Stall of 64 sq ft near 600042, call 9840012345'))
   const ours = inbound(wa(21), `wamid.V1-${run}`, 'Price for 200 guests?')
   assert.deepEqual(splitVaasal(ours), { found: false, rest: ours })
   const login = splitVaasal(inbound(wa(21), `wamid.V2-${run}`, 'Vaasal login code: 123456'))

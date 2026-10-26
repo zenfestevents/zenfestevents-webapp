@@ -169,9 +169,9 @@ src/
     `webhookReceive` checks the signature, calls `recordWebhook()` (saves every message +
     delivery status, creates the WhatsApp Contact on first message, links a Lead by phone,
     handles STOP/START) and then does the verification codes. Don't add a second webhook.
-  - **Vaasal shares this number (2026-10-26)** for its WhatsApp login until it has its own.
-    With `VAASAL_WEBHOOK_URL` set, `webhookReceive` passes messages like "Vaasal login code:
-    123456" (or வாசல் …) to Vaasal with the raw body and Meta's original signature (same Meta
+  - **Vaasal (renamed 64 Sqft, 2026-10-26) shares this number** for its WhatsApp login until it
+    has its own. With `VAASAL_WEBHOOK_URL` set, `webhookReceive` passes messages like "64 Sqft
+    login code: 123456" (Tamil wording too, and the old "Vaasal …" / "வாசல் …" texts) to it with the raw body and Meta's original signature (same Meta
     app, so the same App secret checks out there) and leaves them out of the inbox
     (`lib/whatsapp/vaasal.ts`). Unset, nothing changes. Remove once Vaasal has its own number.
   - `whatsapp-contacts` (inbox + campaign audience) is separate from the occasion-reminders
