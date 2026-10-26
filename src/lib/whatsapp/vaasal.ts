@@ -1,12 +1,17 @@
-// Server-only: Vaasal (Zenfest's property app) borrows our WhatsApp number for its
-// login until it has its own. Meta allows one webhook per app, so ours hands Vaasal's
+// Server-only: Vaasal, now 64 Sqft (Zenfest's property app), borrows our WhatsApp number
+// for its login until it has its own. Meta allows one webhook per app, so ours hands Vaasal's
 // login messages on to Vaasal, byte for byte with Meta's signature (both apps check it
 // with the same App secret), and keeps them out of our inbox. Off unless
 // VAASAL_WEBHOOK_URL is set.
 import type { WebhookBody } from './events'
 
-/** "Vaasal login code: 123456" / "வாசல் உள்நுழைவுக் குறியீடு: 123456": the pattern Vaasal itself reads. */
-const VAASAL_LOGIN = /(vaasal|வாசல்)\D{0,60}?\d{6}(?!\d)/i
+/**
+ * The patterns the property app itself reads: "64 Sqft login code: 123456" (or the Tamil
+ * wording), and the old "Vaasal login code: 123456" / "வாசல் …" while old links are about.
+ * "64 sq ft" alone is an ordinary phrase, so the new form needs the login wording too.
+ */
+const VAASAL_LOGIN =
+  /(?:vaasal|வாசல்)\D{0,60}?\d{6}(?!\d)|64\s*sq\.?\s*ft\s*(?:login code|உள்நுழைவுக் குறியீடு)\s*:?\s*\d{6}(?!\d)/i
 
 export function isVaasalLogin(text: string | undefined): boolean {
   return !!text && VAASAL_LOGIN.test(text)
