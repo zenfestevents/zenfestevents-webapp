@@ -16,6 +16,7 @@ import { newCode, newToken } from '../lib/phoneVerification'
 import { changeAccountPhone, createWhatsAppAccount, whatsAppLoginAccount } from '../lib/whatsappAuth'
 import { recordWebhook } from '../lib/whatsapp/inbox'
 import { optCommand } from '../lib/whatsapp/events'
+import { forwardToVaasal, isVaasalLogin, splitVaasal } from '../lib/whatsapp/vaasal'
 import { toWaNumber } from '../lib/whatsapp/phone'
 
 if ((process.env.DATABASE_URI || '').startsWith('postgres')) {
@@ -203,6 +204,37 @@ await check('STOP / START words are recognised (and ordinary text is not)', asyn
   assert.equal(optCommand('STOP.'), 'stop')
   assert.equal(optCommand('start'), 'start')
   assert.equal(optCommand('stop by tomorrow?'), null)
+})
+
+await check('Vaasal login messages are split off and everything else stays', async () => {
+  assert.ok(isVaasalLogin('Vaasal login code: 123456'))
+  assert.ok(isVaasalLogin('வாசல் உள்நுழைவுக் குறியீடு: 123456'))
+  assert.ok(!isVaasalLogin('Is Vaasal open on Sunday?'))
+  assert.ok(!isVaasalLogin('ZENFEST VERIFY 123456'))
+  const ours = inbound(wa(21), `wamid.V1-${run}`, 'Price for 200 guests?')
+  assert.deepEqual(splitVaasal(ours), { found: false, rest: ours })
+  const login = splitVaasal(inbound(wa(21), `wamid.V2-${run}`, 'Vaasal login code: 123456'))
+  assert.equal(login.found, true)
+  assert.deepEqual(login.rest.entry?.[0].changes?.[0].value?.messages, [])
+})
+
+await check("a Vaasal login is passed on with Meta's raw body and signature", async () => {
+  const fakeMeta = globalThis.fetch
+  let got: { url: string; init?: RequestInit } | null = null
+  globalThis.fetch = (async (url: string | URL, init?: RequestInit) => {
+    got = { url: String(url), init }
+    return Response.json({})
+  }) as typeof fetch
+  process.env.VAASAL_WEBHOOK_URL = 'https://vaasal.test/api/whatsapp/webhook'
+  try {
+    assert.equal(await forwardToVaasal('{"entry":[]}', 'sha256=abc'), null)
+    assert.equal(got!.url, 'https://vaasal.test/api/whatsapp/webhook')
+    assert.equal(got!.init?.body, '{"entry":[]}')
+    assert.equal((got!.init?.headers as Record<string, string>)['x-hub-signature-256'], 'sha256=abc')
+  } finally {
+    globalThis.fetch = fakeMeta
+    delete process.env.VAASAL_WEBHOOK_URL
+  }
 })
 
 await check('first message creates the contact (not opted in) and links the Lead', async () => {

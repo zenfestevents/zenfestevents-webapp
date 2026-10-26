@@ -5,6 +5,7 @@ import { adminHidden, ownerOnly } from '../access/roles'
 import { cloudConfigured, sendText } from '../lib/whatsapp/cloud'
 import type { WebhookBody } from '../lib/whatsapp/events'
 import { findOrCreateContact, recordWebhook } from '../lib/whatsapp/inbox'
+import { forwardToVaasal, splitVaasal, vaasalForwardingOn } from '../lib/whatsapp/vaasal'
 import {
   VERIFY_PREFIX,
   VERIFY_TTL_MS,
@@ -25,7 +26,8 @@ import {
  *
  * `/webhook` is the **only** webhook of the Meta app, so it also feeds the WhatsApp
  * inbox: every message and delivery status is saved by `recordWebhook`
- * (lib/whatsapp/inbox.ts) before the verification codes are checked.
+ * (lib/whatsapp/inbox.ts) before the verification codes are checked. Vaasal's
+ * login messages are passed on to Vaasal instead (lib/whatsapp/vaasal.ts).
  */
 export const PhoneVerifications: CollectionConfig = {
   slug: 'phone-verifications',
@@ -169,9 +171,10 @@ async function webhookSubscribe(req: PayloadRequest) {
 /** POST /webhook — incoming WhatsApp messages and delivery statuses from Meta. */
 async function webhookReceive(req: PayloadRequest) {
   const raw = (await req.text?.()) ?? ''
+  const signature = req.headers.get('x-hub-signature-256')
   const secret = process.env.WHATSAPP_APP_SECRET
   // Meta signs every delivery with the App secret; anything unsigned is ignored.
-  if (!secret || !validSignature(raw, req.headers.get('x-hub-signature-256'), secret)) {
+  if (!secret || !validSignature(raw, signature, secret)) {
     req.payload.logger.warn('[phone-verifications] Rejected webhook with a bad signature.')
     return new Response('Invalid signature', { status: 401 })
   }
@@ -181,6 +184,16 @@ async function webhookReceive(req: PayloadRequest) {
     body = JSON.parse(raw)
   } catch {
     return new Response('OK', { status: 200 })
+  }
+
+  // Vaasal's login messages go to Vaasal, not into our inbox (lib/whatsapp/vaasal.ts).
+  if (vaasalForwardingOn()) {
+    const split = splitVaasal(body)
+    if (split.found) {
+      const error = await forwardToVaasal(raw, signature)
+      if (error) req.payload.logger.warn(`[phone-verifications] Could not pass a login on to Vaasal: ${error}`)
+      body = split.rest
+    }
   }
 
   await recordWebhook(req.payload, body)
