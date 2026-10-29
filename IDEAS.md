@@ -1,7 +1,8 @@
 # Zenfest ideas list
 
 Ideas for the website that we want to build later. Add new ones at the bottom of the
-right section; when one gets built, move it to **Done** with the date.
+right section (with who suggested it and the date); when one gets built, move it to
+**Done** with the date. The owner drops ideas in chat as they come — they all land here.
 
 ## Next up
 - **Shop phase B — seller products and orders.** Vendors add products from their dashboard
@@ -30,6 +31,13 @@ right section; when one gets built, move it to **Done** with the date.
 - **Delivery / to-do tracker** for the event day.
 - **Razorpay escrow** for vendor bookings (pay advance, released after the event).
 - **Wedding-loan referral** partner.
+
+## Games & offers
+- **Spin wheel** (owner, 2026-10-29) — a spin-the-wheel game on the site. Details still to
+  decide: who spins (visitors, logged-in couples/vendors), how often, what the prizes are
+  (₹ off a booking, a free add-on, Runs club runs), and where it shows (homepage, sign-up
+  popup, after an enquiry). Note: the Runs club rules say "nothing is chance-based", so a
+  wheel that gives runs would need that rule changed; prizes should need no purchase to play.
 
 ## Already built, waiting to be switched on
 - **WhatsApp phone verification** — needs Meta business number setup (see memory/notes).

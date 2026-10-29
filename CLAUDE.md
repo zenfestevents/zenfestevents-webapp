@@ -17,6 +17,8 @@ admin/staff (`users`, `/admin`), **vendors** (`vendors`, `/vendors/*`) and **cou
 registry (secret host link) and **Zenfest AI** (chat token in the browser) predate accounts
 and don't use them yet; Zenfest AI's intake has the slot for profile name/phone. See
 [README.md](README.md) for setup and [DESIGN.md](DESIGN.md) for the visual direction.
+**Ideas for later go in [IDEAS.md](IDEAS.md)** — when the owner shares an idea in chat,
+add it to the right section there (owner + date) instead of building it.
 
 ## Stack
 - **Next.js 16.3.3** (App Router) + **Payload CMS 3.88.0** in the same app
