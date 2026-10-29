@@ -1,6 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 
+import { placeLabel } from '../../lib/locations'
 import type { PublicVendor } from '../../lib/marketplace'
 import { ALL_CHENNAI, rupees, unitLabel } from '../../lib/marketplaceOptions'
 import { ShortlistButton } from './ShortlistButton'
@@ -9,14 +10,26 @@ import { ShortlistButton } from './ShortlistButton'
  * A vendor in a results grid: cover, name, service, areas and "from ₹" price. Leave
  * `shortlisted` out on cached pages: the heart then fills in from the browser's session.
  */
-export function VendorCard({ vendor, shortlisted }: { vendor: PublicVendor; shortlisted?: boolean }) {
+export function VendorCard({
+  vendor,
+  shortlisted,
+  km,
+}: {
+  vendor: PublicVendor
+  shortlisted?: boolean
+  /** Distance from the page's city or area to the vendor's base (area pages). */
+  km?: number | null
+}) {
   const cheapest = vendor.priceCard.reduce<PublicVendor['priceCard'][number] | null>(
     (min, r) => (min == null || r.price < min.price ? r : min),
     null,
   )
-  const areas = vendor.areas.includes(ALL_CHENNAI)
-    ? 'All over Chennai'
-    : vendor.areas.slice(0, 2).join(', ') + (vendor.areas.length > 2 ? ` +${vendor.areas.length - 2}` : '')
+  const base = vendor.baseArea ? placeLabel(vendor.baseArea) : ''
+  const areas = base
+    ? `Based in ${base}${km != null ? ` · ${km < 1 ? 'nearby' : `${km} km away`}` : ''}`
+    : vendor.areas.includes(ALL_CHENNAI)
+      ? 'All over Chennai'
+      : vendor.areas.slice(0, 2).join(', ') + (vendor.areas.length > 2 ? ` +${vendor.areas.length - 2}` : '')
   return (
     <article className="mk-card">
       <Link href={`/marketplace/v/${vendor.slug}`} className="mk-card__link">

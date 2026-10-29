@@ -76,6 +76,8 @@ src/
     shop/                 Zenfest Shop: /shop, /shop/[occasion] (+ 'all'), /shop/p/[slug],
                           /shop/go/[id] (affiliate redirect), /shop/policies
     earn/page.tsx         "Earn from events" — families apply to host foreign guests
+                          marketplace/cities/ + marketplace/area/[slug] = city pages and
+                          /marketplace/<service>-in-<place> (lib/locations.ts, areaPages.ts)
     plan/                 Zenfest AI: full-screen chat page, chat/route.ts (NDJSON
                           stream; kickoff after the intake), actions.ts (startChat =
                           intake → conversation + Lead, contact card, loadChat)
@@ -543,6 +545,31 @@ src/
   metadata merges shallowly, so a fixed og:title made every shared link read like the
   homepage; left out, Next fills og/twitter title + description from each page's own. The homepage renders LocalBusiness JSON-LD from Site Settings (`lib/seo.ts`) —
   never add review stars to it (Google ignores self-served ratings).
+- **City & area pages ("front door / side door" SEO, owner 2026-10-29).** `lib/locations.ts`
+  holds the 25 city corporations and ~150 popular areas with map points (OpenStreetMap;
+  `// ~` = estimated). Zones: **direct** (Chennai, Tambaram, Avadi, Kanchipuram — Zenfest's
+  own team) and **market** (partner vendors). **All of it lives under the marketplace (owner,
+  2026-10-30):** `/marketplace/cities`, `/marketplace/cities/<city>` (services + a "Popular
+  areas" grid of plain links) and `/marketplace/<service>-in-<city or area>` (services in
+  `lib/areaPages.ts`), all cached pages built on first visit (`generateStaticParams` returns
+  `[]`). These stay live while `MARKETPLACE_SOON` hides the vendor browsing. The header's
+  **Marketplace** dropdown (and the phone menu's Marketplace group) lists only the 25 cities,
+  then "All cities" and "All vendors · Soon". Direct-zone pages pin `ZenfestHostCard` ("Verified
+  Premium Host", real Google numbers only) above vendors. Vendors match by `baseArea` +
+  `travelKm` (dashboard "Where you're based") or their Chennai `areas` (`reachKm` in
+  `lib/areaVendors.ts`). Easy to get wrong:
+  - **Built for every place, on Google only when real (owner's choice):** `indexable()` —
+    direct-zone in-house services at once; everything else `noindex` until `MIN_VENDORS` (3)
+    live vendors serve it, and vendors count only once `MARKETPLACE_SOON` is off. The sitemap
+    lists only indexable ones. Hundreds of empty look-alike pages read as doorway pages to
+    Google and can sink the whole site — never index them all.
+  - Slugs are URLs, unique across cities **and** areas (same-name areas and generic roads carry
+    their city: `anna-nagar-madurai`, `trichy-road-namakkal`). Never rename a live one.
+    Zenfest-only services (event/wedding planners) 404 in the market zone.
+  - Area pages live in `marketplace/area/[slug]` and are reached through a **rewrite** in
+    `next.config.ts` (`/marketplace/:slug(.+-in-.+)`), because `/marketplace/[category]` reads
+    search filters and can't be cached. `/marketplace/area/…` redirects to the public address.
+    Category slugs must never contain `-in-`.
 - **Live `/admin` was blank (fixed 2026-10-25):** the Vercel Blob plugin adds an admin
   provider (`VercelBlobClientUploadHandler`), and Payload renders nothing under a provider
   missing from `importMap.js`. The plugin used to be added only when `BLOB_READ_WRITE_TOKEN`

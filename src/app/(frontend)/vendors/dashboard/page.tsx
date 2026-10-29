@@ -46,6 +46,8 @@ export default async function VendorDashboardPage({ searchParams }: { searchPara
     category: v.category,
     otherService: v.otherService ?? '',
     areas: v.areas ?? [],
+    baseArea: v.baseArea ?? '',
+    travelKm: v.travelKm ?? null,
     about: v.about ?? '',
     instagram: v.instagram ?? '',
     languages: v.languages ?? [],

@@ -114,6 +114,15 @@ export const Vendors: CollectionConfig = {
       hasMany: true,
       label: 'Areas served',
     },
+    {
+      // A city or area slug from lib/locations.ts (text, like `areas`, so adding an area
+      // needs no migration). With travelKm it places the vendor on the city/area pages.
+      name: 'baseArea',
+      type: 'text',
+      label: 'Based in',
+      admin: { description: 'City or area slug from lib/locations.ts, e.g. guduvanchery.' },
+    },
+    { name: 'travelKm', type: 'number', min: 1, max: 1000, label: 'Travels up to (km)' },
     { name: 'about', type: 'textarea' },
     {
       name: 'priceCard',

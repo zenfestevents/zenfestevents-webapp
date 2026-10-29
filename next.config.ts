@@ -22,7 +22,15 @@ const nextConfig: NextConfig = {
       { source: '/', has: fromPolls, destination: `${to}/polls`, permanent: true },
       { source: '/polls/:path*', has: fromPolls, destination: `${to}/polls/:path*`, permanent: true },
       { source: '/:path*', has: fromPolls, destination: `${to}/polls`, permanent: true },
+      // The area pages' only public address is /marketplace/<service>-in-<place> (below).
+      { source: '/marketplace/area/:slug', destination: '/marketplace/:slug', permanent: true },
     ]
+  },
+  // /marketplace/birthday-decorators-in-guduvanchery → the cached area page (lib/areaPages.ts).
+  // A rewrite because /marketplace/[category] reads the search filters and so can't be cached;
+  // these run before dynamic routes, and category slugs never contain "-in-".
+  async rewrites() {
+    return [{ source: '/marketplace/:slug(.+-in-.+)', destination: '/marketplace/area/:slug' }]
   },
   // The hero film/stills and the logos keep fixed names, so Vercel serves them with
   // max-age=0 and every visit re-asks for each one. Let browsers keep them for a week

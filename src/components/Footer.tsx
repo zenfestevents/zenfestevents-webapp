@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 
+import { CITIES_HREF, cityHref } from '../lib/areaPages'
 import { ANNOUNCE_COMING_SOON, FEATURES, MARKETPLACE_SOON } from '../lib/features'
 import { MAJOR_CITIES, SITE_FALLBACK, telLink, whatsappLink, DEFAULT_WA_MESSAGE, type SiteSettings } from '../lib/site'
 import { SeamDivider } from './game'
@@ -33,7 +34,15 @@ export function Footer({ settings, hasTestimonials = false }: { settings: SiteSe
               Full-service event management across Tamil Nadu. We plan, style and run
               weddings, birthdays, corporate functions, housewarmings and sports events.
             </p>
-            <p className="site-footer__cities">{MAJOR_CITIES.join(' · ')} — and towns across the state.</p>
+            <p className="site-footer__cities">
+              {MAJOR_CITIES.map((name, i) => (
+                <React.Fragment key={name}>
+                  {i > 0 && ' · '}
+                  <Link href={cityHref({ slug: name.toLowerCase() })}>{name}</Link>
+                </React.Fragment>
+              ))}{' '}
+              — and <Link href={CITIES_HREF}>all 25 cities we cover</Link>.
+            </p>
             <div className="btn-row">
               {contact.phonePrimary && (
                 <a className="btn btn--ghost" href={telLink(contact.phonePrimary)}>

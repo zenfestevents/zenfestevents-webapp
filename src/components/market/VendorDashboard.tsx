@@ -28,6 +28,7 @@ import {
   type ListingStatus,
 } from '../../lib/marketplaceOptions'
 import { EMAIL_LOGIN } from '../../lib/accountOptions'
+import { CITIES, TRAVEL_KM } from '../../lib/locations'
 import type { VerifyMode } from '../PhoneVerify'
 import { ChangePhone } from './ChangePhone'
 import { EnquiryFacts, EnquiryThread, StatusPill, formatDay } from './EnquiryThread'
@@ -46,6 +47,8 @@ export type DashboardVendor = {
   category: string
   otherService: string
   areas: string[]
+  baseArea: string
+  travelKm: number | null
   about: string
   instagram: string
   languages: string[]
@@ -350,6 +353,7 @@ function ListingTab({ vendor, verifyMode }: { vendor: DashboardVendor; verifyMod
   const s = useSave(LOGIN)
   const [category, setCategory] = useState(vendor.category)
   const [areas, setAreas] = useState<string[]>(vendor.areas)
+  const [baseArea, setBaseArea] = useState(vendor.baseArea)
   const [about, setAbout] = useState(vendor.about)
   const allChennai = areas.includes('All over Chennai')
 
@@ -368,6 +372,8 @@ function ListingTab({ vendor, verifyMode }: { vendor: DashboardVendor; verifyMod
         category,
         otherService: String(fd.get('otherService') ?? ''),
         areas,
+        baseArea,
+        travelKm: String(fd.get('travelKm') ?? ''),
         about,
         instagram: String(fd.get('instagram') ?? ''),
         languages: fd.getAll('languages').map(String),
@@ -412,8 +418,39 @@ function ListingTab({ vendor, verifyMode }: { vendor: DashboardVendor; verifyMod
         <span className="field__hint">{about.trim().length} characters · couples read this first.</span>
       </label>
 
+      {/* Places the listing on the city and area pages (lib/locations.ts) anywhere in Tamil Nadu. */}
+      <div className="form__row">
+        <label className="field">
+          <span className="field__label">Where you&apos;re based</span>
+          <select value={baseArea} onChange={(e) => setBaseArea(e.target.value)}>
+            <option value="">Choose your city or area</option>
+            {CITIES.map((c) => (
+              <optgroup key={c.slug} label={c.name}>
+                <option value={c.slug}>{c.name} (city)</option>
+                {c.areas.map((a) => (
+                  <option key={a.slug} value={a.slug}>
+                    {a.name}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        </label>
+        <label className="field">
+          <span className="field__label">How far you travel{baseArea ? ' *' : ''}</span>
+          <select name="travelKm" defaultValue={vendor.travelKm ?? 25} disabled={!baseArea}>
+            {TRAVEL_KM.map(([km, label]) => (
+              <option key={km} value={km}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <p className="field__hint">Couples searching any area within that distance of your base will see your listing.</p>
+
       <fieldset className="field choice">
-        <legend className="field__label">Areas you serve *</legend>
+        <legend className="field__label">Chennai areas you serve{baseArea ? '' : ' *'}</legend>
         <label className="choice__option">
           <input type="checkbox" checked={allChennai} onChange={() => toggleArea('All over Chennai')} />
           <span>

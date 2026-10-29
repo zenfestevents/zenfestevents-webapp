@@ -251,6 +251,39 @@
   background: rgba(217, 178, 76, 0.09);
   box-shadow: inset 2px 0 0 var(--marigold);
 }
+/* The Marketplace panel: 25 city names in three columns (Header.tsx, `grid` groups). */
+.site-nav__menu--grid {
+  width: 32rem;
+  grid-template-columns: repeat(3, 1fr);
+}
+.site-nav__cell {
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  color: var(--jasmine);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.site-nav__cell:hover,
+.site-nav__cell:focus-visible,
+.site-nav__cell.is-active {
+  background: rgba(217, 178, 76, 0.12);
+  color: var(--marigold);
+}
+.mobile-menu__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 1rem;
+  padding: 0.3rem 0 0.6rem;
+  border-bottom: 1px solid var(--hairline);
+}
+.mobile-menu__cell {
+  padding: 0.55rem 0;
+  color: var(--jasmine);
+  font-size: 1rem;
+}
+.mobile-menu__cell[aria-current='page'] {
+  color: var(--marigold);
+}
 @keyframes panel-in {
   from {
     opacity: 0;

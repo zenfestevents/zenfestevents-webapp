@@ -21,6 +21,9 @@ export type PublicVendor = {
   categoryLabel: string
   service: string
   areas: string[]
+  /** City or area slug (lib/locations.ts) and how far they travel from it. */
+  baseArea: string
+  travelKm: number | null
   about: string
   priceCard: { item: string; unit: string; price: number; gstIncluded: boolean; note: string }[]
   startingPrice: number | null
@@ -60,6 +63,8 @@ export function toPublicVendor(v: Vendor): PublicVendor {
     categoryLabel: categoryLabel(v.category),
     service: v.category === 'other' && v.otherService ? v.otherService : categoryLabel(v.category),
     areas: v.areas ?? [],
+    baseArea: v.baseArea ?? '',
+    travelKm: v.travelKm ?? null,
     about: v.about ?? '',
     priceCard: (v.priceCard ?? []).map((r) => ({
       item: r.item,

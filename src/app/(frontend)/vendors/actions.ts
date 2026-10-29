@@ -8,6 +8,7 @@ import { refresh } from 'next/cache'
 import type { Vendor } from '../../../payload-types'
 import { UserError, dayToDate, fail, int, oneOf, text } from '../../../lib/formCheck'
 import { listingGaps } from '../../../lib/listing'
+import { TRAVEL_KM, findPlace, placeLabel } from '../../../lib/locations'
 import { dayKey } from '../../../lib/marketplace'
 import { sendMail, siteUrl, teamInbox } from '../../../lib/marketplaceMail'
 import {
@@ -47,6 +48,8 @@ export type ListingInput = {
   category: string
   otherService: string
   areas: string[]
+  baseArea: string
+  travelKm: number | string
   about: string
   instagram: string
   languages: string[]
@@ -66,6 +69,9 @@ export async function saveListing(input: ListingInput): Promise<Result> {
     const otherService = input.category === 'other' ? text(input.otherService, 80) : ''
     if (input.category === 'other' && !otherService) throw new UserError('Tell us which service you offer.')
     const areas = [...new Set((input.areas ?? []).filter((a) => MARKET_AREAS.includes(a)))].slice(0, 60)
+    const baseArea = findPlace(input.baseArea) ? input.baseArea : null
+    const travelKm = baseArea && TRAVEL_KM.some(([km]) => km === Number(input.travelKm)) ? Number(input.travelKm) : null
+    if (baseArea && !travelKm) throw new UserError('Choose how far you travel.')
     const langs = LANGUAGES.map((l) => l.toLowerCase())
     const languages = [...new Set((input.languages ?? []).filter((l) => langs.includes(l)))]
     let instagram = text(input.instagram, 300)
@@ -84,6 +90,8 @@ export async function saveListing(input: ListingInput): Promise<Result> {
       category: input.category,
       otherService: otherService || null,
       areas,
+      baseArea,
+      travelKm,
       about: text(input.about, 3000),
       instagram,
       languages: languages as Vendor['languages'],
@@ -208,6 +216,7 @@ export async function submitForReview(): Promise<Result> {
       `${vendor.businessName} (${categoryLabel(vendor.category)}) sent their marketplace listing for review.`,
       `Contact: ${vendor.name}, ${vendor.phone}${vendor.phoneVerified ? ' (verified)' : ''}, ${vendor.email}`,
       `Areas: ${(vendor.areas ?? []).join(', ')}`,
+      ...(vendor.baseArea ? [`Based in: ${placeLabel(vendor.baseArea)}, travels up to ${vendor.travelKm ?? '?'} km`] : []),
       `Prices: ${(vendor.priceCard ?? []).map((r) => `${r.item} ${rupees(r.price)}`).join('; ')}`,
       '',
       `Check it and set "Listing status" to Live: ${siteUrl()}/admin/collections/vendors/${vendor.id}`,

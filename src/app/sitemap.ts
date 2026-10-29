@@ -1,6 +1,8 @@
 import type { MetadataRoute } from 'next'
 
 import { FEATURES, MARKETPLACE_SOON } from '../lib/features'
+import { CITIES_HREF } from '../lib/areaPages'
+import { indexablePaths } from '../lib/areaVendors'
 import { categoryCounts, listVendors } from '../lib/marketplace'
 import { SITE_URL } from '../lib/seo'
 import { hasTestimonials } from '../lib/testimonials'
@@ -24,10 +26,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const none: Record<string, number> = {}
   // While the couples' side is "Coming soon" its pages are left out of the sitemap.
   const browse = FEATURES.marketplace && !MARKETPLACE_SOON
-  const [reviews, counts, vendors] = await Promise.all([
+  const [reviews, counts, vendors, areaPages] = await Promise.all([
     hasTestimonials().catch(() => false),
     browse ? categoryCounts().catch(() => none) : none,
     browse ? listVendors({ sort: 'new' }).catch(() => []) : [],
+    // City and area pages: only those with something real on them (lib/areaVendors.ts).
+    indexablePaths().catch(() => [] as string[]),
   ])
 
   return [
@@ -57,6 +61,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...(FEATURES.ai ? [page('/plan', 0.8)] : []),
     ...(FEATURES.earn ? [page('/earn', 0.5)] : []),
     ...(FEATURES.polls ? [page('/polls', 0.4, 'daily')] : []),
+    page(CITIES_HREF, 0.6),
+    ...areaPages.map((path) => page(path, path.startsWith(`${CITIES_HREF}/`) ? 0.6 : 0.5, 'weekly')),
     page('/privacy', 0.2, 'monthly'),
   ]
 }

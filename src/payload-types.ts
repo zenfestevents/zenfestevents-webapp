@@ -447,6 +447,11 @@ export interface Vendor {
     | 'other';
   otherService?: string | null;
   areas?: string[] | null;
+  /**
+   * City or area slug from lib/locations.ts, e.g. guduvanchery.
+   */
+  baseArea?: string | null;
+  travelKm?: number | null;
   about?: string | null;
   priceCard?:
     | {
@@ -2034,6 +2039,8 @@ export interface VendorsSelect<T extends boolean = true> {
   category?: T;
   otherService?: T;
   areas?: T;
+  baseArea?: T;
+  travelKm?: T;
   about?: T;
   priceCard?:
     | T

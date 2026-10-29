@@ -1307,3 +1307,164 @@ button.cal__day:hover {
 .reg-tab {
   touch-action: manipulation;
 }
+
+/* ---------- city and area pages (/cities/*, /<service>-in-<place>; lib/areaPages.ts) ---------- */
+.ar-page .page-head {
+  margin-bottom: 1.6rem;
+}
+.ar-head {
+  margin: 2.6rem 0 1rem;
+}
+/* Zenfest pinned first in the direct zone: a full-width card ahead of the vendors. */
+.ar-host {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.2rem;
+  padding: 1.4rem;
+  border-radius: var(--radius-m);
+  border: 1px solid rgba(217, 178, 76, 0.55);
+  background: var(--surface-1);
+  box-shadow: inset 3px 0 0 var(--marigold);
+}
+.ar-host__mark {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+}
+.ar-host__body {
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+}
+.ar-host__badge {
+  justify-self: start;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: var(--marigold);
+  color: var(--ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.ar-host__name {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.6rem;
+  font-weight: 500;
+  line-height: 1.1;
+}
+.ar-host__meta a {
+  color: var(--link);
+}
+.ar-host .btn--gold {
+  --btn-bg: var(--marigold);
+  --btn-fg: var(--ink);
+}
+.ar-join {
+  margin-top: 1.4rem;
+}
+/* Nearby areas: name + "Chromepet · 4 km". */
+.ar-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.6rem;
+}
+.ar-links a {
+  display: grid;
+  gap: 0.1rem;
+  height: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  font-weight: 600;
+}
+.ar-links a:hover,
+.ar-area__links a:hover {
+  border-color: var(--marigold);
+  color: var(--link);
+}
+.ar-links .muted {
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+.ar-chips {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.ar-chips .chip {
+  display: inline-block;
+  font-size: 0.9rem;
+}
+/* The city page's "Popular areas" grid: plain <a> links to every area's service pages. */
+.ar-areas {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 0.9rem;
+}
+.ar-area {
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+}
+.ar-area__name {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+}
+.ar-area__links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.15rem;
+  font-size: 0.9rem;
+}
+.ar-area__links a {
+  color: var(--text-muted);
+}
+.ar-empty {
+  margin-top: 2rem;
+}
+.ar-cities {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 0.6rem;
+}
+.ar-cities a {
+  display: block;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.15rem;
+}
+.ar-cities a:hover {
+  border-color: var(--marigold);
+  color: var(--link);
+}
+@media (max-width: 560px) {
+  .ar-host {
+    grid-template-columns: 1fr;
+  }
+  .ar-host__mark {
+    width: 56px;
+    height: 56px;
+  }
+}

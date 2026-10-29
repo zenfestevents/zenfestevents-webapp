@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { ANNOUNCE_COMING_SOON, COMING_SOON, FEATURES, MARKETPLACE_SOON, VENDORS_HREF } from '../lib/features'
+import { CITIES_HREF, cityHref } from '../lib/areaPages'
+import { CITIES } from '../lib/locations'
 import { DEFAULT_WA_MESSAGE, MAJOR_CITIES, SITE_FALLBACK, whatsappLink, type SiteSettings } from '../lib/site'
 import { AiLink } from './ai/AiLink'
 import { Ticker } from './game'
@@ -14,8 +16,8 @@ const SIGNUP_ENABLED = false
 
 /** `desc` is the one-line hint under the label in the laptop dropdown panels. */
 type NavItem = { href: string; label: string; desc?: string; also?: string[]; soon?: boolean }
-/** A dropdown on laptops, a headed group in the phone menu. */
-type NavGroup = { label: string; items: NavItem[] }
+/** A dropdown on laptops, a headed group in the phone menu. `grid`: short labels in columns. */
+type NavGroup = { label: string; items: NavItem[]; grid?: boolean }
 /** A plain link. `group` is its heading in the phone menu, which shows only groups. */
 type NavLink = NavItem & { group: string }
 type NavEntry = NavGroup | NavLink
@@ -30,9 +32,9 @@ const isGroup = (e: NavEntry): e is NavGroup => 'items' in e
  */
 function buildNav(hasTestimonials: boolean): NavEntry[] {
   return [
-    ...(FEATURES.marketplace
-      ? [{ href: '/marketplace', label: 'Marketplace', group: 'Book vendors', soon: MARKETPLACE_SOON }]
-      : []),
+    // The marketplace's front door (lib/areaPages.ts): the 25 cities only, never their
+    // hundreds of areas — those are reached from each city page.
+    ...(FEATURES.marketplace ? [{ label: 'Marketplace', grid: true, items: MARKET_ITEMS }] : []),
     {
       label: 'About Zenfest',
       items: [
@@ -65,6 +67,12 @@ function buildNav(hasTestimonials: boolean): NavEntry[] {
     { href: '/contact', label: 'Contact', group: 'Contact' },
   ]
 }
+
+const MARKET_ITEMS: NavItem[] = [
+  ...[...CITIES].sort((a, b) => a.name.localeCompare(b.name)).map((c) => ({ href: cityHref(c), label: c.name })),
+  { href: CITIES_HREF, label: 'All cities →' },
+  { href: '/marketplace', label: 'All vendors', soon: MARKETPLACE_SOON },
+]
 
 const SOON = ANNOUNCE_COMING_SOON ? COMING_SOON.filter((f) => !FEATURES[f.key]) : []
 
@@ -132,7 +140,22 @@ function NavDropdown({
         {group.label}
         <span className="site-nav__caret" aria-hidden="true" />
       </button>
-      {open && (
+      {open && group.grid && (
+        <div id={id} className="site-nav__menu site-nav__menu--grid">
+          {group.items.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`site-nav__cell ${pathname === item.href ? 'is-active' : ''}`}
+              aria-current={pathname === item.href ? 'page' : undefined}
+            >
+              {item.label}
+              {item.soon && <span className="site-nav__soon">Soon</span>}
+            </Link>
+          ))}
+        </div>
+      )}
+      {open && !group.grid && (
         <div id={id} className="site-nav__menu">
           {group.items.map((item, i) => (
             <Link
@@ -277,16 +300,31 @@ export function Header({ settings, hasTestimonials = false }: { settings: SiteSe
             {nav.map((entry) => (
               <React.Fragment key={entry.label}>
                 <p className="mobile-menu__group">{isGroup(entry) ? entry.label : entry.group}</p>
-                {(isGroup(entry) ? entry.items : [entry]).map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`mobile-menu__link ${item.soon ? 'mobile-menu__link--soon' : ''}`}
-                    aria-current={isActive(pathname, item) ? 'page' : undefined}
-                  >
-                    {item.label} {item.soon && <span className="mobile-menu__soon">Soon</span>}
-                  </Link>
-                ))}
+                {isGroup(entry) && entry.grid ? (
+                  <div className="mobile-menu__grid">
+                    {entry.items.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className="mobile-menu__cell"
+                        aria-current={pathname === item.href ? 'page' : undefined}
+                      >
+                        {item.label} {item.soon && <span className="mobile-menu__soon">Soon</span>}
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  (isGroup(entry) ? entry.items : [entry]).map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`mobile-menu__link ${item.soon ? 'mobile-menu__link--soon' : ''}`}
+                      aria-current={isActive(pathname, item) ? 'page' : undefined}
+                    >
+                      {item.label} {item.soon && <span className="mobile-menu__soon">Soon</span>}
+                    </Link>
+                  ))
+                )}
               </React.Fragment>
             ))}
 
