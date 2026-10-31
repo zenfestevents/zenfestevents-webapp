@@ -9,12 +9,19 @@ import {
   DECOR_PRICE_MODES,
   DECOR_STATUSES,
   DECOR_THEMES,
+  LEGACY_EVENT_TYPES,
   decorOptions,
   marginOf,
 } from '../lib/decorOptions'
 
 /** Only fields the server works out itself. */
 const noOne: FieldAccess = () => false
+
+/** "Others" needs the typed name; anything else clears it. */
+const neededWhenOther =
+  (selectField: string, message: string) =>
+  (value: unknown, { siblingData }: { siblingData?: Record<string, unknown> }) =>
+    siblingData?.[selectField] === 'other' && !String(value ?? '').trim() ? message : true
 
 /** Hide what the server fills in until the item has been saved once. */
 const onceSaved = (data: Record<string, unknown> | undefined) => Boolean(data?.id)
@@ -72,8 +79,12 @@ export const DecorItems: CollectionConfig = {
       hasMany: true,
       label: 'Photos',
       admin: {
-        description: 'The first photo is the cover. Drag to reorder.',
-        components: { Cell: '/components/admin/decor/CoverCell#DecorCoverCell' },
+        description: 'The first photo is the cover. Drag to reorder. On a phone, use the “Add photos” button.',
+        components: {
+          Cell: '/components/admin/decor/CoverCell#DecorCoverCell',
+          // Shrinks phone photos before uploading (Vercel refuses requests over ~4.5 MB).
+          afterInput: ['/components/admin/decor/AddPhotos#DecorAddPhotos'],
+        },
       },
       validate: neededWhenActive('Add at least one photo before making this Active.'),
     },
@@ -93,12 +104,57 @@ export const DecorItems: CollectionConfig = {
           required: true,
           label: 'Event type',
           options: decorOptions(DECOR_EVENT_TYPES),
+          // The old catch-all "Birthday" is offered only to items that already have it.
+          filterOptions: ({ options, siblingData }) =>
+            options.filter((o) => {
+              const value = typeof o === 'string' ? o : o.value
+              return !LEGACY_EVENT_TYPES.includes(value) || siblingData?.eventType === value
+            }),
+          // Same rule on the server (filterOptions only hides it in the form). This replaces
+          // Payload's own select check, so it also checks required + a known value.
+          validate: (value: unknown, { previousValue }: { previousValue?: unknown }) => {
+            if (!value) return 'Choose the event type.'
+            if (!DECOR_EVENT_TYPES.some(([v]) => v === value)) return 'Choose an event type from the list.'
+            if (LEGACY_EVENT_TYPES.includes(String(value)) && value !== previousValue) {
+              return 'Choose Birthday – boy or Birthday – girl (or First birthday) instead.'
+            }
+            return true
+          },
         },
         {
           name: 'category',
           type: 'select',
           required: true,
           options: decorOptions(DECOR_CATEGORIES),
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'eventTypeOther',
+          type: 'text',
+          maxLength: 80,
+          label: 'Which event?',
+          admin: {
+            condition: (_, siblingData) => siblingData?.eventType === 'other',
+            description: 'e.g. Corporate annual day, Temple festival',
+          },
+          validate: neededWhenOther('eventType', 'Type the event, since Event type is “Others”.'),
+          hooks: { beforeChange: [({ value, siblingData }) => (siblingData?.eventType === 'other' ? value : null)] },
+        },
+        {
+          name: 'categoryOther',
+          type: 'text',
+          maxLength: 80,
+          label: 'Which category?',
+          admin: {
+            condition: (_, siblingData) => siblingData?.category === 'other',
+            description: 'e.g. Ceiling drapes, Table centrepiece',
+          },
+          validate: neededWhenOther('category', 'Type the category, since Category is “Other”.'),
+          hooks: { beforeChange: [({ value, siblingData }) => (siblingData?.category === 'other' ? value : null)] },
         },
       ],
     },

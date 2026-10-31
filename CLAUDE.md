@@ -927,7 +927,7 @@ src/
   steps, each stopped for the owner to test:
   1. plan;
   2. database + admin list (done);
-  3. phone Quick add;
+  3. phone photo upload + Quick add, and the longer event-type list (done);
   4. public `/decorations`;
   5. CSV import;
   6. PDF/PPTX export + README.
@@ -943,8 +943,23 @@ src/
     - `test:decor` checks visitors, couples and vendors against every list.
   - **Decor photos:** files are public (`isReadingStaticFile` in `readPhotos`), but the records
     are staff-only, so nobody can page through every upload. Uploads get a random file name,
-    because phone file names can carry a supplier's name. Payload caps the original at
-    1600 px and saves WebP, with `thumbnail` and `card` sizes. Vercel Blob in production.
+    because phone file names can carry a supplier's name. Payload keeps a **2560 px (long
+    edge) WebP master** (owner, 2026-10-31) with `thumbnail` 400, `card` 800×600 and `large`
+    1600 sizes. Vercel Blob in production.
+  - **Phone photos are shrunk on the phone before upload** (`components/admin/decor/uploadPhotos.ts`:
+    canvas → ≤ 2560 px JPEG q0.9, under 3.8 MB, EXIF/GPS dropped). Vercel refuses request bodies
+    over ~4.5 MB, so camera photos (5–12 MB) failed with a bare "Failed to upload" through
+    Payload's own uploader. Use the **"Add photos"** button under the Photos field
+    (`AddPhotos.tsx`, an `afterInput` that appends ids with `useField`) or **Quick add**
+    (`/admin/decor/quick-add`, a custom admin view in `payload.config.ts` → `admin.components.views`;
+    saves a Draft). Payload's "Create New" still works for files under 4 MB.
+  - **Event types (owner, 2026-10-31)** are grouped (`DECOR_EVENT_GROUPS`): wedding functions,
+    birthdays (boy / girl / first boy / first girl / surprise), family functions, business &
+    others. The step-2 catch-all `birthday` stays in the enum for existing items but is hidden
+    for new choices (`filterOptions` in the form, `validate` with `previousValue` on the server).
+    "Shop Opening" is labelled "Opening ceremony" (value `shop_opening`, new code OPN). "Others"
+    / category "Other" require `eventTypeOther` / `categoryOther`, cleared when the choice changes;
+    show them with `eventTypeText()` / `categoryText()`.
   - **Item codes** (`WED-STG-014`) are given once on create (`assignItemCode`): the max running
     number for that event + category prefix, plus one. They never change, because quotes cite
     them. The unique index catches two saves at the same instant.

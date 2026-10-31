@@ -78,6 +78,14 @@ export default buildConfig({
         '/components/admin/TodayBoard#TodayBoard',
         '/components/admin/UpcomingOccasions#UpcomingOccasions',
       ],
+      views: {
+        // Phone screen to add a decoration as a Draft (photos shrunk on the phone).
+        decorQuickAdd: {
+          Component: '/components/admin/decor/QuickAddView#DecorQuickAddView',
+          path: '/decor/quick-add',
+          meta: { title: 'Quick add decoration' },
+        },
+      },
     },
     meta: {
       titleSuffix: ' — Zenfest Events',

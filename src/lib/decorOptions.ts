@@ -3,16 +3,53 @@
 // Event types, categories, themes, kinds, price modes and statuses are Postgres enums:
 // adding one needs `npm run migrate:create` (and `generate:types`).
 
-/** [value, label, code] — the code is the first part of an item code (WED-STG-014). */
+/**
+ * [value, label, code] in grouped order (owner, 2026-10-31). The code is the first part of
+ * a new item's code (REC-STG-001); codes already given never change, so old `SHP-…` and
+ * `BDY-…` codes stay as they are. Values are stored in the database: never rename one.
+ */
 export const DECOR_EVENT_TYPES = [
-  ['wedding', 'Wedding', 'WED'],
+  // Wedding functions
+  ['wedding', 'Wedding / Muhurtham', 'WED'],
+  ['reception', 'Reception', 'REC'],
+  ['engagement', 'Engagement', 'ENG'],
+  ['haldi', 'Haldi', 'HLD'],
+  ['mehendi', 'Mehendi', 'MHD'],
+  ['sangeet', 'Sangeet', 'SNG'],
+  // Birthdays
+  ['birthday_boy', 'Birthday – boy', 'BDB'],
+  ['birthday_girl', 'Birthday – girl', 'BDG'],
+  ['first_birthday_boy', 'First birthday – boy', 'FBB'],
+  ['first_birthday_girl', 'First birthday – girl', 'FBG'],
+  ['birthday_surprise', 'Birthday surprise', 'BSP'],
+  // Old catch-all birthday from step 2: kept so existing items stay valid, but no longer
+  // offered for new choices (LEGACY_EVENT_TYPES).
+  ['birthday', 'Birthday (not specified)', 'BDY'],
+  // Family functions
   ['housewarming', 'Housewarming', 'HSW'],
-  ['birthday', 'Birthday', 'BDY'],
+  ['baby_shower', 'Baby shower', 'BBS'],
+  ['puberty', 'Puberty ceremony', 'PUB'],
+  ['anniversary', 'Anniversary', 'ANV'],
+  // Business & others
   ['corporate', 'Corporate', 'CRP'],
-  ['shop_opening', 'Shop Opening', 'SHP'],
+  ['shop_opening', 'Opening ceremony', 'OPN'],
   ['sports', 'Sports', 'SPT'],
-  ['other', 'Other', 'OTH'],
+  ['other', 'Others', 'OTH'],
 ] as const
+
+/** Kept for existing items only; hidden when choosing an event type. */
+export const LEGACY_EVENT_TYPES: readonly string[] = ['birthday']
+
+/** Headings for grouped dropdowns (`<optgroup>`), in DECOR_EVENT_TYPES order. */
+export const DECOR_EVENT_GROUPS: readonly { label: string; values: readonly DecorEventType[] }[] = [
+  { label: 'Wedding functions', values: ['wedding', 'reception', 'engagement', 'haldi', 'mehendi', 'sangeet'] },
+  {
+    label: 'Birthdays',
+    values: ['birthday_boy', 'birthday_girl', 'first_birthday_boy', 'first_birthday_girl', 'birthday_surprise', 'birthday'],
+  },
+  { label: 'Family functions', values: ['housewarming', 'baby_shower', 'puberty', 'anniversary'] },
+  { label: 'Business & others', values: ['corporate', 'shop_opening', 'sports', 'other'] },
+]
 
 /** [value, label, code] — the code is the middle part of an item code. */
 export const DECOR_CATEGORIES = [
@@ -82,6 +119,13 @@ const labelIn = (list: readonly (readonly [string, string, ...string[]])[], valu
 
 export const eventTypeLabel = (v: unknown) => labelIn(DECOR_EVENT_TYPES, v)
 export const categoryLabel = (v: unknown) => labelIn(DECOR_CATEGORIES, v)
+
+/** What to show for an item's event type: the typed text when it is "Others". */
+export const eventTypeText = (v: unknown, other?: string | null) =>
+  v === 'other' && other?.trim() ? other.trim() : eventTypeLabel(v)
+/** What to show for an item's category: the typed text when it is "Other". */
+export const categoryText = (v: unknown, other?: string | null) =>
+  v === 'other' && other?.trim() ? other.trim() : categoryLabel(v)
 export const themeLabel = (v: unknown) => labelIn(DECOR_THEMES, v)
 
 export const isDecorEventType = (v: unknown): v is DecorEventType => DECOR_EVENT_TYPES.some(([x]) => x === v)

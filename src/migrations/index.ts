@@ -19,6 +19,7 @@ import * as migration_20261025_152046_team_roles from './20261025_152046_team_ro
 import * as migration_20261029_181719_vendor_base_area from './20261029_181719_vendor_base_area';
 import * as migration_20261031_070620_decor_catalog from './20261031_070620_decor_catalog';
 import * as migration_20261031_071740_decor_exact_default from './20261031_071740_decor_exact_default';
+import * as migration_20261031_085337_decor_event_types_photos from './20261031_085337_decor_event_types_photos';
 
 export const migrations = [
   {
@@ -124,6 +125,11 @@ export const migrations = [
   {
     up: migration_20261031_071740_decor_exact_default.up,
     down: migration_20261031_071740_decor_exact_default.down,
-    name: '20261031_071740_decor_exact_default'
+    name: '20261031_071740_decor_exact_default',
+  },
+  {
+    up: migration_20261031_085337_decor_event_types_photos.up,
+    down: migration_20261031_085337_decor_event_types_photos.down,
+    name: '20261031_085337_decor_event_types_photos'
   },
 ];
