@@ -694,9 +694,6 @@ export interface VendorUpload {
  */
 export interface DecorItem {
   id: number;
-  /**
-   * The first photo is the cover. Drag to reorder. On a phone, use the “Add photos” button.
-   */
   photos?: (number | DecorPhoto)[] | null;
   /**
    * What a client sees, e.g. “Peacock stage with jasmine strings”.

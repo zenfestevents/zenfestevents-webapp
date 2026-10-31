@@ -41,7 +41,7 @@ export const DecorPhotos: CollectionConfig = {
   upload: {
     mimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
     // High-res master (owner, 2026-10-31): at most 2560 px on the long edge, never enlarged,
-    // saved as WebP. Phones already shrink to this before uploading (AddPhotos / Quick add),
+    // saved as WebP. Phones already shrink to this before uploading (PhotosField / Quick add),
     // which keeps every upload under Vercel's 4.5 MB request limit.
     resizeOptions: { width: 2560, height: 2560, fit: 'inside', withoutEnlargement: true },
     formatOptions: { format: 'webp', options: { quality: 82 } },
