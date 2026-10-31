@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
-import { DECOR_CATEGORIES, DECOR_EVENT_TYPES, DECOR_STATUSES, DECOR_THEMES } from '../../../lib/decorOptions'
+import { DECOR_CATEGORIES, DECOR_EVENT_GROUPS, DECOR_STATUSES, DECOR_THEMES, eventTypeLabel } from '../../../lib/decorOptions'
 
 type Filters = {
   eventType: string
@@ -116,10 +117,14 @@ export function DecorQuickFilters() {
         <span>Event</span>
         <select value={f.eventType} onChange={set('eventType')}>
           <option value="">All events</option>
-          {DECOR_EVENT_TYPES.map(([v, l]) => (
-            <option key={v} value={v}>
-              {l}
-            </option>
+          {DECOR_EVENT_GROUPS.map((g) => (
+            <optgroup key={g.label} label={g.label}>
+              {g.values.map((v) => (
+                <option key={v} value={v}>
+                  {eventTypeLabel(v)}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
       </label>
@@ -175,6 +180,9 @@ export function DecorQuickFilters() {
         <input type="number" inputMode="numeric" min={0} step={1000} placeholder="Max" value={f.max} onChange={set('max')} />
       </fieldset>
       <div className="zf-decor-filters__actions">
+        <Link className="btn btn--style-secondary btn--size-small" href="/admin/decor/quick-add">
+          📷 Quick add
+        </Link>
         <button type="submit" className="btn btn--style-primary btn--size-small">
           Filter
         </button>

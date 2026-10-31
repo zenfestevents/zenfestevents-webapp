@@ -695,14 +695,34 @@ export interface VendorUpload {
 export interface DecorItem {
   id: number;
   /**
-   * The first photo is the cover. Drag to reorder.
+   * The first photo is the cover. Drag to reorder. On a phone, use the “Add photos” button.
    */
   photos?: (number | DecorPhoto)[] | null;
   /**
    * What a client sees, e.g. “Peacock stage with jasmine strings”.
    */
   title?: string | null;
-  eventType: 'wedding' | 'housewarming' | 'birthday' | 'corporate' | 'shop_opening' | 'sports' | 'other';
+  eventType:
+    | 'wedding'
+    | 'reception'
+    | 'engagement'
+    | 'haldi'
+    | 'mehendi'
+    | 'sangeet'
+    | 'birthday_boy'
+    | 'birthday_girl'
+    | 'first_birthday_boy'
+    | 'first_birthday_girl'
+    | 'birthday_surprise'
+    | 'birthday'
+    | 'housewarming'
+    | 'baby_shower'
+    | 'puberty'
+    | 'anniversary'
+    | 'corporate'
+    | 'shop_opening'
+    | 'sports'
+    | 'other';
   category:
     | 'stage'
     | 'entrance'
@@ -714,6 +734,14 @@ export interface DecorItem {
     | 'kuthuvilakku'
     | 'photo_booth'
     | 'other';
+  /**
+   * e.g. Corporate annual day, Temple festival
+   */
+  eventTypeOther?: string | null;
+  /**
+   * e.g. Ceiling drapes, Table centrepiece
+   */
+  categoryOther?: string | null;
   themes?:
     | ('traditional' | 'modern' | 'floral' | 'minimal' | 'royal' | 'pastel' | 'rustic' | 'temple' | 'kids' | 'luxury')[]
     | null;
@@ -797,6 +825,14 @@ export interface DecorPhoto {
       filename?: string | null;
     };
     card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    large?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -2383,6 +2419,8 @@ export interface DecorItemsSelect<T extends boolean = true> {
   title?: T;
   eventType?: T;
   category?: T;
+  eventTypeOther?: T;
+  categoryOther?: T;
   themes?: T;
   kind?: T;
   clientPrice?: T;
@@ -2447,6 +2485,16 @@ export interface DecorPhotosSelect<T extends boolean = true> {
               filename?: T;
             };
         card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        large?:
           | T
           | {
               url?: T;

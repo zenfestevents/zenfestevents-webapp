@@ -108,7 +108,7 @@ const photo = await payload.create({
   collection: 'decor-photos',
   data: { alt: TITLE },
   file: {
-    data: await sharp({ create: { width: 2400, height: 1600, channels: 3, background: '#8a6414' } }).jpeg().toBuffer(),
+    data: await sharp({ create: { width: 4000, height: 3000, channels: 3, background: '#8a6414' } }).jpeg().toBuffer(),
     mimetype: 'image/jpeg',
     name: 'Kumar Decorators stage.jpg',
     size: 0,
@@ -146,8 +146,14 @@ await check('codes follow event type + category with a running number', async ()
   assert.equal(Number(String(b.itemCode).slice(8)), Number(String(a.itemCode).slice(8)) + 1)
 })
 await check('a different category starts its own count', async () => {
-  const c = await make({ eventType: 'birthday', category: 'balloon' })
-  assert.match(String(c.itemCode), /^BDY-BLN-\d{3,}$/)
+  const c = await make({ eventType: 'birthday_girl', category: 'balloon' })
+  assert.match(String(c.itemCode), /^BDG-BLN-\d{3,}$/)
+})
+await check('new event types get their own codes (Reception, Opening ceremony)', async () => {
+  const r = await make({ eventType: 'reception' })
+  assert.match(String(r.itemCode), /^REC-STG-\d{3,}$/)
+  const o = await make({ eventType: 'shop_opening', category: 'entrance' })
+  assert.match(String(o.itemCode), /^OPN-ENT-\d{3,}$/)
 })
 await check('the website shows the exact client price unless the team picks otherwise', async () => {
   assert.equal(a.publicDisplay, 'exact')
@@ -219,6 +225,40 @@ await check('a Quick-add draft needs only event type, category and a photo/price
   assert.match(String(d.itemCode), /^WED-STG-/)
 })
 
+console.log('Others needs its box')
+await check('Event type "Others" without the event typed is refused', async () => {
+  assert.equal(await allowed(() => make({ eventType: 'other' })), false)
+})
+await check('Event type "Others" with the event typed is saved', async () => {
+  const o = await make({ eventType: 'other', eventTypeOther: 'Corporate annual day' })
+  assert.equal(o.eventTypeOther, 'Corporate annual day')
+  assert.match(String(o.itemCode), /^OTH-STG-/)
+})
+await check('Category "Other" without the category typed is refused', async () => {
+  assert.equal(await allowed(() => make({ category: 'other' })), false)
+})
+await check('a typed "Others" box is cleared when the event type changes', async () => {
+  const o = await make({ eventType: 'other', eventTypeOther: 'Temple festival' })
+  const u = await payload.update({
+    collection: 'decor-items',
+    id: o.id,
+    data: { eventType: 'haldi' },
+    user: staff.team,
+    overrideAccess: false,
+  })
+  assert.equal(u.eventTypeOther ?? null, null)
+})
+await check('the old catch-all "Birthday" is not offered for new decorations', async () => {
+  assert.equal(await allowed(() => make({ eventType: 'birthday' })), false)
+})
+await check('a decoration that already has the old "Birthday" can still be edited', async () => {
+  const old = await make({ eventType: 'birthday_boy' })
+  // As if saved before the boy/girl split (straight to the database, no validation).
+  await payload.db.updateOne({ collection: 'decor-items', id: old.id, data: { eventType: 'birthday' } })
+  const u = await payload.update({ collection: 'decor-items', id: old.id, data: { size: '10 ft' }, user: staff.team, overrideAccess: false })
+  assert.deepEqual([u.eventType, u.size], ['birthday', '10 ft'])
+})
+
 // ── 4. Privacy ─────────────────────────────────────────────────────────────
 console.log('Privacy: nothing for visitors, couples or vendors')
 const PRIVATE_LISTS = ['decor-items', 'decor-suppliers', 'decor-price-history', 'decor-views', 'decor-photos'] as const
@@ -258,10 +298,30 @@ await check('photo files get a random name (the supplier’s file name never sho
   assert.match(String(photo.filename), /^decor-[0-9a-f]{12}\.webp$/)
   assert.equal(JSON.stringify(photo).toLowerCase().includes('kumar'), false)
 })
-await check('photos are shrunk to 1600 px wide WebP with thumbnail + card', async () => {
-  assert.equal(photo.width, 1600)
+await check('photos are kept high-res: 2560 px long edge, WebP, with thumbnail + card + large', async () => {
+  assert.equal(photo.width, 2560)
+  assert.equal(photo.height, 1920)
   assert.equal(photo.mimeType, 'image/webp')
   assert.ok(photo.sizes?.thumbnail?.url && photo.sizes?.card?.url)
+  assert.equal(photo.sizes?.large?.width, 1600)
+})
+await check('a portrait photo is capped by its height, and small photos are never enlarged', async () => {
+  const make2 = async (width: number, height: number) =>
+    payload.create({
+      collection: 'decor-photos',
+      data: { alt: TITLE },
+      file: {
+        data: await sharp({ create: { width, height, channels: 3, background: '#335' } }).jpeg().toBuffer(),
+        mimetype: 'image/jpeg',
+        name: 'p.jpg',
+        size: 0,
+      },
+      overrideAccess: true,
+    })
+  const tall = await make2(3024, 4032)
+  assert.deepEqual([tall.width, tall.height], [1920, 2560])
+  const small = await make2(900, 600)
+  assert.deepEqual([small.width, small.height], [900, 600])
 })
 
 // ── 5. Roles ───────────────────────────────────────────────────────────────

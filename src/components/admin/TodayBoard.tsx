@@ -24,9 +24,10 @@ export async function TodayBoard({ payload, user }: { payload: Payload; user?: u
   const role = roleOf(user as never)
   if (!role) return null
   const canManage = hasRole(user as never, 'manager')
+  const canWork = hasRole(user as never, 'team')
   const since = agoIso(DAY_MS)
 
-  const [enquiries, wishes, recentChats, repliesSince, applications, listings] = await Promise.all([
+  const [enquiries, wishes, recentChats, repliesSince, applications, listings, decorDrafts] = await Promise.all([
     payload.count({ collection: 'leads', where: { status: { equals: 'new' } } }),
     payload.count({
       collection: 'reminders',
@@ -50,6 +51,7 @@ export async function TodayBoard({ payload, user }: { payload: Payload; user?: u
       ? payload.count({ collection: 'vendor-applications', where: { status: { in: ['new', 'reviewing'] } } })
       : null,
     canManage ? payload.count({ collection: 'vendors', where: { listingStatus: { equals: 'pending' } } }) : null,
+    canWork ? payload.count({ collection: 'decor-items', where: { status: { equals: 'draft' } } }) : null,
   ])
 
   // A chat is waiting when their last message (inside WhatsApp's 24-hour reply window)
@@ -98,6 +100,15 @@ export async function TodayBoard({ payload, user }: { payload: Payload; user?: u
       count: listings.totalDocs,
       href: listUrl('vendors', 'listingStatus', 'equals', 'pending'),
       hint: 'Set Listing status to Live, or write what to fix.',
+    })
+  }
+
+  if (decorDrafts) {
+    cards.push({
+      label: 'Decoration drafts to finish',
+      count: decorDrafts.totalDocs,
+      href: listUrl('decor-items', 'status', 'equals', 'draft'),
+      hint: 'Added with Quick add: give each a title, then set Status to Active.',
     })
   }
 

@@ -40,12 +40,25 @@ export const DecorPhotos: CollectionConfig = {
   },
   upload: {
     mimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
-    // Cap the stored original at 1600 px wide (never enlarged) and save it as WebP.
-    resizeOptions: { width: 1600, withoutEnlargement: true },
-    formatOptions: { format: 'webp', options: { quality: 80 } },
+    // High-res master (owner, 2026-10-31): at most 2560 px on the long edge, never enlarged,
+    // saved as WebP. Phones already shrink to this before uploading (AddPhotos / Quick add),
+    // which keeps every upload under Vercel's 4.5 MB request limit.
+    resizeOptions: { width: 2560, height: 2560, fit: 'inside', withoutEnlargement: true },
+    formatOptions: { format: 'webp', options: { quality: 82 } },
     imageSizes: [
+      // Admin list and shortlists.
       { name: 'thumbnail', width: 400, height: 400, crop: 'center', formatOptions: { format: 'webp', options: { quality: 72 } } },
+      // The /decorations grid (4:3 cards, ~60–120 KB).
       { name: 'card', width: 800, height: 600, crop: 'center', formatOptions: { format: 'webp', options: { quality: 76 } } },
+      // The item page gallery; the full master loads only on "tap to zoom".
+      {
+        name: 'large',
+        width: 1600,
+        height: 1600,
+        fit: 'inside',
+        withoutEnlargement: true,
+        formatOptions: { format: 'webp', options: { quality: 80 } },
+      },
     ],
     adminThumbnail: 'thumbnail',
   },
