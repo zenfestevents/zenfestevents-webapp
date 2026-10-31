@@ -949,10 +949,13 @@ src/
   - **Phone photos are shrunk on the phone before upload** (`components/admin/decor/uploadPhotos.ts`:
     canvas → ≤ 2560 px JPEG q0.9, under 3.8 MB, EXIF/GPS dropped). Vercel refuses request bodies
     over ~4.5 MB, so camera photos (5–12 MB) failed with a bare "Failed to upload" through
-    Payload's own uploader. Use the **"Add photos"** button under the Photos field
-    (`AddPhotos.tsx`, an `afterInput` that appends ids with `useField`) or **Quick add**
-    (`/admin/decor/quick-add`, a custom admin view in `payload.config.ts` → `admin.components.views`;
-    saves a Draft). Payload's "Create New" still works for files under 4 MB.
+    Payload's own uploader. So the Photos field is **our own `Field` component**
+    (`PhotosField.tsx`, `useField`): thumbnails (first = cover, "Make cover", ×) and one
+    "Add photos" button. Payload's "Create New / Choose from existing" box is gone from the
+    decoration form on purpose (owner found both confusing, 2026-10-31). **Quick add**
+    (`/admin/decor/quick-add`, a custom admin view in `payload.config.ts` → `admin.components.views`)
+    saves a Draft. HEIF photos (Samsung "High efficiency pictures") can't be opened by Chrome on
+    Android; `uploadPhotos.ts` says how to switch it off.
   - **Event types (owner, 2026-10-31)** are grouped (`DECOR_EVENT_GROUPS`): wedding functions,
     birthdays (boy / girl / first boy / first girl / surprise), family functions, business &
     others. The step-2 catch-all `birthday` stays in the enum for existing items but is hidden

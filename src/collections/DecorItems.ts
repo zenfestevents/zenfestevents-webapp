@@ -79,11 +79,11 @@ export const DecorItems: CollectionConfig = {
       hasMany: true,
       label: 'Photos',
       admin: {
-        description: 'The first photo is the cover. Drag to reorder. On a phone, use the “Add photos” button.',
         components: {
           Cell: '/components/admin/decor/CoverCell#DecorCoverCell',
-          // Shrinks phone photos before uploading (Vercel refuses requests over ~4.5 MB).
-          afterInput: ['/components/admin/decor/AddPhotos#DecorAddPhotos'],
+          // Replaces Payload's upload box: one "Add photos" button that shrinks phone photos
+          // before uploading (Vercel refuses requests over ~4.5 MB), thumbnails, make cover.
+          Field: '/components/admin/decor/PhotosField#DecorPhotosField',
         },
       },
       validate: neededWhenActive('Add at least one photo before making this Active.'),

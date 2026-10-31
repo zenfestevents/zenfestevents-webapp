@@ -1,4 +1,4 @@
-// Browser-only helpers for decoration photos (used by AddPhotos and QuickAdd).
+// Browser-only helpers for decoration photos (used by PhotosField and QuickAddForm).
 //
 // Phone camera photos are 5–12 MB, and Vercel refuses any request over ~4.5 MB, so the
 // admin's own upload failed with a bare "Failed to upload". Here the phone itself shrinks
@@ -19,6 +19,15 @@ export type UploadedPhoto = { id: number; thumb: string }
 /** Thrown with a sentence a team member can act on. */
 export class PhotoError extends Error {}
 
+/** HEIF/HEIC photos ("High efficiency pictures" on Samsung and some other Android phones). */
+const isHeif = (file: File) => /hei[cf]/i.test(file.type) || /\.hei[cf]$/i.test(file.name)
+
+/** Chrome on Android can't open HEIF photos, so say how to get a JPEG instead. */
+const HEIF_HELP =
+  'This photo is in HEIF format, which this browser can’t open. On Samsung: Camera → Settings → ' +
+  'Advanced picture options → turn off “High efficiency pictures”, then take the photo again. ' +
+  'Or send the photo to yourself on WhatsApp and pick that copy.'
+
 /** Decodes a picked file, honouring the camera's rotation. */
 async function decode(file: File): Promise<{ source: CanvasImageSource; width: number; height: number; close?: () => void }> {
   try {
@@ -34,6 +43,7 @@ async function decode(file: File): Promise<{ source: CanvasImageSource; width: n
       await img.decode()
       return { source: img, width: img.naturalWidth, height: img.naturalHeight }
     } catch {
+      if (isHeif(file)) throw new PhotoError(HEIF_HELP)
       throw new PhotoError(`“${file.name}” couldn’t be opened. Try another photo, or take a screenshot of it.`)
     } finally {
       URL.revokeObjectURL(url)
