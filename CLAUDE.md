@@ -44,6 +44,8 @@ npm run seed             # seed demo content (FORCE_SEED=1 to re-run over data)
 npm run seed:ai          # add sample Zenfest AI options/prices to local services (never prod)
 npm run seed:marketplace # 4 live demo vendors + 1 couple, local SQLite only (logins in src/seed/marketplaceDemo.ts)
 npm run seed:shop        # 15 demo shop products (affiliate + seller), local SQLite only; run seed:marketplace first
+npm run seed:decor       # 10 demo decorations + 3 suppliers with placeholder photos, local SQLite only
+npm run test:decor       # Decoration catalog: codes, price history, privacy/roles (local SQLite only)
 npm run migrate:create   # new Postgres migration after schema changes (needs a postgres DATABASE_URI, no DB)
 npm run generate:types   # regenerate src/payload-types.ts after schema changes
 npm run generate:importmap  # regenerate the admin import map
@@ -91,8 +93,10 @@ src/
                         Packages, Projects, Leads, Signups, VendorApplications,
                         HostApplications, registry-*, polls / poll-votes / poll-voters,
                         AiConversations (Zenfest AI chats), Vendors + Customers (auth),
-                        VendorMedia, Enquiries (marketplace), Testimonials
-  globals/              SiteSettings
+                        VendorMedia, Enquiries (marketplace), Testimonials,
+                        Decor* (decoration catalog: items, photos, suppliers,
+                        price history, price views)
+  globals/              SiteSettings, DecorSettings, …
   components/
     Header.tsx, Footer.tsx, MobileCTABar.tsx
     Kolam.tsx            Kolam line-art (KolamRosette, KolamDivider)
@@ -911,6 +915,50 @@ src/
   - `npm run test:rewards` (local SQLite only). The Postgres savepoint path was not run locally.
   - Cricket names stay generic (DESIGN.md list): Debut … Hall of Fame, Net Bowler … Player of
     the Series.
+- **Decoration catalog (`/admin` → Decorations; `collections/Decor*.ts`,
+  `globals/DecorSettings.ts`, `hooks/decorPrices.ts`, `lib/decorOptions.ts`,
+  `components/admin/decor/*`), owner 2026-10-31.** Decorations collected from suppliers, with
+  photos and prices. The team enters everything in /admin. The site will show photos to
+  everyone and prices only to logged-in couples (step 4, not built yet). It is built in six
+  steps, each stopped for the owner to test:
+  1. plan;
+  2. database + admin list (done);
+  3. phone Quick add;
+  4. public `/decorations`;
+  5. CSV import;
+  6. PDF/PPTX export + README.
+
+  Easy to get wrong:
+  - **The vendor (cost) price must never reach the public.**
+    - Every `decor-*` list is staff-only over REST and GraphQL.
+    - `vendorPrice`, `supplier`, `notes`, `margin` and the price-history join carry their own
+      `canViewField` read rule as a second wall.
+    - The site may read items only through a server-only boundary file (`lib/decorations.ts`,
+      step 4), like `lib/shop.ts`, copying out an explicit list of public fields.
+    - Exports must leave out the vendor price and supplier too.
+    - `test:decor` checks visitors, couples and vendors against every list.
+  - **Decor photos:** files are public (`isReadingStaticFile` in `readPhotos`), but the records
+    are staff-only, so nobody can page through every upload. Uploads get a random file name,
+    because phone file names can carry a supplier's name. Payload caps the original at
+    1600 px and saves WebP, with `thumbnail` and `card` sizes. Vercel Blob in production.
+  - **Item codes** (`WED-STG-014`) are given once on create (`assignItemCode`): the max running
+    number for that event + category prefix, plus one. They never change, because quotes cite
+    them. The unique index catches two saves at the same instant.
+  - **Every price change writes a `decor-price-history` row** (old → new, who) and stamps
+    `priceUpdatedOn`, both from `stampPriceChange` / `recordPriceHistory`. Nobody can write
+    history by hand.
+  - Status: Draft (Quick add, not on the site) / Active (needs photo, title, client price) /
+    Archived. Delete is Owner-only: archive instead.
+  - Anti-scraping (owner's question): per-item `publicDisplay` (range / from / exact / hidden),
+    a per-couple daily price limit (`decor-views`, unique per customer + item + India day,
+    Decor settings → 40), `customers.decorBlocked`, and the Owner-only "Decor price views" list.
+  - `customers.decorShortlist` / `decorBlocked` are staff-read fields, so a couple's own
+    `/api/customers/me` never carries them; the site reads them with `overrideAccess`.
+  - Themes, categories and event types are select enums: adding one needs `migrate:create`.
+  - `decor-suppliers` is a separate staff-only list, not marketplace `vendors`, because most
+    suppliers have no login. `vendorAccount` links one when they do.
+  - The admin quick filters (`QuickFilters.tsx`) write Payload's own `where[and][i]…` URL, so
+    the search box, sorting and paging keep working with them.
 - **Occasion reminders (`/admin` → Occasion Reminders; `collections/Contacts.ts`,
   `Reminders.ts`, `globals/ReminderSettings.ts`, `lib/occasions/*`) — internal only.**
   The owner wanted yearly birthdays/anniversaries of past clients and unconverted leads

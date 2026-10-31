@@ -75,6 +75,11 @@ export interface Config {
     vendors: Vendor;
     'vendor-media': VendorMedia;
     'vendor-uploads': VendorUpload;
+    'decor-items': DecorItem;
+    'decor-suppliers': DecorSupplier;
+    'decor-photos': DecorPhoto;
+    'decor-price-history': DecorPriceHistory;
+    'decor-views': DecorView;
     'whatsapp-contacts': WhatsappContact;
     'whatsapp-messages': WhatsappMessage;
     'whatsapp-campaigns': WhatsappCampaign;
@@ -113,6 +118,9 @@ export interface Config {
     leads: {
       aiConversation: 'ai-conversations';
     };
+    'decor-items': {
+      priceHistory: 'decor-price-history';
+    };
   };
   collectionsSelect: {
     leads: LeadsSelect<false> | LeadsSelect<true>;
@@ -121,6 +129,11 @@ export interface Config {
     vendors: VendorsSelect<false> | VendorsSelect<true>;
     'vendor-media': VendorMediaSelect<false> | VendorMediaSelect<true>;
     'vendor-uploads': VendorUploadsSelect<false> | VendorUploadsSelect<true>;
+    'decor-items': DecorItemsSelect<false> | DecorItemsSelect<true>;
+    'decor-suppliers': DecorSuppliersSelect<false> | DecorSuppliersSelect<true>;
+    'decor-photos': DecorPhotosSelect<false> | DecorPhotosSelect<true>;
+    'decor-price-history': DecorPriceHistorySelect<false> | DecorPriceHistorySelect<true>;
+    'decor-views': DecorViewsSelect<false> | DecorViewsSelect<true>;
     'whatsapp-contacts': WhatsappContactsSelect<false> | WhatsappContactsSelect<true>;
     'whatsapp-messages': WhatsappMessagesSelect<false> | WhatsappMessagesSelect<true>;
     'whatsapp-campaigns': WhatsappCampaignsSelect<false> | WhatsappCampaignsSelect<true>;
@@ -163,11 +176,13 @@ export interface Config {
     'reminder-settings': ReminderSetting;
     'site-settings': SiteSetting;
     'reward-settings': RewardSetting;
+    'decor-settings': DecorSetting;
   };
   globalsSelect: {
     'reminder-settings': ReminderSettingsSelect<false> | ReminderSettingsSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'reward-settings': RewardSettingsSelect<false> | RewardSettingsSelect<true>;
+    'decor-settings': DecorSettingsSelect<false> | DecorSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -386,6 +401,11 @@ export interface Customer {
   city?: string | null;
   eventDate?: string | null;
   shortlist?: (number | Vendor)[] | null;
+  decorShortlist?: (number | DecorItem)[] | null;
+  /**
+   * Tick if this account seems to be copying our decoration prices. They still see photos.
+   */
+  decorBlocked?: boolean | null;
   marketingConsent?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -667,6 +687,217 @@ export interface VendorUpload {
   focalY?: number | null;
 }
 /**
+ * Decorations with photos and prices. Search by code or title, or use the filters. To take one off the website, set Status to Archived — don’t delete it.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "decor-items".
+ */
+export interface DecorItem {
+  id: number;
+  /**
+   * The first photo is the cover. Drag to reorder.
+   */
+  photos?: (number | DecorPhoto)[] | null;
+  /**
+   * What a client sees, e.g. “Peacock stage with jasmine strings”.
+   */
+  title?: string | null;
+  eventType: 'wedding' | 'housewarming' | 'birthday' | 'corporate' | 'shop_opening' | 'sports' | 'other';
+  category:
+    | 'stage'
+    | 'entrance'
+    | 'mandap'
+    | 'backdrop'
+    | 'balloon'
+    | 'flower'
+    | 'lighting'
+    | 'kuthuvilakku'
+    | 'photo_booth'
+    | 'other';
+  themes?:
+    | ('traditional' | 'modern' | 'floral' | 'minimal' | 'royal' | 'pastel' | 'rustic' | 'temple' | 'kids' | 'luxury')[]
+    | null;
+  kind: 'item' | 'package';
+  /**
+   * What we quote the client.
+   */
+  clientPrice?: number | null;
+  /**
+   * Never shown on the website or in client exports.
+   */
+  vendorPrice?: number | null;
+  /**
+   * Prices are shown only to logged-in clients, a few dozen items a day each.
+   */
+  publicDisplay: 'range' | 'from' | 'exact' | 'hidden';
+  supplier?: (number | null) | DecorSupplier;
+  /**
+   * e.g. 20 ft × 10 ft stage
+   */
+  size?: string | null;
+  includes?: string | null;
+  description?: string | null;
+  notes?: string | null;
+  /**
+   * Given automatically when saved. Quote it to clients.
+   */
+  itemCode?: string | null;
+  /**
+   * Draft: not on the website yet. Active: on the website. Archived: hidden, kept for old quotes.
+   */
+  status: 'draft' | 'active' | 'archived';
+  /**
+   * Client price − vendor price. Team only.
+   */
+  margin?: number | null;
+  priceUpdatedOn?: string | null;
+  validTill?: string | null;
+  /**
+   * Set from the title and code when first saved.
+   */
+  slug?: string | null;
+  priceHistory?: {
+    docs?: (number | DecorPriceHistory)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Photos of decorations. Add them from a decoration item; they are resized automatically.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "decor-photos".
+ */
+export interface DecorPhoto {
+  id: number;
+  /**
+   * Shown to screen readers. Never put the supplier’s name here — it is public.
+   */
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * Who supplies each decoration, with their phone and area. Only the team sees this.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "decor-suppliers".
+ */
+export interface DecorSupplier {
+  id: number;
+  name: string;
+  /**
+   * Any format; saved as 91XXXXXXXXXX.
+   */
+  phone?: string | null;
+  area?: string | null;
+  vendorAccount?: (number | null) | Vendor;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Every price change on a decoration, to check what a past quote was based on. Filled in automatically.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "decor-price-history".
+ */
+export interface DecorPriceHistory {
+  id: number;
+  item: number | DecorItem;
+  itemCode?: string | null;
+  field: 'client' | 'vendor';
+  oldPrice?: number | null;
+  newPrice?: number | null;
+  changedOn: string;
+  changedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Your team’s logins for this admin. Add a person, give them a role, and share their email + password with them. When someone leaves, untick “Can log in”.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  name?: string | null;
+  phone?: string | null;
+  /**
+   * What this person is allowed to do. Only the Owner can change it.
+   */
+  role: 'owner' | 'manager' | 'team' | 'viewer';
+  /**
+   * Untick when someone leaves. Their name stays on the work they did.
+   */
+  active?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * Which client saw which decoration price, and when. Someone opening many items every day may be copying prices — tick “Blocked from decoration prices” on their client account.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "decor-views".
+ */
+export interface DecorView {
+  id: number;
+  customer: number | Customer;
+  item: number | DecorItem;
+  /**
+   * India date, YYYY-MM-DD.
+   */
+  day: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Everyone on our WhatsApp number. Open a person to read the chat and reply. Offers go only to “Opted in” people; anyone who replies STOP is moved to “Opted out” automatically.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -818,43 +1049,6 @@ export interface Media {
       filename?: string | null;
     };
   };
-}
-/**
- * Your team’s logins for this admin. Add a person, give them a role, and share their email + password with them. When someone leaves, untick “Can log in”.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  name?: string | null;
-  phone?: string | null;
-  /**
-   * What this person is allowed to do. Only the Owner can change it.
-   */
-  role: 'owner' | 'manager' | 'team' | 'viewer';
-  /**
-   * Untick when someone leaves. Their name stays on the work they did.
-   */
-  active?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
 }
 /**
  * Past clients and enquiries whose birthdays and anniversaries we remember. Add the person once with their dates; wishes are created automatically before each date.
@@ -1725,6 +1919,26 @@ export interface PayloadLockedDocument {
         value: number | VendorUpload;
       } | null)
     | ({
+        relationTo: 'decor-items';
+        value: number | DecorItem;
+      } | null)
+    | ({
+        relationTo: 'decor-suppliers';
+        value: number | DecorSupplier;
+      } | null)
+    | ({
+        relationTo: 'decor-photos';
+        value: number | DecorPhoto;
+      } | null)
+    | ({
+        relationTo: 'decor-price-history';
+        value: number | DecorPriceHistory;
+      } | null)
+    | ({
+        relationTo: 'decor-views';
+        value: number | DecorView;
+      } | null)
+    | ({
         relationTo: 'whatsapp-contacts';
         value: number | WhatsappContact;
       } | null)
@@ -1936,6 +2150,8 @@ export interface CustomersSelect<T extends boolean = true> {
   city?: T;
   eventDate?: T;
   shortlist?: T;
+  decorShortlist?: T;
+  decorBlocked?: T;
   marketingConsent?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2157,6 +2373,116 @@ export interface VendorUploadsSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "decor-items_select".
+ */
+export interface DecorItemsSelect<T extends boolean = true> {
+  photos?: T;
+  title?: T;
+  eventType?: T;
+  category?: T;
+  themes?: T;
+  kind?: T;
+  clientPrice?: T;
+  vendorPrice?: T;
+  publicDisplay?: T;
+  supplier?: T;
+  size?: T;
+  includes?: T;
+  description?: T;
+  notes?: T;
+  itemCode?: T;
+  status?: T;
+  margin?: T;
+  priceUpdatedOn?: T;
+  validTill?: T;
+  slug?: T;
+  priceHistory?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "decor-suppliers_select".
+ */
+export interface DecorSuppliersSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
+  area?: T;
+  vendorAccount?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "decor-photos_select".
+ */
+export interface DecorPhotosSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "decor-price-history_select".
+ */
+export interface DecorPriceHistorySelect<T extends boolean = true> {
+  item?: T;
+  itemCode?: T;
+  field?: T;
+  oldPrice?: T;
+  newPrice?: T;
+  changedOn?: T;
+  changedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "decor-views_select".
+ */
+export interface DecorViewsSelect<T extends boolean = true> {
+  customer?: T;
+  item?: T;
+  day?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3038,6 +3364,25 @@ export interface RewardSetting {
   createdAt?: string | null;
 }
 /**
+ * How many decoration prices one logged-in client may see per day, and how wide price ranges are.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "decor-settings".
+ */
+export interface DecorSetting {
+  id: number;
+  /**
+   * Different decorations one logged-in client can see prices for each day. After that the site asks them to WhatsApp us. Seeing the same item again is free.
+   */
+  dailyPriceLimit: number;
+  /**
+   * For items shown as a range: how far below and above the client price the range goes, before rounding.
+   */
+  rangeSpreadPercent: number;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "reminder-settings_select".
  */
@@ -3172,6 +3517,17 @@ export interface RewardSettingsSelect<T extends boolean = true> {
         perks?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "decor-settings_select".
+ */
+export interface DecorSettingsSelect<T extends boolean = true> {
+  dailyPriceLimit?: T;
+  rangeSpreadPercent?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

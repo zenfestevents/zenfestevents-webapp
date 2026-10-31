@@ -1,4 +1,8 @@
 import { StatusPill as StatusPill_ab7e90262632553960ea6c372de1f87a } from '../../../components/admin/StatusPill'
+import { DecorCoverCell as DecorCoverCell_bf96ccc7195185c8f63ad6cfb2390631 } from '../../../components/admin/decor/CoverCell'
+import { DecorRupeesCell as DecorRupeesCell_562b43e7259bda229c700cd6e07425ce } from '../../../components/admin/decor/MarginCell'
+import { DecorMarginCell as DecorMarginCell_562b43e7259bda229c700cd6e07425ce } from '../../../components/admin/decor/MarginCell'
+import { DecorQuickFilters as DecorQuickFilters_35f8d7ee0b89322867b635687334d964 } from '../../../components/admin/decor/QuickFilters'
 import { ContactChat as ContactChat_53afbbb9fd9100cb5060941d7cd1c39d } from '../../../components/admin/whatsapp/ContactChat'
 import { ImportContacts as ImportContacts_3713c6db397e7f5623704a683daada6a } from '../../../components/admin/whatsapp/ImportContacts'
 import { CampaignSender as CampaignSender_a88c518be67592bf0a363eff125802c6 } from '../../../components/admin/whatsapp/CampaignSender'
@@ -14,6 +18,10 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 /** @type import('payload').ImportMap */
 export const importMap = {
   "/components/admin/StatusPill#StatusPill": StatusPill_ab7e90262632553960ea6c372de1f87a,
+  "/components/admin/decor/CoverCell#DecorCoverCell": DecorCoverCell_bf96ccc7195185c8f63ad6cfb2390631,
+  "/components/admin/decor/MarginCell#DecorRupeesCell": DecorRupeesCell_562b43e7259bda229c700cd6e07425ce,
+  "/components/admin/decor/MarginCell#DecorMarginCell": DecorMarginCell_562b43e7259bda229c700cd6e07425ce,
+  "/components/admin/decor/QuickFilters#DecorQuickFilters": DecorQuickFilters_35f8d7ee0b89322867b635687334d964,
   "/components/admin/whatsapp/ContactChat#ContactChat": ContactChat_53afbbb9fd9100cb5060941d7cd1c39d,
   "/components/admin/whatsapp/ImportContacts#ImportContacts": ImportContacts_3713c6db397e7f5623704a683daada6a,
   "/components/admin/whatsapp/CampaignSender#CampaignSender": CampaignSender_a88c518be67592bf0a363eff125802c6,

@@ -43,6 +43,7 @@ next-env.d.ts
 /media
 /vendor-uploads
 /vendor-media
+/decor-photos
 
 # local sqlite database (dev only)
 *.db

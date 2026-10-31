@@ -81,6 +81,28 @@ export const Customers: CollectionConfig = {
     { name: 'eventDate', type: 'date', label: 'Event date (if known)' },
     { name: 'shortlist', type: 'relationship', relationTo: 'vendors', hasMany: true },
     {
+      // Saved decorations ("My list" on /decorations). Read and written only through
+      // lib/decorations.ts, so a couple's /api/customers/me never carries decor records.
+      name: 'decorShortlist',
+      type: 'relationship',
+      relationTo: 'decor-items',
+      hasMany: true,
+      label: 'Saved decorations',
+      access: { read: canViewField, create: canManageField, update: canManageField },
+      admin: { readOnly: true },
+    },
+    {
+      name: 'decorBlocked',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Blocked from decoration prices',
+      access: { read: canViewField, create: canManageField, update: canManageField },
+      admin: {
+        position: 'sidebar',
+        description: 'Tick if this account seems to be copying our decoration prices. They still see photos.',
+      },
+    },
+    {
       name: 'marketingConsent',
       type: 'checkbox',
       defaultValue: false,
