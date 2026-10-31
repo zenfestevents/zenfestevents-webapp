@@ -13972,9 +13972,9 @@
       "name": "enum_decor_items_public_display",
       "schema": "public",
       "values": [
-        "exact",
         "range",
         "from",
+        "exact",
         "hidden"
       ]
     },
@@ -14603,6 +14603,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "a140bdaa-7d1d-4276-925e-f5c2be9c47d5",
+  "id": "0ac52dad-2fe6-4e17-a498-3d8ff6f3474b",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

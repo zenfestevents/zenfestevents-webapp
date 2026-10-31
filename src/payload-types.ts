@@ -729,7 +729,7 @@ export interface DecorItem {
   /**
    * Which way the client price shows to logged-in clients. The vendor price is never shown.
    */
-  publicDisplay: 'exact' | 'range' | 'from' | 'hidden';
+  publicDisplay: 'range' | 'from' | 'exact' | 'hidden';
   supplier?: (number | null) | DecorSupplier;
   /**
    * e.g. 20 ft × 10 ft stage

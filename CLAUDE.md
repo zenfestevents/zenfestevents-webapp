@@ -425,6 +425,10 @@ src/
   so an uncommitted migration means a green build whose every page 500s on missing
   tables. `migrate:create` needs no database connection. Commit `src/migrations/`;
   `vercel.json` runs `payload migrate` ahead of `next build` on every deploy.
+  **Never rename, regenerate or edit a migration once it is pushed to any branch** — add a
+  new one instead. Vercel applies env vars to Preview builds unless they're limited to
+  Production, so a branch push can migrate the live Neon database. A regenerated decor
+  migration (2026-10-31) made the next preview build fail with "already exists".
   If you regenerate `(payload)` boilerplate, use the file
   from the matching Payload version tag (e.g. `v3.88.0`), not `main`.
 

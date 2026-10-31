@@ -51,10 +51,11 @@ export const DECOR_KINDS = [
  * 2026-10-31); range / "starting from" / hidden stay available for items the team wants
  * to keep vaguer. The vendor price is never shown, whatever this says.
  */
+// Keep this order: it is the Postgres enum's order (changing it would rewrite the type).
 export const DECOR_PRICE_MODES = [
-  ['exact', 'Exact client price'],
   ['range', 'Price range (e.g. ₹25k – ₹35k)'],
   ['from', '“Starting from ₹X”'],
+  ['exact', 'Exact client price'],
   ['hidden', 'Hidden — “Contact us for price”'],
 ] as const
 
