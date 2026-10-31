@@ -13,10 +13,12 @@ const TONE: Record<string, 'wait' | 'work' | 'done' | 'stop' | 'off'> = {
   booked: 'done',
   approved: 'done',
   published: 'done',
+  active: 'done',
   rejected: 'stop',
   closed: 'off',
   draft: 'off',
   paused: 'off',
+  archived: 'off',
 }
 
 /**

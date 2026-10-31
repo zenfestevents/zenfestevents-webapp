@@ -44,7 +44,13 @@ import { WhatsAppMessages } from './collections/WhatsAppMessages'
 import { WhatsAppCampaigns } from './collections/WhatsAppCampaigns'
 import { Runs } from './collections/Runs'
 import { ReferralVisits } from './collections/ReferralVisits'
+import { DecorItems } from './collections/DecorItems'
+import { DecorPhotos } from './collections/DecorPhotos'
+import { DecorSuppliers } from './collections/DecorSuppliers'
+import { DecorPriceHistory } from './collections/DecorPriceHistory'
+import { DecorViews } from './collections/DecorViews'
 import { SiteSettings } from './globals/SiteSettings'
+import { DecorSettings } from './globals/DecorSettings'
 import { ReminderSettings } from './globals/ReminderSettings'
 import { RewardSettings } from './globals/RewardSettings'
 
@@ -85,6 +91,11 @@ export default buildConfig({
     Vendors,
     VendorMedia,
     VendorUploads,
+    DecorItems,
+    DecorSuppliers,
+    DecorPhotos,
+    DecorPriceHistory,
+    DecorViews,
     WhatsAppContacts,
     WhatsAppMessages,
     WhatsAppCampaigns,
@@ -116,7 +127,7 @@ export default buildConfig({
     AiConversations,
     Products,
   ],
-  globals: [ReminderSettings, SiteSettings, RewardSettings],
+  globals: [ReminderSettings, SiteSettings, RewardSettings, DecorSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -155,7 +166,8 @@ export default buildConfig({
       enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
       // Vendor uploads (FSSAI certificates) stay behind Payload's access
       // control: they're served via /api, not straight from the Blob URL.
-      collections: { media: true, 'vendor-uploads': true, 'vendor-media': true },
+      // Decor photos are served through /api too, so draft items' photos can't be listed.
+      collections: { media: true, 'vendor-uploads': true, 'vendor-media': true, 'decor-photos': true },
       token: process.env.BLOB_READ_WRITE_TOKEN,
     }),
   ],
