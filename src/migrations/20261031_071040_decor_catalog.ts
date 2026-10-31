@@ -6,7 +6,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TYPE "public"."enum_decor_items_event_type" AS ENUM('wedding', 'housewarming', 'birthday', 'corporate', 'shop_opening', 'sports', 'other');
   CREATE TYPE "public"."enum_decor_items_category" AS ENUM('stage', 'entrance', 'mandap', 'backdrop', 'balloon', 'flower', 'lighting', 'kuthuvilakku', 'photo_booth', 'other');
   CREATE TYPE "public"."enum_decor_items_kind" AS ENUM('item', 'package');
-  CREATE TYPE "public"."enum_decor_items_public_display" AS ENUM('range', 'from', 'exact', 'hidden');
+  CREATE TYPE "public"."enum_decor_items_public_display" AS ENUM('exact', 'range', 'from', 'hidden');
   CREATE TYPE "public"."enum_decor_items_status" AS ENUM('draft', 'active', 'archived');
   CREATE TYPE "public"."enum_decor_price_history_field" AS ENUM('client', 'vendor');
   CREATE TABLE "decor_items_themes" (
@@ -24,7 +24,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"kind" "enum_decor_items_kind" DEFAULT 'item' NOT NULL,
   	"client_price" numeric,
   	"vendor_price" numeric,
-  	"public_display" "enum_decor_items_public_display" DEFAULT 'range' NOT NULL,
+  	"public_display" "enum_decor_items_public_display" DEFAULT 'exact' NOT NULL,
   	"supplier_id" integer,
   	"size" varchar,
   	"includes" varchar,

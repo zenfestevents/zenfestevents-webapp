@@ -47,13 +47,14 @@ export const DECOR_KINDS = [
 ] as const
 
 /**
- * How the client price is shown on the website, per item. `range` is the default because
- * it gives a couple a real idea of the budget without handing out the exact quote.
+ * How the client price is shown on the website, per item. `exact` is the default (owner,
+ * 2026-10-31); range / "starting from" / hidden stay available for items the team wants
+ * to keep vaguer. The vendor price is never shown, whatever this says.
  */
 export const DECOR_PRICE_MODES = [
+  ['exact', 'Exact client price'],
   ['range', 'Price range (e.g. ₹25k – ₹35k)'],
   ['from', '“Starting from ₹X”'],
-  ['exact', 'Exact price'],
   ['hidden', 'Hidden — “Contact us for price”'],
 ] as const
 

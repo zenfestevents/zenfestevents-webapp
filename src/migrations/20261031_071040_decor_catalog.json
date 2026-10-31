@@ -3001,7 +3001,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "'range'"
+          "default": "'exact'"
         },
         "supplier_id": {
           "name": "supplier_id",
@@ -13972,9 +13972,9 @@
       "name": "enum_decor_items_public_display",
       "schema": "public",
       "values": [
+        "exact",
         "range",
         "from",
-        "exact",
         "hidden"
       ]
     },
@@ -14603,6 +14603,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "b304ccbf-cf62-4a84-8384-88f1df8fda9b",
+  "id": "a140bdaa-7d1d-4276-925e-f5c2be9c47d5",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

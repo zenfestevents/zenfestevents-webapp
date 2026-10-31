@@ -149,6 +149,9 @@ await check('a different category starts its own count', async () => {
   const c = await make({ eventType: 'birthday', category: 'balloon' })
   assert.match(String(c.itemCode), /^BDY-BLN-\d{3,}$/)
 })
+await check('the website shows the exact client price unless the team picks otherwise', async () => {
+  assert.equal(a.publicDisplay, 'exact')
+})
 await check('web address = title + code', async () => {
   assert.equal(a.slug, `decor-test-stage-${String(a.itemCode).toLowerCase()}`)
 })

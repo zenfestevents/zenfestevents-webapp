@@ -34,7 +34,8 @@ export const DecorSettings: GlobalConfig = {
       max: 50,
       label: 'Price range width (%)',
       admin: {
-        description: 'For items shown as a range: how far below and above the client price the range goes, before rounding.',
+        description:
+          'Only for items set to “Price range”: how far below and above the client price the range goes, before rounding.',
       },
     },
   ],

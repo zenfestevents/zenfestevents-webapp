@@ -152,10 +152,12 @@ export const DecorItems: CollectionConfig = {
       name: 'publicDisplay',
       type: 'select',
       required: true,
-      defaultValue: 'range',
+      defaultValue: 'exact',
       label: 'Price on the website',
       options: decorOptions(DECOR_PRICE_MODES),
-      admin: { description: 'Prices are shown only to logged-in clients, a few dozen items a day each.' },
+      admin: {
+        description: 'Which way the client price shows to logged-in clients. The vendor price is never shown.',
+      },
     },
     {
       name: 'supplier',

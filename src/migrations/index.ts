@@ -17,7 +17,7 @@ import * as migration_20261024_061243_runs_club from './20261024_061243_runs_clu
 import * as migration_20261024_075645_referrals from './20261024_075645_referrals';
 import * as migration_20261025_152046_team_roles from './20261025_152046_team_roles';
 import * as migration_20261029_181719_vendor_base_area from './20261029_181719_vendor_base_area';
-import * as migration_20261031_070620_decor_catalog from './20261031_070620_decor_catalog';
+import * as migration_20261031_071040_decor_catalog from './20261031_071040_decor_catalog';
 
 export const migrations = [
   {
@@ -116,8 +116,8 @@ export const migrations = [
     name: '20261029_181719_vendor_base_area',
   },
   {
-    up: migration_20261031_070620_decor_catalog.up,
-    down: migration_20261031_070620_decor_catalog.down,
-    name: '20261031_070620_decor_catalog'
+    up: migration_20261031_071040_decor_catalog.up,
+    down: migration_20261031_071040_decor_catalog.down,
+    name: '20261031_071040_decor_catalog'
   },
 ];

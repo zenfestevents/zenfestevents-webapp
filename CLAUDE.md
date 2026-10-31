@@ -949,7 +949,8 @@ src/
     history by hand.
   - Status: Draft (Quick add, not on the site) / Active (needs photo, title, client price) /
     Archived. Delete is Owner-only: archive instead.
-  - Anti-scraping (owner's question): per-item `publicDisplay` (range / from / exact / hidden),
+  - Anti-scraping (owner's question): per-item `publicDisplay` (**exact by default**, owner
+    2026-10-31; range / from / hidden per item),
     a per-couple daily price limit (`decor-views`, unique per customer + item + India day,
     Decor settings → 40), `customers.decorBlocked`, and the Owner-only "Decor price views" list.
   - `customers.decorShortlist` / `decorBlocked` are staff-read fields, so a couple's own

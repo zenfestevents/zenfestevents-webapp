@@ -727,9 +727,9 @@ export interface DecorItem {
    */
   vendorPrice?: number | null;
   /**
-   * Prices are shown only to logged-in clients, a few dozen items a day each.
+   * Which way the client price shows to logged-in clients. The vendor price is never shown.
    */
-  publicDisplay: 'range' | 'from' | 'exact' | 'hidden';
+  publicDisplay: 'exact' | 'range' | 'from' | 'hidden';
   supplier?: (number | null) | DecorSupplier;
   /**
    * e.g. 20 ft × 10 ft stage
@@ -3376,7 +3376,7 @@ export interface DecorSetting {
    */
   dailyPriceLimit: number;
   /**
-   * For items shown as a range: how far below and above the client price the range goes, before rounding.
+   * Only for items set to “Price range”: how far below and above the client price the range goes, before rounding.
    */
   rangeSpreadPercent: number;
   updatedAt?: string | null;
