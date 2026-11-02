@@ -790,13 +790,25 @@ export interface DecorItem {
    */
   clientPrice?: number | null;
   /**
-   * Never shown on the website or in client exports.
+   * Never shown on the website or in client exports. With rows in “Supplier prices” below, this follows the cheapest supplier by itself.
    */
   vendorPrice?: number | null;
   /**
    * Which way the client price shows to logged-in clients. The vendor price is never shown.
    */
   publicDisplay: 'range' | 'from' | 'exact' | 'hidden';
+  /**
+   * Every supplier who can do this decoration and what they charge, cheapest first when you save. Vendor price and margin follow the cheapest. Compare price and the supplier’s area for each event. Never shown on the website.
+   */
+  supplierPrices?:
+    | {
+        supplier: number | DecorSupplier;
+        price: number;
+        quotedOn?: string | null;
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   supplier?: (number | null) | DecorSupplier;
   /**
    * e.g. 20 ft × 10 ft backdrop
@@ -2501,6 +2513,15 @@ export interface DecorItemsSelect<T extends boolean = true> {
   clientPrice?: T;
   vendorPrice?: T;
   publicDisplay?: T;
+  supplierPrices?:
+    | T
+    | {
+        supplier?: T;
+        price?: T;
+        quotedOn?: T;
+        note?: T;
+        id?: T;
+      };
   supplier?: T;
   size?: T;
   includes?: T;

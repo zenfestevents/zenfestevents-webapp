@@ -1,7 +1,7 @@
 import type { CollectionConfig, FieldAccess } from 'payload'
 
 import { accessFor } from '../access/roles'
-import { assignItemCode, recordPriceHistory, stampPriceChange } from '../hooks/decorPrices'
+import { assignItemCode, recordPriceHistory, stampPriceChange, supplierIdOf, syncSupplierPrices } from '../hooks/decorPrices'
 import { noBrandNames } from '../lib/brandGuard'
 import { revalidateCollection } from '../hooks/revalidateContent'
 import { CONTENT_TAGS } from '../lib/contentCache'
@@ -89,7 +89,7 @@ export const DecorItems: CollectionConfig = {
   },
   defaultSort: '-updatedAt',
   hooks: {
-    beforeChange: [assignItemCode, stampPriceChange],
+    beforeChange: [assignItemCode, syncSupplierPrices, stampPriceChange],
     // Saving clears the cached "is there any decoration?" check behind the menu link.
     afterChange: [recordPriceHistory, ...revalidateCollection(CONTENT_TAGS.decorations).afterChange],
     afterDelete: revalidateCollection(CONTENT_TAGS.decorations).afterDelete,
@@ -297,7 +297,8 @@ export const DecorItems: CollectionConfig = {
           access: { read: canViewField },
           admin: {
             step: 500,
-            description: 'Never shown on the website or in client exports.',
+            description:
+              'Never shown on the website or in client exports. With rows in “Supplier prices” below, this follows the cheapest supplier by itself.',
             components: { Cell: '/components/admin/decor/MarginCell#DecorRupeesCell' },
           },
         },
@@ -315,11 +316,59 @@ export const DecorItems: CollectionConfig = {
       },
     },
     {
+      // Supplier prices (owner, 2026-11-02): who can build this decoration and what each charges.
+      // Transportation is not stored: the team weighs price and distance for each event.
+      name: 'supplierPrices',
+      type: 'array',
+      label: 'Supplier prices (team only)',
+      labels: { singular: 'Supplier', plural: 'Suppliers' },
+      access: { read: canViewField },
+      admin: {
+        initCollapsed: false,
+        description:
+          'Every supplier who can do this decoration and what they charge, cheapest first when you save. Vendor price and margin follow the cheapest. Compare price and the supplier’s area for each event. Never shown on the website.',
+        components: { RowLabel: '/components/admin/decor/SupplierRowLabel#SupplierRowLabel' },
+      },
+      validate: (value: unknown) => {
+        const rows = Array.isArray(value) ? (value as { supplier?: unknown }[]) : []
+        const ids = rows.map((r) => String(supplierIdOf(r.supplier as never) ?? '')).filter(Boolean)
+        return new Set(ids).size === ids.length ? true : 'Each supplier once: change the price on their existing row instead.'
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'supplier', type: 'relationship', relationTo: 'decor-suppliers', required: true, admin: { width: '45%' } },
+            {
+              name: 'price',
+              type: 'number',
+              required: true,
+              min: 0,
+              max: 100_000_000,
+              label: 'Their price ₹',
+              admin: { step: 500, width: '25%' },
+            },
+            {
+              name: 'quotedOn',
+              type: 'date',
+              label: 'Quoted on',
+              defaultValue: () => new Date().toISOString(),
+              admin: { width: '30%', date: { pickerAppearance: 'dayOnly', displayFormat: 'd MMM yyyy' } },
+            },
+          ],
+        },
+        { name: 'note', type: 'text', maxLength: 300, label: 'Note (e.g. needs 2 days, price excludes lights)' },
+      ],
+    },
+    {
+      // The cheapest supplier (kept in step by syncSupplierPrices): the old single supplier, still
+      // used by the admin list and filters.
       name: 'supplier',
       type: 'relationship',
       relationTo: 'decor-suppliers',
-      label: 'Supplier (team only)',
+      label: 'Cheapest supplier (team only)',
       access: { read: canViewField },
+      admin: { hidden: true },
     },
     { name: 'size', type: 'text', maxLength: 200, label: 'Size', admin: { description: 'e.g. 20 ft × 10 ft backdrop' } },
     { name: 'includes', type: 'textarea', maxLength: 2000, label: 'What’s included', validate: noBrandNames },

@@ -133,8 +133,16 @@ export async function seedDecor(payload: Payload) {
         includes: d.includes,
         description: d.description,
         photos,
-        supplier: supplierIds[d.supplier],
-        vendorPrice: d.vendorPrice,
+        // Two suppliers quote each decoration (the second a bit higher, from another area), so the
+        // price table can be tried: the cheapest becomes the vendor price.
+        supplierPrices: [
+          { supplier: supplierIds[d.supplier], price: d.vendorPrice, note: 'Demo quote' },
+          {
+            supplier: supplierIds[SUPPLIERS[(SUPPLIERS.findIndex((x) => x.key === d.supplier) + 1) % SUPPLIERS.length].key],
+            price: Math.round((d.vendorPrice * 1.12) / 500) * 500,
+            note: 'Demo quote, needs 2 days',
+          },
+        ],
         clientPrice: d.clientPrice,
         publicDisplay: d.publicDisplay,
         status: d.status ?? 'active',

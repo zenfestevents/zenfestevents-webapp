@@ -989,6 +989,18 @@ src/
       with the code, title, the client's first name and the answers). Add-ons are priced by the team on
       WhatsApp: nothing is saved in admin and no add-on prices are shown. Later: collections of entrances
       and name boards to pick from (not built).
+  - **Supplier prices (owner, 2026-11-02).** A decoration can be built by several suppliers at different
+    prices, and the team picks per event by weighing price and where the supplier is based
+    (transportation is deliberately not stored). `supplierPrices` is an array (supplier, price, quoted on,
+    note), team-only (`canViewField`). `syncSupplierPrices` (`hooks/decorPrices.ts`, before
+    `stampPriceChange`) sorts it cheapest first and keeps `vendorPrice` + the hidden `supplier` equal to the
+    cheapest, so the margin, the price history and the cell columns keep working on one number; with no
+    rows they stay as typed (Quick add still sends a plain vendor price). There is **no permanent chosen
+    supplier**. The admin list filters by any supplier on the table and by supplier area
+    (`supplierPrices.supplier(.area)`), and each row's title shows name · area · price · margin
+    (`SupplierRowLabel.tsx`). A supplier on any price table can't be deleted (`beforeDelete` in
+    `DecorSuppliers.ts`: the row's link is required, so Postgres would 500). The migration moved each
+    existing supplier + vendor price into the first row.
   - **Event types (owner, 2026-10-31; changed 2026-11-02)** are grouped (`DECOR_EVENT_GROUPS`):
     wedding functions, birthdays (**boy / girl only** since 2026-11-02: designs hardly differ, it is
     mostly balloons), family functions (+ **Naming ceremony**, NMC), business & others. The step-2

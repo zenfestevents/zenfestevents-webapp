@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import { APIError, type CollectionConfig } from 'payload'
 
 import { accessFor } from '../access/roles'
 import { toWaNumber } from '../lib/whatsapp/phone'
@@ -28,6 +28,28 @@ export const DecorSuppliers: CollectionConfig = {
     description: 'Who supplies each decoration, with their phone and area. Only the team sees this.',
   },
   defaultSort: 'name',
+  hooks: {
+    // A supplier on a decoration's price table can't be deleted: the table's link is required, so
+    // Postgres refuses (a 500) when it tries to clear it. Say so plainly instead.
+    beforeDelete: [
+      async ({ id, req }) => {
+        const used = await req.payload.count({
+          collection: 'decor-items',
+          where: { 'supplierPrices.supplier': { equals: id } },
+          overrideAccess: true,
+          req,
+        })
+        if (used.totalDocs > 0) {
+          throw new APIError(
+            `This supplier is on the price table of ${used.totalDocs} decoration${used.totalDocs === 1 ? '' : 's'}. Remove them from there first.`,
+            400,
+            null,
+            true,
+          )
+        }
+      },
+    ],
+  },
   fields: [
     { name: 'name', type: 'text', required: true, label: 'Supplier / business name', maxLength: 120 },
     {

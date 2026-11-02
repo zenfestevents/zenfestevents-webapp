@@ -589,6 +589,106 @@ await check('theme chips only count items for the chosen event', async () => {
   assert.ok(found.items.length >= 1 && found.items.every((i) => i.eventType === 'birthday_girl'))
 })
 
+console.log('Supplier prices (2026-11-02)')
+const supplierB = await payload.create({
+  collection: 'decor-suppliers',
+  data: { name: `${TITLE} supplier B`, phone: '+91 61000 00298', area: 'Test far area' },
+  overrideAccess: true,
+})
+const supplierC = await payload.create({
+  collection: 'decor-suppliers',
+  data: { name: `${TITLE} supplier C`, phone: '+91 61000 00297', area: 'Test area' },
+  overrideAccess: true,
+})
+const quotes = (...rows: [number, number][]) => rows.map(([supplier, price]) => ({ supplier, price }))
+await check('rows are sorted cheapest first and the vendor price + supplier follow the cheapest', async () => {
+  const d = await make({
+    title: `${TITLE} quotes`,
+    clientPrice: 12000,
+    vendorPrice: undefined,
+    supplier: undefined,
+    supplierPrices: quotes([supplier.id, 10000], [supplierB.id, 8000], [supplierC.id, 9000]),
+  })
+  assert.deepEqual(
+    (d.supplierPrices ?? []).map((r) => r.price),
+    [8000, 9000, 10000],
+  )
+  assert.equal(d.vendorPrice, 8000)
+  const first = d.supplierPrices?.[0]?.supplier
+  assert.equal(typeof first === 'object' ? first?.id : first, supplierB.id)
+  assert.equal(d.margin, 4000)
+})
+await check('a price change on the cheapest supplier moves the vendor price and is logged', async () => {
+  const d = await make({ title: `${TITLE} quotes 2`, vendorPrice: undefined, supplier: undefined, supplierPrices: quotes([supplier.id, 10000], [supplierB.id, 8000]) })
+  const u = await payload.update({
+    collection: 'decor-items',
+    id: d.id,
+    data: { supplierPrices: quotes([supplier.id, 10000], [supplierB.id, 11000]) },
+    user: staff.team,
+    overrideAccess: false,
+  })
+  assert.equal(u.vendorPrice, 10000, 'the other supplier is now the cheapest')
+  const h = await history(d.id)
+  const vendor = h.docs.filter((x) => x.field === 'vendor').map((x) => [x.oldPrice ?? null, x.newPrice])
+  assert.deepEqual(vendor, [[null, 8000], [8000, 10000]])
+})
+await check('an edit that leaves the price table out keeps it', async () => {
+  const d = await make({ title: `${TITLE} quotes 3`, vendorPrice: undefined, supplier: undefined, supplierPrices: quotes([supplier.id, 7000], [supplierB.id, 9000]) })
+  const u = await payload.update({ collection: 'decor-items', id: d.id, data: { size: '12 ft' }, user: staff.team, overrideAccess: false })
+  assert.equal(u.supplierPrices?.length, 2)
+  assert.equal(u.vendorPrice, 7000)
+})
+await check('a decoration with no rows keeps the vendor price and supplier as typed', async () => {
+  const d = await make({ title: `${TITLE} no rows`, vendorPrice: 5500, supplierPrices: [] })
+  assert.equal(d.vendorPrice, 5500)
+})
+await check('each supplier once, and a price is required', async () => {
+  assert.equal(await allowed(() => make({ supplierPrices: quotes([supplier.id, 5000], [supplier.id, 6000]) })), false)
+  assert.equal(await allowed(() => make({ supplierPrices: [{ supplier: supplier.id }] })), false)
+  assert.equal(await allowed(() => make({ supplierPrices: quotes([supplier.id, -1]) })), false)
+})
+await check('find decorations by any supplier on the table, or by the area a supplier is based in', async () => {
+  const d = await make({ title: `${TITLE} findme`, vendorPrice: undefined, supplier: undefined, supplierPrices: quotes([supplier.id, 6000], [supplierB.id, 9000]) })
+  const bySupplier = await payload.find({
+    collection: 'decor-items',
+    where: { 'supplierPrices.supplier': { equals: supplierB.id } },
+    depth: 0,
+    overrideAccess: true,
+  })
+  assert.ok(bySupplier.docs.some((x) => x.id === d.id), 'any supplier on the table, not only the cheapest')
+  const byArea = await payload.find({
+    collection: 'decor-items',
+    where: { 'supplierPrices.supplier.area': { equals: 'Test far area' } },
+    depth: 0,
+    overrideAccess: true,
+  })
+  assert.ok(byArea.docs.some((x) => x.id === d.id))
+  assert.ok(byArea.docs.every((x) => (x.supplierPrices ?? []).length > 0))
+})
+await check('suppliers and their prices never reach the website', async () => {
+  const d = await make({ title: `${TITLE} private quotes`, supplierPrices: quotes([supplier.id, 6123], [supplierB.id, 9871]) })
+  const found = await getPublicDecoration(String(d.slug))
+  const json = JSON.stringify(found)
+  for (const secret of ['6123', '9871', 'supplier B', 'Test far area', 'supplierPrices']) {
+    assert.ok(!json.includes(secret), `leaked: ${secret}`)
+  }
+})
+await check('a supplier on a price table cannot be deleted (said plainly); it can once removed', async () => {
+  const d = await make({ title: `${TITLE} guarded`, vendorPrice: undefined, supplier: undefined, supplierPrices: quotes([supplierC.id, 4000]) })
+  assert.equal(await allowed(() => payload.delete({ collection: 'decor-suppliers', id: supplierC.id, user: staff.owner, overrideAccess: false })), false)
+  await payload.update({ collection: 'decor-items', id: d.id, data: { supplierPrices: [] }, overrideAccess: true })
+  await payload.update({ collection: 'decor-items', id: d.id, data: { supplier: null }, overrideAccess: true })
+  const stillUsed = await payload.count({
+    collection: 'decor-items',
+    where: { and: [{ id: { equals: d.id } }, { 'supplierPrices.supplier': { equals: supplierC.id } }] },
+    overrideAccess: true,
+  })
+  assert.equal(stillUsed.totalDocs, 0)
+  // …and the supplier can go once no decoration lists it (the earlier ones here do, so clear them too).
+  await payload.delete({ collection: 'decor-items', where: { title: { like: TITLE } }, overrideAccess: true })
+  assert.equal(await allowed(() => payload.delete({ collection: 'decor-suppliers', id: supplierC.id, user: staff.owner, overrideAccess: false })), true)
+})
+
 await cleanup()
 console.log(failures ? `\n${failures} check(s) failed.` : '\nAll decoration checks passed.')
 process.exit(failures ? 1 : 0)

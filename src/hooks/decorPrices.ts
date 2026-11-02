@@ -46,6 +46,32 @@ export const assignItemCode: CollectionBeforeChangeHook = async ({ data, operati
   return data
 }
 
+type SupplierRow = {
+  supplier?: number | string | { id: number | string } | null
+  price?: number | null
+}
+
+/** The supplier id out of a relationship value (an id, or a populated record). */
+export const supplierIdOf = (v: SupplierRow['supplier']) => (v && typeof v === 'object' ? v.id : (v ?? null))
+
+/**
+ * Supplier prices (owner, 2026-11-02): each decoration can list every supplier's price. On save
+ * the rows are sorted cheapest first, and `vendorPrice` + `supplier` follow the cheapest, so the
+ * margin, the price history and the admin filters keep working on one number. With no rows the
+ * vendor price and supplier stay as typed. Must run before `stampPriceChange`.
+ */
+export const syncSupplierPrices: CollectionBeforeChangeHook = ({ data, originalDoc, operation }) => {
+  const sent = Array.isArray(data.supplierPrices)
+  const rows = ((sent ? data.supplierPrices : operation === 'update' ? originalDoc?.supplierPrices : []) ?? []) as SupplierRow[]
+  const priced = rows.filter((r) => supplierIdOf(r.supplier) != null && num(r.price) != null)
+  if (!priced.length) return data
+  const sorted = [...priced].sort((a, b) => (num(a.price) as number) - (num(b.price) as number))
+  if (sent) data.supplierPrices = [...sorted, ...rows.filter((r) => !priced.includes(r))]
+  data.vendorPrice = num(sorted[0].price)
+  data.supplier = supplierIdOf(sorted[0].supplier)
+  return data
+}
+
 /**
  * Stamps `priceUpdatedOn` whenever the client or vendor price changes (or is first set)
  * and remembers the change for `recordPriceHistory`.

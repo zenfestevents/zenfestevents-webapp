@@ -17,12 +17,13 @@ type Filters = {
   material: string
   theme: string
   supplier: string
+  area: string
   min: string
   max: string
   status: string
 }
 
-const EMPTY: Filters = { eventType: '', material: '', theme: '', supplier: '', min: '', max: '', status: '' }
+const EMPTY: Filters = { eventType: '', material: '', theme: '', supplier: '', area: '', min: '', max: '', status: '' }
 
 /**
  * Our filters → Payload list conditions. Each entry is one `where[and][i]…` condition, written as
@@ -38,7 +39,9 @@ function toConditions(f: Filters): [string, string][][] {
     ])
   if (f.material) add('material', 'equals', f.material)
   if (f.theme) add('themes', 'in', f.theme)
-  if (f.supplier) add('supplier', 'equals', f.supplier)
+  // Any supplier on the decoration's price table (not just the cheapest), or any supplier based in an area.
+  if (f.supplier) add('supplierPrices.supplier', 'equals', f.supplier)
+  if (f.area) add('supplierPrices.supplier.area', 'equals', f.area)
   if (f.min && Number(f.min) >= 0) add('clientPrice', 'greater_than_equal', String(Number(f.min)))
   if (f.max && Number(f.max) > 0) add('clientPrice', 'less_than_equal', String(Number(f.max)))
   if (f.status === 'not_archived') add('status', 'not_equals', 'archived')
@@ -54,13 +57,14 @@ function fromParams(params: URLSearchParams): Filters {
       f.eventType = value
       continue
     }
-    const m = key.match(/^where\[and\]\[\d+\]\[(\w+)\]\[(\w+)\]$/)
+    const m = key.match(/^where\[and\]\[\d+\]\[([\w.]+)\]\[(\w+)\]$/)
     if (!m) continue
     const [, field, op] = m
     if (field === 'eventType') f.eventType = value
     else if (field === 'material') f.material = value
     else if (field === 'themes') f.theme = value
-    else if (field === 'supplier') f.supplier = value
+    else if (field === 'supplierPrices.supplier') f.supplier = value
+    else if (field === 'supplierPrices.supplier.area') f.area = value
     else if (field === 'clientPrice' && op === 'greater_than_equal') f.min = value
     else if (field === 'clientPrice' && op === 'less_than_equal') f.max = value
     else if (field === 'status') f.status = op === 'not_equals' ? 'not_archived' : value
@@ -70,7 +74,7 @@ function fromParams(params: URLSearchParams): Filters {
 
 /**
  * Above the Decorations list: quick filters a team member can use on a phone while a client
- * is on the line — event type, flowers, theme, supplier, client-price budget and status.
+ * is on the line — event type, flowers, theme, supplier, supplier area, client-price budget and status.
  * They set Payload's own `where` in the address, so the list's search box, sorting and
  * paging keep working with them.
  */
@@ -81,7 +85,11 @@ export function DecorQuickFilters() {
   const query = params.toString()
   const current = useMemo(() => fromParams(new URLSearchParams(query)), [query])
   const [f, setF] = useState<Filters>(current)
-  const [suppliers, setSuppliers] = useState<{ id: number; name: string }[]>([])
+  const [suppliers, setSuppliers] = useState<{ id: number; name: string; area?: string | null }[]>([])
+  const areas = useMemo(
+    () => [...new Set(suppliers.map((s) => (s.area ?? '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b)),
+    [suppliers],
+  )
 
   // When the address changes (back button, Payload's own controls), show its filters.
   const [shownQuery, setShownQuery] = useState(query)
@@ -92,7 +100,7 @@ export function DecorQuickFilters() {
 
   useEffect(() => {
     let live = true
-    fetch('/api/decor-suppliers?limit=500&depth=0&sort=name&select[name]=true', { credentials: 'include' })
+    fetch('/api/decor-suppliers?limit=500&depth=0&sort=name&select[name]=true&select[area]=true', { credentials: 'include' })
       .then((r) => (r.ok ? r.json() : { docs: [] }))
       .then((d) => live && setSuppliers(d.docs ?? []))
       .catch(() => {})
@@ -174,6 +182,17 @@ export function DecorQuickFilters() {
           {suppliers.map((s) => (
             <option key={s.id} value={String(s.id)}>
               {s.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span>Supplier area</span>
+        <select value={f.area} onChange={set('area')}>
+          <option value="">Any area</option>
+          {areas.map((a) => (
+            <option key={a} value={a}>
+              {a}
             </option>
           ))}
         </select>
