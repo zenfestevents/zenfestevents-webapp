@@ -10,6 +10,7 @@ export const CONTENT_TAGS = {
   projects: 'content:projects',
   services: 'content:services',
   testimonials: 'content:testimonials',
+  decorations: 'content:decorations',
 } as const
 
 export type ContentTag = (typeof CONTENT_TAGS)[keyof typeof CONTENT_TAGS]

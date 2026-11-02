@@ -368,6 +368,73 @@ await check('owner: can delete', async () => {
   assert.equal(await allowed(() => payload.delete({ collection: 'decor-items', id: c.id, user: staff.owner, overrideAccess: false })), true)
 })
 
+// ── 6. The public site (lib/decorations.ts) ────────────────────────────────
+console.log('Public pages')
+const { getPublicDecoration, listDecorations, priceFor } = await import('../lib/decorations')
+const slugOf = (d: { slug?: string | null }) => String(d.slug)
+// Earlier sections edit and archive `a`, so the public checks use a fresh Active item.
+const live = await make({ title: `${TITLE} live` })
+await check('the site gets only public fields: no cost price, supplier or notes', async () => {
+  const found = await getPublicDecoration(slugOf(live))
+  assert.ok(found, 'an Active decoration is on the site')
+  const json = JSON.stringify(found.item)
+  assert.ok(!json.includes('36000'), 'vendor price leaked')
+  assert.ok(!json.includes(`${TITLE} supplier`), 'supplier leaked')
+  assert.ok(!/vendorPrice|supplier|notes|margin|clientPrice/.test(json), 'a private field name leaked')
+  assert.ok(!json.includes('Kumar'), 'the phone file name leaked')
+})
+await check('drafts and archived items are not on the site', async () => {
+  const d = await make({ status: 'draft', photos: [], title: `${TITLE} draft` })
+  assert.equal(await getPublicDecoration(slugOf(d)), null)
+  const x = await make({ title: `${TITLE} archived` })
+  await payload.update({ collection: 'decor-items', id: x.id, data: { status: 'archived' }, overrideAccess: true })
+  assert.equal(await getPublicDecoration(slugOf(x)), null)
+  const list = await listDecorations({})
+  assert.ok(!list.items.some((i) => i.id === d.id || i.id === x.id))
+})
+await check('prices: logged-out visitors are asked to log in', async () => {
+  const found = await getPublicDecoration(slugOf(live))
+  assert.deepEqual(await priceFor(live.id, found!.price, null), { state: 'login' })
+})
+await check('prices: a client sees exact, range, "from" and hidden as the team set them', async () => {
+  const one = (mode: string, price = 50000) =>
+    make({ publicDisplay: mode, clientPrice: price, title: `${TITLE} ${mode}` }).then(async (d) => {
+      const f = await getPublicDecoration(slugOf(d))
+      return priceFor(d.id, f!.price, couple as never)
+    })
+  const exact = await one('exact')
+  assert.equal(exact.state === 'shown' && exact.text, '₹50,000')
+  const range = await one('range')
+  assert.equal(range.state === 'shown' && range.text, '₹43,000 – ₹58,000')
+  const from = await one('from')
+  assert.equal(from.state === 'shown' && from.text, 'Starting from ₹50,000')
+  assert.deepEqual(await one('hidden'), { state: 'ask', reason: 'hidden' })
+})
+await check('prices: the daily limit counts different items; seeing one again is free', async () => {
+  await payload.delete({ collection: 'decor-views', where: { customer: { equals: couple.id } }, overrideAccess: true })
+  await payload.updateGlobal({ slug: 'decor-settings', data: { dailyPriceLimit: 2 }, overrideAccess: true })
+  try {
+    const items = [await make({ title: `${TITLE} l1` }), await make({ title: `${TITLE} l2` }), await make({ title: `${TITLE} l3` })]
+    const see = async (d: (typeof items)[number]) => (await priceFor(d.id, (await getPublicDecoration(slugOf(d)))!.price, couple as never)).state
+    assert.equal(await see(items[0]), 'shown')
+    assert.equal(await see(items[1]), 'shown')
+    assert.equal(await see(items[2]), 'limit')
+    assert.equal(await see(items[0]), 'shown', 'an item already seen today stays visible')
+    const views = await payload.count({ collection: 'decor-views', where: { customer: { equals: couple.id } }, overrideAccess: true })
+    assert.equal(views.totalDocs, 2)
+  } finally {
+    await payload.updateGlobal({ slug: 'decor-settings', data: { dailyPriceLimit: 40 }, overrideAccess: true })
+  }
+})
+await check('prices: a blocked client sees no prices', async () => {
+  await payload.update({ collection: 'customers', id: couple.id, data: { decorBlocked: true } as never, overrideAccess: true })
+  try {
+    assert.deepEqual(await priceFor(live.id, (await getPublicDecoration(slugOf(live)))!.price, couple as never), { state: 'limit' })
+  } finally {
+    await payload.update({ collection: 'customers', id: couple.id, data: { decorBlocked: false } as never, overrideAccess: true })
+  }
+})
+
 await cleanup()
 console.log(failures ? `\n${failures} check(s) failed.` : '\nAll decoration checks passed.')
 process.exit(failures ? 1 : 0)

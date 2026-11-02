@@ -2,6 +2,8 @@ import type { CollectionConfig, FieldAccess } from 'payload'
 
 import { canView, canViewField, canWork, ownerOnly } from '../access/roles'
 import { assignItemCode, recordPriceHistory, stampPriceChange } from '../hooks/decorPrices'
+import { revalidateCollection } from '../hooks/revalidateContent'
+import { CONTENT_TAGS } from '../lib/contentCache'
 import {
   DECOR_CATEGORIES,
   DECOR_EVENT_TYPES,
@@ -69,7 +71,9 @@ export const DecorItems: CollectionConfig = {
   defaultSort: '-updatedAt',
   hooks: {
     beforeChange: [assignItemCode, stampPriceChange],
-    afterChange: [recordPriceHistory],
+    // Saving clears the cached "is there any decoration?" check behind the menu link.
+    afterChange: [recordPriceHistory, ...revalidateCollection(CONTENT_TAGS.decorations).afterChange],
+    afterDelete: revalidateCollection(CONTENT_TAGS.decorations).afterDelete,
   },
   fields: [
     {

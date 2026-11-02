@@ -6,7 +6,15 @@ import { ANNOUNCE_COMING_SOON, FEATURES, MARKETPLACE_SOON } from '../lib/feature
 import { MAJOR_CITIES, SITE_FALLBACK, telLink, whatsappLink, DEFAULT_WA_MESSAGE, type SiteSettings } from '../lib/site'
 import { SeamDivider } from './game'
 
-export function Footer({ settings, hasTestimonials = false }: { settings: SiteSettings; hasTestimonials?: boolean }) {
+export function Footer({
+  settings,
+  hasTestimonials = false,
+  hasDecorations = false,
+}: {
+  settings: SiteSettings
+  hasTestimonials?: boolean
+  hasDecorations?: boolean
+}) {
   const contact = { ...SITE_FALLBACK.contact, ...(settings?.contact || {}) }
   const branches = settings?.branches?.length ? settings.branches : SITE_FALLBACK.branches
   const social = settings?.social || {}
@@ -67,6 +75,7 @@ export function Footer({ settings, hasTestimonials = false }: { settings: SiteSe
           <div className="site-footer__col">
             <h2 className="site-footer__heading">Services</h2>
             <Link href="/services">Services</Link>
+            {hasDecorations && <Link href="/decorations">Decorations</Link>}
             <Link href="/packages">Packages{!FEATURES.packages && <Soon />}</Link>
             <Link href="/enquire">Plan your event</Link>
             {FEATURES.shop && <Link href="/shop">Zenfest Shop</Link>}

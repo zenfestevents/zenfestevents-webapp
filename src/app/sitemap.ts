@@ -3,6 +3,7 @@ import type { MetadataRoute } from 'next'
 import { FEATURES, MARKETPLACE_SOON } from '../lib/features'
 import { CITIES_HREF } from '../lib/areaPages'
 import { indexablePaths } from '../lib/areaVendors'
+import { hasDecorations, listDecorationSlugs } from '../lib/decorations'
 import { categoryCounts, listVendors } from '../lib/marketplace'
 import { SITE_URL } from '../lib/seo'
 import { hasTestimonials } from '../lib/testimonials'
@@ -26,12 +27,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const none: Record<string, number> = {}
   // While the couples' side is "Coming soon" its pages are left out of the sitemap.
   const browse = FEATURES.marketplace && !MARKETPLACE_SOON
-  const [reviews, counts, vendors, areaPages] = await Promise.all([
+  const [reviews, counts, vendors, areaPages, decorSlugs] = await Promise.all([
     hasTestimonials().catch(() => false),
     browse ? categoryCounts().catch(() => none) : none,
     browse ? listVendors({ sort: 'new' }).catch(() => []) : [],
     // City and area pages: only those with something real on them (lib/areaVendors.ts).
     indexablePaths().catch(() => [] as string[]),
+    // Active decorations: photos are public, prices are not.
+    hasDecorations()
+      .then((any) => (any ? listDecorationSlugs() : []))
+      .catch(() => [] as string[]),
   ])
 
   return [
@@ -39,6 +44,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     page('/enquire', 0.9),
     page('/services', 0.9),
     page('/gallery', 0.8, 'weekly'),
+    ...(decorSlugs.length ? [page('/decorations', 0.8, 'weekly')] : []),
+    ...decorSlugs.map((slug) => page(`/decorations/${slug}`, 0.6, 'weekly')),
     page('/about', 0.7),
     ...(reviews ? [page('/testimonials', 0.7, 'weekly')] : []),
     page('/contact', 0.7),

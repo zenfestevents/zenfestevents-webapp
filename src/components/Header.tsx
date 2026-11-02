@@ -30,7 +30,7 @@ const isGroup = (e: NavEntry): e is NavGroup => 'items' in e
  * (lib/features.ts) drop out; with ANNOUNCE_COMING_SOON they reappear in the phone menu's
  * "Coming soon" group. Testimonials shows once a review is published.
  */
-function buildNav(hasTestimonials: boolean): NavEntry[] {
+function buildNav(hasTestimonials: boolean, hasDecorations: boolean): NavEntry[] {
   return [
     // The marketplace's front door (lib/areaPages.ts): the 25 cities only, never their
     // hundreds of areas — those are reached from each city page.
@@ -51,6 +51,9 @@ function buildNav(hasTestimonials: boolean): NavEntry[] {
       label: 'Services',
       items: [
         { href: '/services', label: 'Services', desc: 'The full squad, under one roof' },
+        ...(hasDecorations
+          ? [{ href: '/decorations', label: 'Decorations', desc: 'Stages, entrances, mandaps & more' }]
+          : []),
         { href: '/packages', label: 'Packages', desc: 'Powerplay to Century', soon: !FEATURES.packages },
         // The Runs club needs accounts, which open with the marketplace.
         ...(FEATURES.marketplace
@@ -182,13 +185,21 @@ function NavDropdown({
   )
 }
 
-export function Header({ settings, hasTestimonials = false }: { settings: SiteSettings; hasTestimonials?: boolean }) {
+export function Header({
+  settings,
+  hasTestimonials = false,
+  hasDecorations = false,
+}: {
+  settings: SiteSettings
+  hasTestimonials?: boolean
+  hasDecorations?: boolean
+}) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [menu, setMenu] = useState<string | null>(null)
   const [scrolled, setScrolled] = useState(false)
   const wa = whatsappLink(settings?.contact?.whatsapp || SITE_FALLBACK.contact.whatsapp, DEFAULT_WA_MESSAGE)
-  const nav = buildNav(hasTestimonials)
+  const nav = buildNav(hasTestimonials, hasDecorations)
   /** A short bar (everything optional switched off) fits on a small laptop. */
   const compact = nav.length <= 6
   const closeMenu = useCallback(() => setMenu(null), [])

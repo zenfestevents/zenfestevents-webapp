@@ -9,6 +9,7 @@ import './polls.css'
 import './ai.css'
 import './marketplace.css'
 import './shop.css'
+import './decor.css'
 import './game.css'
 import { Header } from '../../components/Header'
 import { Footer } from '../../components/Footer'
@@ -16,6 +17,7 @@ import { MobileCTABar } from '../../components/MobileCTABar'
 import { JoinPrompt } from '../../components/JoinPrompt'
 import { NavProgress } from '../../components/NavProgress'
 import { getSiteSettings } from '../../lib/getSettings'
+import { hasDecorations } from '../../lib/decorations'
 import { hasTestimonials } from '../../lib/testimonials'
 import { aiAvailable } from '../../lib/ai/status'
 import { getAgentProfiles } from '../../lib/ai/knowledge'
@@ -71,8 +73,13 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Both cached (lib/contentCache.ts); Testimonials joins the menu once a review is published.
-  const [settings, testimonials] = await Promise.all([getSiteSettings(), hasTestimonials()])
+  // All cached (lib/contentCache.ts); Testimonials joins the menu once a review is published,
+  // Decorations once one is Active.
+  const [settings, testimonials, decorations] = await Promise.all([
+    getSiteSettings(),
+    hasTestimonials(),
+    hasDecorations(),
+  ])
   const ai = aiAvailable(settings)
   // The intake form offers the enabled specialists as services.
   const agents = ai ? await getAgentProfiles() : []
@@ -91,9 +98,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           whatsapp={settings.contact?.whatsapp || ''}
           phone={settings.contact?.phonePrimary || ''}
         >
-          <Header settings={settings} hasTestimonials={testimonials} />
+          <Header settings={settings} hasTestimonials={testimonials} hasDecorations={decorations} />
           <main id="main">{children}</main>
-          <Footer settings={settings} hasTestimonials={testimonials} />
+          <Footer settings={settings} hasTestimonials={testimonials} hasDecorations={decorations} />
           <MobileCTABar settings={settings} />
           <JoinPrompt />
         </AiShell>
