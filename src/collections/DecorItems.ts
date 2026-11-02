@@ -268,6 +268,9 @@ export const DecorItems: CollectionConfig = {
       defaultValue: 'item',
       label: 'Single item or package',
       options: decorOptions(DECOR_KINDS),
+      // Everything is a single backdrop for now (owner, 2026-11-02): no packages. The field stays
+      // (defaults to a single item) so packages can come back later.
+      admin: { hidden: true },
     },
     {
       type: 'row',
