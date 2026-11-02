@@ -74,6 +74,17 @@ export const DecorItems: CollectionConfig = {
     // Saving clears the cached "is there any decoration?" check behind the menu link.
     afterChange: [recordPriceHistory, ...revalidateCollection(CONTENT_TAGS.decorations).afterChange],
     afterDelete: revalidateCollection(CONTENT_TAGS.decorations).afterDelete,
+    // Price history and price views point at the item with a required link. Postgres "clears"
+    // that link when the item goes, which a required column refuses, so deleting any item that
+    // ever had a price failed with a 500 (2026-11-02). Remove them first, in the same
+    // transaction: if the delete itself then fails, they come back.
+    beforeDelete: [
+      async ({ id, req }) => {
+        for (const collection of ['decor-price-history', 'decor-views'] as const) {
+          await req.payload.delete({ collection, where: { item: { equals: id } }, req, overrideAccess: true })
+        }
+      },
+    ],
   },
   fields: [
     {

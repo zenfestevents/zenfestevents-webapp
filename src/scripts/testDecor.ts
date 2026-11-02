@@ -362,10 +362,22 @@ await check('nobody can write price history by hand', async () => {
     false,
   )
 })
-await check('owner: can delete', async () => {
+await check('owner: can delete a decoration that has price history and price views', async () => {
+  // Production Postgres refused this with a 500 until the item's history and views were
+  // removed first (beforeDelete in DecorItems.ts); the local SQLite doesn't enforce that rule,
+  // so this checks the clean-up itself.
   const c = await make()
-  await payload.delete({ collection: 'decor-price-history', where: { item: { equals: c.id } }, overrideAccess: true })
+  await payload.create({
+    collection: 'decor-views',
+    data: { customer: couple.id, item: c.id, day: '2026-11-02' },
+    overrideAccess: true,
+  })
+  const rows = (collection: 'decor-price-history' | 'decor-views') =>
+    payload.count({ collection, where: { item: { equals: c.id } }, overrideAccess: true }).then((r) => r.totalDocs)
+  assert.ok((await rows('decor-price-history')) > 0, 'the item has price history')
   assert.equal(await allowed(() => payload.delete({ collection: 'decor-items', id: c.id, user: staff.owner, overrideAccess: false })), true)
+  assert.equal(await rows('decor-price-history'), 0)
+  assert.equal(await rows('decor-views'), 0)
 })
 
 // ── 6. The public site (lib/decorations.ts) ────────────────────────────────
