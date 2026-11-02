@@ -1,10 +1,12 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access'
-import { adminHidden, canManage, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { slugField } from '../fields/slug'
 import { CONTENT_TAGS } from '../lib/contentCache'
 import { revalidateCollection } from '../hooks/revalidateContent'
+
+const { canManage, canDelete } = accessFor('website')
 
 /**
  * Past-work showcase — THE most important collection. Each project is one
@@ -18,14 +20,14 @@ export const Projects: CollectionConfig = {
     read: anyone,
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Website',
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'branch', 'featured'],
     description: 'Past events shown on the website. Clients decide based on these photos.',
-    hidden: adminHidden('projects'),
+    hidden: moduleHidden('website', 'projects'),
   },
   defaultSort: '-createdAt',
   fields: [

@@ -1,13 +1,15 @@
 import type { Access, CollectionConfig } from 'payload'
 
-import { adminHidden, canManage, canManageField, ownerOnly } from '../access/roles'
+import { accessFor, hasLevel, moduleHidden } from '../access/roles'
 import { CONTENT_TAGS } from '../lib/contentCache'
 import { revalidateCollection } from '../hooks/revalidateContent'
 import { TESTIMONIAL_EVENTS } from '../lib/testimonialOptions'
 
-/** The public reads published reviews only; staff see everything. */
+const { canManage, canManageField, canDelete } = accessFor('website')
+
+/** The public reads published reviews only; staff with access to Website see everything. */
 const readPublished: Access = ({ req }) =>
-  req.user?.collection === 'users' ? true : { published: { equals: true } }
+  hasLevel(req.user, 'website', 'read') ? true : { published: { equals: true } }
 
 /**
  * What clients say (/testimonials, the homepage strip, "About Zenfest" menu). Most come
@@ -22,14 +24,14 @@ export const Testimonials: CollectionConfig = {
     read: readPublished,
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Website',
     useAsTitle: 'name',
     defaultColumns: ['name', 'rating', 'eventType', 'published', 'featured'],
     description: 'Client reviews shown on the website. Copy them exactly as written. Untick “Published” to hide one.',
-    hidden: adminHidden('testimonials'),
+    hidden: moduleHidden('website', 'testimonials'),
   },
   defaultSort: '-date',
   fields: [
@@ -72,7 +74,7 @@ export const Testimonials: CollectionConfig = {
       type: 'checkbox',
       defaultValue: true,
       access: { update: canManageField },
-      admin: { position: 'sidebar', description: 'Ticked = shown on the website. Only a Manager or the Owner can change it.' },
+      admin: { position: 'sidebar', description: 'Ticked = shown on the website. Only someone with Full access to Website (or the Owner) can change it.' },
     },
     {
       name: 'featured',

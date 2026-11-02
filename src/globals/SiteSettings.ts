@@ -1,9 +1,11 @@
 import type { GlobalConfig } from 'payload'
 
 import { anyone } from '../access'
-import { canManage } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { CONTENT_TAGS } from '../lib/contentCache'
 import { revalidateGlobal } from '../hooks/revalidateContent'
+
+const { canManage } = accessFor('website')
 
 /** Business-wide details: contact numbers, branches, hero copy, social links. */
 export const SiteSettings: GlobalConfig = {
@@ -16,7 +18,8 @@ export const SiteSettings: GlobalConfig = {
   },
   admin: {
     group: 'Website',
-    description: 'Phone numbers, branches and homepage text shown on the website. Only a Manager or the Owner can change these.',
+    hidden: moduleHidden('website', 'site-settings'),
+    description: 'Phone numbers, branches and homepage text shown on the website. Only someone with Full access to Website (or the Owner) can change these.',
   },
   fields: [
     {

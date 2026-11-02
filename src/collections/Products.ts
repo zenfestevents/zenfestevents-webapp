@@ -1,6 +1,6 @@
 import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 
-import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { slugify } from '../lib/formCheck'
 import { LISTING_STATUSES, toOptionList } from '../lib/marketplaceOptions'
 import {
@@ -11,6 +11,8 @@ import {
   isOccasion,
   merchantFromUrl,
 } from '../lib/shopOptions'
+
+const { canView, canManage, canDelete } = accessFor('website', 'products')
 
 /** Fills the slug from the title and the store name from the affiliate link. */
 const fillDerived: CollectionBeforeChangeHook = ({ data }) => {
@@ -32,14 +34,14 @@ export const Products: CollectionConfig = {
     read: canView,
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Shop',
     useAsTitle: 'title',
     defaultColumns: ['title', 'source', 'price', 'status', 'updatedAt'],
     description: 'Event products in the Zenfest Shop. Set "Status" to Live to show one on the site.',
-    hidden: adminHidden('products'),
+    hidden: moduleHidden('website', 'products'),
   },
   defaultSort: 'sortOrder',
   hooks: { beforeChange: [fillDerived] },

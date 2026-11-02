@@ -1,8 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access'
-import { adminHidden, canManage, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { slugField } from '../fields/slug'
+
+const { canManage, canDelete } = accessFor('website')
 
 /** Event types: Weddings, Birthdays, Corporate, Housewarmings, Sports, etc. */
 export const Categories: CollectionConfig = {
@@ -12,14 +14,14 @@ export const Categories: CollectionConfig = {
     read: anyone,
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Website',
     useAsTitle: 'title',
     defaultColumns: ['title', 'order'],
     description: 'Kinds of events (Wedding, Birthday…) used to sort the gallery.',
-    hidden: adminHidden('categories'),
+    hidden: moduleHidden('website', 'categories'),
   },
   defaultSort: 'order',
   fields: [

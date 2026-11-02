@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from 'crypto'
 import type { CollectionConfig, PayloadRequest } from 'payload'
 
-import { adminHidden, ownerOnly } from '../access/roles'
+import { ownerHidden, ownerOnly } from '../access/roles'
 import { cloudConfigured, sendText } from '../lib/whatsapp/cloud'
 import type { WebhookBody } from '../lib/whatsapp/events'
 import { findOrCreateContact, recordWebhook } from '../lib/whatsapp/inbox'
@@ -43,7 +43,7 @@ export const PhoneVerifications: CollectionConfig = {
     useAsTitle: 'phone',
     defaultColumns: ['phone', 'status', 'purpose', 'createdAt'],
     description: 'Automatic WhatsApp number checks from the website forms. Nothing to do here.',
-    hidden: adminHidden('phone-verifications', 'owner'),
+    hidden: ownerHidden('phone-verifications'),
   },
   defaultSort: '-createdAt',
   fields: [

@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
-import { canView, canWork, ownerOnly } from '../access/roles'
+import { accessFor } from '../access/roles'
 import { toWaNumber } from '../lib/whatsapp/phone'
+
+const { canView, canWork, canDelete } = accessFor('decorations')
 
 /**
  * The people who supply decorations (stage decorators, florists, balloon artists…). Kept
@@ -16,7 +18,7 @@ export const DecorSuppliers: CollectionConfig = {
     read: canView,
     create: canWork,
     update: canWork,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Decorations',

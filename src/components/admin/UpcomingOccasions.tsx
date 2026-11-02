@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Payload } from 'payload'
 
+import { hasLevel } from '../../access/roles'
 import { addDays, daysBetween, istYmd, nextOccurrence, todayIst, ymdKey, ymdToIso } from '../../lib/occasions/dates'
 import { milestone } from '../../lib/occasions/options'
 import { OccasionsBoard, type BoardItem } from './OccasionsBoard'
@@ -12,7 +13,9 @@ const COMING_UP_DAYS = 60
  * payload.config.ts). Server component — Payload passes it the Local API;
  * the interactive part is OccasionsBoard. Styles: app/(payload)/custom.scss.
  */
-export async function UpcomingOccasions({ payload }: { payload: Payload }) {
+export async function UpcomingOccasions({ payload, user }: { payload: Payload; user?: unknown }) {
+  // Only people with access to Birthdays & anniversaries (the queries below skip access checks).
+  if (!hasLevel(user as never, 'occasions', 'read')) return null
   const today = todayIst()
   const startOfMonth = new Date(`${ymdKey({ ...today, d: 1 })}T00:00:00+05:30`).toISOString()
   const horizon = ymdToIso(addDays(today, COMING_UP_DAYS))

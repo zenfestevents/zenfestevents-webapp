@@ -1,6 +1,8 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
+
+const { canView, canManage, canDelete } = accessFor('clients', 'ai-conversations')
 
 
 /**
@@ -16,14 +18,14 @@ export const AiConversations: CollectionConfig = {
     read: canView,
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Zenfest AI',
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'turns', 'lead', 'updatedAt'],
     description: 'Every Zenfest AI conversation. Open one to read what the customer and the agents said.',
-    hidden: adminHidden('ai-conversations'),
+    hidden: moduleHidden('clients', 'ai-conversations'),
   },
   defaultSort: '-updatedAt',
   fields: [

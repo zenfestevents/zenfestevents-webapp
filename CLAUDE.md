@@ -237,29 +237,43 @@ src/
   not inline styles. The menu groups are plain words in daily-work order (Clients · Vendors ·
   WhatsApp · Birthdays & anniversaries · Website · Rewards · Team · System): Payload orders groups
   by first appearance, so the `collections` array in `payload.config.ts` sets it. Home screen =
-  `TodayBoard` (jobs waiting, per role) then `UpcomingOccasions`; status selects use the
+  `TodayBoard` (jobs waiting, only for modules the person can open) then `UpcomingOccasions`; status selects use the
   `StatusPill` list cell. Every list has a one-line plain-English `admin.description` — keep it.
-- **Admin team roles (`access/roles.ts`, owner 2026-10-25).** Each `users` login has a `role`:
-  **Owner** (everything, Team, deleting) · **Manager** (approves vendor applications / listings /
-  reviews, edits the website and settings, sends WhatsApp campaigns, imports contacts) · **Team
-  member** (works enquiries, replies on WhatsApp, wishes; default for new people) · **Viewer**
-  (looks only). Easy to get wrong:
-  - **Never use `authenticated` / `isAdmin` on new collections**; pick `canView` / `canWork` /
-    `canManage` / `ownerOnly` (and the `…Field` twins for approval fields). Delete is `ownerOnly`
-    everywhere, which also removes Payload's Delete button for everyone else.
-  - Every role check also requires `active !== false` ("Can log in"): untick it when someone leaves
-    instead of deleting them (`beforeLogin` refuses, `access.admin` locks the panel). The last
-    active Owner can't be demoted, switched off or deleted (`keepAnOwner` in `Users.ts`).
-  - Only the Owner sees Team (`hiddenBelow('owner')`); others edit their own name/password from
-    the account menu. Runs history, invite visits and phone checks are Owner-only too.
-  - **Hidden for now: `ADMIN_HIDDEN`** in `access/roles.ts` (gift registry, polls, Zenfest AI,
-    shop, host applications, ₹100 sign-ups, marketplace enquiries). `admin.hidden` removes them
-    from the menu *and* their admin pages (404); the data, REST API and website keep working (the
-    public registry is still live). Delete a slug from the set to bring a list back.
-  - The `20261025_152046_team_roles` migration made every existing login an **Owner**; a local
-    SQLite push gives existing rows the default `team` instead — set them with SQL.
-    `npm run create:admin` makes an Owner. `npm run test:roles` (local SQLite) checks every role;
-    `-- --keep` leaves `role-<role>@test.invalid` logins (password in the script) to try by hand.
+- **Admin team access by module (`access/roles.ts`, owner 2026-11-02; replaced the 2026-10-25
+  Manager / Team member / Viewer roles).** A `users` login is the **Owner** (everything, Team, the
+  System lists) or a **Team member** whose `moduleAccess` group (set by the Owner on the Team page)
+  gives one level per module: **None** (hidden in the menu, 404 in the admin, 403 over the API) ·
+  **Read only** · **Add & edit** (add and change; no delete, no approving, no bulk sends) · **Full**
+  (everything in that module: delete, approve vendors / listings / reviews, WhatsApp campaigns +
+  import, settings). Modules = the admin menu groups: `clients`, `vendors`, `whatsapp`, `occasions`
+  (Birthdays & anniversaries), `decorations`, `website`, `rewards` (`MODULES`). Easy to get wrong:
+  - **Never use a bare "is someone logged in" check on a new collection.** Pick its module and use
+    `accessFor('<module>')` (`canView` = Read only+, `canWork` = Add & edit+, `canManage` and
+    `canDelete` = Full, plus `…Field` twins and `can(req, level)` for custom endpoints). Use
+    `moduleHidden('<module>', '<slug>')` for `admin.hidden`. Delete is `canDelete` (Full in that
+    module); the Owner has Full everywhere. A new module needs an entry in `MODULES`, a select in the
+    `moduleAccess` group (`Users.ts`) and a migration.
+  - **Owner-only, no module:** Team, Runs, referral visits, phone checks and Decor price views use
+    `ownerOnly` / `ownerHidden`. Lists in `ADMIN_HIDDEN` (gift registry, polls, Zenfest AI, shop,
+    host applications, ₹100 sign-ups, marketplace enquiries) are hidden **and closed to everyone but
+    the Owner over the API** (`accessFor(module, slug)`); the data and website keep working because
+    the site reads with the Local API. Delete a slug from the set to bring a list back.
+  - **A missing or unknown level is None** (secure by default), and the old `role` values `manager` /
+    `viewer` give no access by themselves. Local-API reads in server components skip access checks, so
+    dashboard widgets must gate themselves (`TodayBoard` / `UpcomingOccasions` check the level first).
+  - Every check also requires `active !== false` ("Can log in"): untick it when someone leaves instead
+    of deleting them (`beforeLogin` refuses, `access.admin` locks the panel). The last active Owner
+    can't be demoted, switched off or deleted (`keepAnOwner` in `Users.ts`). Only the Owner sees Team;
+    others edit their own name/password from the account menu and can't change their own access.
+  - The `20261102_112513_module_access` migration converted the old roles (Viewer → Read only
+    everywhere; Team → Add & edit in Clients, Vendors, WhatsApp, Birthdays & anniversaries,
+    Decorations and Read only in Website, Rewards; Manager → Full everywhere, so managers gained
+    delete) and made everyone a Team member; Owners were left alone. The `role` enum keeps the old
+    values so the column stays valid; the form offers only Owner and Team member.
+  - `npm run create:admin` makes an Owner. `npm run test:roles` (local SQLite) checks every level, the
+    Owner-only lists and the Team rules; `-- --keep` leaves `role-<owner|reader|editor|boss|nobody>@test.invalid`
+    logins (password in the script) to try by hand. The decoration, WhatsApp and rewards tests create
+    their own staff with `moduleAccess`.
 - **Styling:** plain CSS design system. Tokens live in `styles.css`; component/section
   styles in `parts.css`. Use the existing CSS variables and class prefixes; avoid
   adding a CSS framework.

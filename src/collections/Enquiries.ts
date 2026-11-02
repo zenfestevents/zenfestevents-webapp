@@ -1,8 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { enquiryRuns } from '../hooks/runsClub'
 import { ENQUIRY_STATUSES, EVENT_TYPES, toOptionList } from '../lib/marketplaceOptions'
+
+const { canView, canManage, canDelete } = accessFor('clients', 'enquiries')
 
 /**
  * Quote requests from a logged-in couple to one marketplace vendor, with the
@@ -16,14 +18,14 @@ export const Enquiries: CollectionConfig = {
     read: canView,
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Marketplace',
     useAsTitle: 'summary',
     defaultColumns: ['summary', 'vendor', 'customer', 'eventDate', 'status', 'updatedAt'],
     description: 'Quote requests couples sent to vendors through the marketplace.',
-    hidden: adminHidden('enquiries'),
+    hidden: moduleHidden('clients', 'enquiries'),
   },
   defaultSort: '-updatedAt',
   hooks: { afterChange: [enquiryRuns] },

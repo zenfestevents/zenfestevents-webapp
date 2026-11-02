@@ -1,6 +1,8 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminHidden, canView, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
+
+const { canView, canDelete } = accessFor('whatsapp')
 
 
 /**
@@ -15,7 +17,7 @@ export const WhatsAppMessages: CollectionConfig = {
     create: () => false,
     read: canView,
     update: () => false,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'WhatsApp',
@@ -23,7 +25,7 @@ export const WhatsAppMessages: CollectionConfig = {
     defaultColumns: ['at', 'direction', 'phone', 'contact', 'text', 'status'],
     listSearchableFields: ['phone', 'text'],
     description: 'Every message sent and received, newest first. To reply, open the person in “Chats & contacts”.',
-    hidden: adminHidden('whatsapp-messages'),
+    hidden: moduleHidden('whatsapp', 'whatsapp-messages'),
   },
   defaultSort: '-at',
   fields: [

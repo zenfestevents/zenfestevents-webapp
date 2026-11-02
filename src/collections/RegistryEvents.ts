@@ -1,8 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { notifySubmission } from '../hooks/notifySubmission'
 import { REGISTRY_EVENT_TYPES, SLUG_PATTERN, toOptions } from '../lib/registryOptions'
+
+const { canView, canManage, canDelete } = accessFor('website', 'registry-events')
 
 /**
  * Gift registries (`/r/[slug]`). Hosts have no account: each registry has a
@@ -18,14 +20,14 @@ export const RegistryEvents: CollectionConfig = {
     read: canView,
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Gift Registry',
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'eventType', 'eventDate', 'hostName', 'hostPhone', 'createdAt'],
     description: 'Gift registries made by families at /registry. Every new one is also a warm lead.',
-    hidden: adminHidden('registry-events'),
+    hidden: moduleHidden('website', 'registry-events'),
   },
   defaultSort: '-createdAt',
   hooks: {

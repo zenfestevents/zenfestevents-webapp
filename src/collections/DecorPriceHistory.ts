@@ -1,6 +1,8 @@
 import type { CollectionConfig } from 'payload'
 
-import { canView, ownerOnly } from '../access/roles'
+import { accessFor } from '../access/roles'
+
+const { canView, canDelete } = accessFor('decorations')
 
 /**
  * Every change to a decoration's client or vendor price (old → new, when, by whom), so a
@@ -14,7 +16,7 @@ export const DecorPriceHistory: CollectionConfig = {
     read: canView,
     create: () => false,
     update: () => false,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Decorations',

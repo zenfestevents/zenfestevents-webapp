@@ -1,7 +1,7 @@
 import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 
 import { adminOrSelf } from '../access'
-import { adminHidden, canManage, canManageField, canViewField, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { assignReferralCode, vendorRuns } from '../hooks/runsClub'
 import {
   CATEGORY_OPTIONS,
@@ -11,6 +11,8 @@ import {
   toOptionList,
 } from '../lib/marketplaceOptions'
 import { accountAuth } from './accountAuth'
+
+const { canManage, canViewField, canManageField, canDelete } = accessFor('vendors')
 
 /** Keeps `startingPrice` (used for sorting and the budget filter) in step with the price card. */
 const setStartingPrice: CollectionBeforeChangeHook = ({ data }) => {
@@ -35,17 +37,17 @@ export const Vendors: CollectionConfig = {
   labels: { singular: 'Vendor account', plural: 'Vendor accounts' },
   auth: accountAuth({ reset: '/vendors/reset-password', verify: '/vendors/verify-email' }),
   access: {
-    read: adminOrSelf('vendors'),
+    read: adminOrSelf('vendors', 'vendors'),
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Vendors',
     useAsTitle: 'businessName',
     defaultColumns: ['businessName', 'category', 'listingStatus', 'phone', 'updatedAt'],
-    description: 'Vendors who log in to the website with WhatsApp. A Manager or the Owner sets “Listing status” to Live to show a listing.',
-    hidden: adminHidden('vendors'),
+    description: 'Vendors who log in to the website with WhatsApp. Someone with Full access to Vendors (or the Owner) sets “Listing status” to Live to show a listing.',
+    hidden: moduleHidden('vendors', 'vendors'),
   },
   defaultSort: '-updatedAt',
   hooks: { beforeChange: [setStartingPrice, assignReferralCode], afterChange: [vendorRuns] },

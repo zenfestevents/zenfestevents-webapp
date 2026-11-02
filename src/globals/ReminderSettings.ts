@@ -1,8 +1,10 @@
 import type { GlobalConfig } from 'payload'
 
-import { canManage, canView } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { DEFAULT_CLIENT_MESSAGE, DEFAULT_LEAD_MESSAGE, MESSAGE_PLACEHOLDERS } from '../lib/occasions/message'
 import { DEFAULT_LEAD_DAYS, OCCASION_TYPES } from '../lib/occasions/options'
+
+const { canView, canManage } = accessFor('occasions')
 
 /**
  * Settings for occasion reminders. Blank fields fall back to the defaults in
@@ -18,7 +20,8 @@ export const ReminderSettings: GlobalConfig = {
   },
   admin: {
     group: 'Birthdays & anniversaries',
-    description: 'How early wishes are created, the WhatsApp message text and the daily email. Only a Manager or the Owner can change these.',
+    hidden: moduleHidden('occasions', 'reminder-settings'),
+    description: 'How early wishes are created, the WhatsApp message text and the daily email. Only someone with Full access to Birthdays & anniversaries (or the Owner) can change these.',
   },
   fields: [
     {

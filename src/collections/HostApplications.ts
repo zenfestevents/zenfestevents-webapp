@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access'
-import { adminHidden, canView, canWork, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { notifySubmission } from '../hooks/notifySubmission'
 import {
   HOST_CITIES,
@@ -14,6 +14,8 @@ import {
   YES_NO,
   toOptions,
 } from '../lib/hostOptions'
+
+const { canView, canWork, canDelete } = accessFor('clients', 'host-applications')
 
 /**
  * "Earn from events" (/earn): families who'd open their wedding or function to
@@ -28,14 +30,14 @@ export const HostApplications: CollectionConfig = {
     read: canView,
     create: anyone,
     update: canWork,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'phone', 'eventType', 'eventDate', 'city', 'status', 'createdAt'],
     description:
       'Families who want to host foreign guests at their event (/earn). Verify the family before listing.',
-    hidden: adminHidden('host-applications'),
+    hidden: moduleHidden('clients', 'host-applications'),
   },
   defaultSort: '-createdAt',
   hooks: {

@@ -1,9 +1,11 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access'
-import { adminHidden, canView, canWork, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { notifySubmission } from '../hooks/notifySubmission'
 import { LEAD_EVENT_TYPES, toOptions } from '../lib/registryOptions'
+
+const { canView, canWork, canDelete } = accessFor('clients', 'registry-leads')
 
 /**
  * "Plan with Zenfest" leads from the banner on every guest registry page
@@ -17,14 +19,14 @@ export const RegistryLeads: CollectionConfig = {
     read: canView,
     create: anyone,
     update: canWork,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Gift Registry',
     useAsTitle: 'name',
     defaultColumns: ['name', 'phone', 'eventType', 'tentativeDate', 'city', 'referringEvent', 'status', 'createdAt'],
     description: 'Guests who tapped “Plan with Zenfest” on someone’s registry. Call or WhatsApp them.',
-    hidden: adminHidden('registry-leads'),
+    hidden: moduleHidden('clients', 'registry-leads'),
   },
   defaultSort: '-createdAt',
   hooks: {

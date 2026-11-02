@@ -1,4 +1,4 @@
-import { adminHidden, canView, canWork, hasRole, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import type {
   CollectionAfterChangeHook,
   CollectionBeforeChangeHook,
@@ -9,6 +9,8 @@ import type {
 import { parseYmdKey, todayIst } from '../lib/occasions/dates'
 import { OCCASION_TYPES, REMINDER_CHANNELS, REMINDER_STATUSES } from '../lib/occasions/options'
 import { createLeadForReminder, runDailyReminders } from '../lib/occasions/server'
+
+const { canView, canWork, canDelete, can } = accessFor('occasions')
 
 const dayOnly = { date: { pickerAppearance: 'dayOnly' as const, displayFormat: 'd MMM yyyy' } }
 
@@ -57,7 +59,7 @@ const updateContact: CollectionAfterChangeHook = async ({ doc, previousDoc, req 
 async function cron(req: PayloadRequest) {
   const secret = process.env.CRON_SECRET
   const bearer = req.headers.get('authorization') === `Bearer ${secret}`
-  const isStaff = hasRole(req.user, 'viewer')
+  const isStaff = can(req, 'edit')
   if (!(secret && bearer) && !isStaff) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
   const q = req.searchParams
@@ -85,7 +87,7 @@ export const Reminders: CollectionConfig = {
     read: canView,
     create: canWork,
     update: canWork,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Birthdays & anniversaries',
@@ -93,7 +95,7 @@ export const Reminders: CollectionConfig = {
     defaultColumns: ['contactName', 'phone', 'milestone', 'occurrenceDate', 'status', 'assignedTo'],
     listSearchableFields: ['title', 'contactName', 'phone'],
     description: 'Wishes that are due. Tap the WhatsApp number to open the ready message, send it, then set what they said.',
-    hidden: adminHidden('reminders'),
+    hidden: moduleHidden('occasions', 'reminders'),
   },
   defaultSort: '-dueDate',
   indexes: [{ fields: ['occasionId', 'occurrenceYear'], unique: true }],

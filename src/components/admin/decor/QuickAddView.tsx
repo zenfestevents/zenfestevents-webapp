@@ -4,18 +4,18 @@ import type { AdminViewServerProps } from 'payload'
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import { Gutter } from '@payloadcms/ui'
 
-import { hasRole } from '../../../access/roles'
+import { hasLevel } from '../../../access/roles'
 import { DecorQuickAddForm } from './QuickAddForm'
 
 /**
  * /admin/decor/quick-add (registered in payload.config.ts → admin.components.views): a
  * phone-first screen to add a decoration as a Draft from a few photos and a price.
- * Team members and up only; the form itself saves through /api/decor-items, which checks
- * the same role again.
+ * Needs Add & edit (or Full) access to Decorations; the form itself saves through
+ * /api/decor-items, which checks the same access again.
  */
 export function DecorQuickAddView({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const { req, locale, permissions, visibleEntities } = initPageResult
-  const allowed = hasRole(req.user as never, 'team')
+  const allowed = hasLevel(req.user as never, 'decorations', 'edit')
   return (
     <DefaultTemplate
       i18n={req.i18n}
@@ -41,7 +41,7 @@ export function DecorQuickAddView({ initPageResult, params, searchParams }: Admi
         {allowed ? (
           <DecorQuickAddForm />
         ) : (
-          <p className="zf-empty">Your role can look at decorations but not add them. Ask a Manager.</p>
+          <p className="zf-empty">You can’t add decorations. Ask the Owner for Add &amp; edit access to Decorations.</p>
         )}
       </Gutter>
     </DefaultTemplate>

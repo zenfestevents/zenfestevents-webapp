@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto'
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, CollectionBeforeValidateHook, CollectionConfig } from 'payload'
-import { adminHidden, ownerOnly } from '../access/roles'
+import { ownerHidden, ownerOnly } from '../access/roles'
 import { ValidationError } from 'payload'
 
 import { kindOfCollection, recomputeRuns } from '../lib/rewards'
@@ -65,7 +65,7 @@ export const Runs: CollectionConfig = {
     defaultColumns: ['account', 'amount', 'reason', 'source', 'createdAt'],
     description:
       'Every award of runs. To give a bonus or correct a total, add a row with reason "Added by the Zenfest team".',
-    hidden: adminHidden('runs', 'owner'),
+    hidden: ownerHidden('runs'),
   },
   defaultSort: '-createdAt',
   indexes: [{ fields: ['accountKey', 'reason', 'source'], unique: true }],

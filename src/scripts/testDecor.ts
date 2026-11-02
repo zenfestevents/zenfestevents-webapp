@@ -5,7 +5,7 @@
 //   4. PRIVACY: visitors, couples and vendors get nothing from the decor lists (items,
 //      suppliers, price history, views, photo records); staff see the vendor price;
 //      a couple's own account never carries the saved-decorations or blocked fields
-//   5. roles: Viewer looks only, Team member adds/edits, only the Owner deletes
+//   5. access to Decorations: Read only looks, Add & edit adds/edits, Full and the Owner delete
 // Test records are named "Decor test …"; they are removed before and after each run.
 // Refuses to run against Postgres, so it can never touch production.
 import 'dotenv/config'
@@ -24,7 +24,9 @@ if ((process.env.DATABASE_URI || '').startsWith('postgres')) {
 
 /** Local test value only — these logins exist only in the local SQLite database. */
 const TEST_PASSWORD = 'zenfest-decor-test'
+/** `team` = Add & edit and `viewer` = Read only, both on Decorations only. */
 const ROLES = ['owner', 'team', 'viewer'] as const
+const DECOR_LEVEL = { owner: 'full', team: 'edit', viewer: 'read' } as const
 const TITLE = 'Decor test'
 
 const payload: Payload = await getPayload({ config })
@@ -80,7 +82,13 @@ const staff = {} as Record<(typeof ROLES)[number], User & { collection: 'users' 
 for (const role of ROLES) {
   const doc = await payload.create({
     collection: 'users',
-    data: { email: `decor-${role}@test.invalid`, password: TEST_PASSWORD, name: `Decor ${role}`, role },
+    data: {
+      email: `decor-${role}@test.invalid`,
+      password: TEST_PASSWORD,
+      name: `Decor ${role}`,
+      role: role === 'owner' ? 'owner' : 'team',
+      moduleAccess: { decorations: DECOR_LEVEL[role] },
+    },
     overrideAccess: true,
   })
   staff[role] = { ...doc, collection: 'users' }

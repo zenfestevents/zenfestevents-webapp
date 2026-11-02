@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { hiddenBelow, ownerOnly } from '../access/roles'
+import { ownerHidden, ownerOnly } from '../access/roles'
 
 /**
  * Which logged-in client saw which decoration's price, per India calendar day. It is both
@@ -24,7 +24,7 @@ export const DecorViews: CollectionConfig = {
     defaultColumns: ['customer', 'item', 'day', 'createdAt'],
     description:
       'Which client saw which decoration price, and when. Someone opening many items every day may be copying prices — tick “Blocked from decoration prices” on their client account.',
-    hidden: hiddenBelow('owner'),
+    hidden: ownerHidden('decor-views'),
   },
   defaultSort: '-createdAt',
   indexes: [{ fields: ['customer', 'item', 'day'], unique: true }],

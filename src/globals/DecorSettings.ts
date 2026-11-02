@@ -1,6 +1,8 @@
 import type { GlobalConfig } from 'payload'
 
-import { canManage, canView } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
+
+const { canView, canManage } = accessFor('decorations')
 
 /** Settings for the public Decoration catalog's price protection (lib/decorations.ts). */
 export const DecorSettings: GlobalConfig = {
@@ -9,6 +11,7 @@ export const DecorSettings: GlobalConfig = {
   access: { read: canView, update: canManage },
   admin: {
     group: 'Decorations',
+    hidden: moduleHidden('decorations', 'decor-settings'),
     description: 'How many decoration prices one logged-in client may see per day, and how wide price ranges are.',
   },
   fields: [

@@ -1,6 +1,6 @@
 import type { CollectionConfig, FieldAccess } from 'payload'
 
-import { canView, canViewField, canWork, ownerOnly } from '../access/roles'
+import { accessFor } from '../access/roles'
 import { assignItemCode, recordPriceHistory, stampPriceChange } from '../hooks/decorPrices'
 import { revalidateCollection } from '../hooks/revalidateContent'
 import { CONTENT_TAGS } from '../lib/contentCache'
@@ -17,6 +17,8 @@ import {
   decorOptions,
   marginOf,
 } from '../lib/decorOptions'
+
+const { canView, canWork, canViewField, canDelete } = accessFor('decorations')
 
 /** Only fields the server works out itself. */
 const noOne: FieldAccess = () => false
@@ -56,7 +58,7 @@ export const DecorItems: CollectionConfig = {
     read: canView,
     create: canWork,
     update: canWork,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Decorations',

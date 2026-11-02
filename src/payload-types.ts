@@ -433,7 +433,7 @@ export interface Customer {
   collection: 'customers';
 }
 /**
- * Vendors who log in to the website with WhatsApp. A Manager or the Owner sets “Listing status” to Live to show a listing.
+ * Vendors who log in to the website with WhatsApp. Someone with Full access to Vendors (or the Owner) sets “Listing status” to Live to show a listing.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "vendors".
@@ -582,7 +582,7 @@ export interface VendorMedia {
   };
 }
 /**
- * Vendors who want to work with Zenfest. Open one, check the details and call them. A Manager or the Owner then sets “Status” to Approved or Rejected.
+ * Vendors who want to work with Zenfest. Open one, check the details and call them. Someone with Full access to Vendors (or the Owner) then sets “Status” to Approved or Rejected.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "vendor-applications".
@@ -663,7 +663,7 @@ export interface VendorApplication {
    */
   referredBy?: string | null;
   /**
-   * Only a Manager or the Owner can approve or reject.
+   * Only someone with Full access to Vendors (or the Owner) can approve or reject.
    */
   status?: ('new' | 'reviewing' | 'approved' | 'rejected') | null;
   updatedAt: string;
@@ -888,7 +888,7 @@ export interface DecorPriceHistory {
   createdAt: string;
 }
 /**
- * Your team’s logins for this admin. Add a person, give them a role, and share their email + password with them. When someone leaves, untick “Can log in”.
+ * Your team’s logins for this admin. Add a person, choose which modules they can open and what they can do there, and share their email + password with them. When someone leaves, untick “Can log in”.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
@@ -898,9 +898,42 @@ export interface User {
   name?: string | null;
   phone?: string | null;
   /**
-   * What this person is allowed to do. Only the Owner can change it.
+   * Owner can do everything, including this Team list. A Team member can do only what you set under “Access by module”. Only the Owner can change this.
    */
   role: 'owner' | 'manager' | 'team' | 'viewer';
+  /**
+   * Choose what this person can open. None hides the module completely. Read only can look. Add & edit can add and change records but cannot delete, approve vendors, listings or reviews, or send bulk WhatsApp messages. Full can do everything in that module.
+   */
+  moduleAccess?: {
+    /**
+     * Enquiries and client accounts
+     */
+    clients?: ('none' | 'read' | 'edit' | 'full') | null;
+    /**
+     * Vendor applications, vendor listings and uploads
+     */
+    vendors?: ('none' | 'read' | 'edit' | 'full') | null;
+    /**
+     * Chats, contacts and campaigns
+     */
+    whatsapp?: ('none' | 'read' | 'edit' | 'full') | null;
+    /**
+     * Contacts, wishes and wish settings
+     */
+    occasions?: ('none' | 'read' | 'edit' | 'full') | null;
+    /**
+     * Decorations, suppliers, photos, prices and settings
+     */
+    decorations?: ('none' | 'read' | 'edit' | 'full') | null;
+    /**
+     * Our work, services, packages, reviews, photos and website settings
+     */
+    website?: ('none' | 'read' | 'edit' | 'full') | null;
+    /**
+     * Reward settings
+     */
+    rewards?: ('none' | 'read' | 'edit' | 'full') | null;
+  };
   /**
    * Untick when someone leaves. Their name stays on the work they did.
    */
@@ -995,7 +1028,7 @@ export interface WhatsappMessage {
   createdAt: string;
 }
 /**
- * One approved message sent to many opted-in people at once. Meta charges about ₹1 per person. Only a Manager or the Owner can send.
+ * One approved message sent to many opted-in people at once. Meta charges about ₹1 per person. Only someone with Full access to WhatsApp (or the Owner) can send.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "whatsapp-campaigns".
@@ -1462,7 +1495,7 @@ export interface Testimonial {
   date?: string | null;
   source: 'google' | 'direct';
   /**
-   * Ticked = shown on the website. Only a Manager or the Owner can change it.
+   * Ticked = shown on the website. Only someone with Full access to Website (or the Owner) can change it.
    */
   published?: boolean | null;
   /**
@@ -2874,6 +2907,17 @@ export interface UsersSelect<T extends boolean = true> {
   name?: T;
   phone?: T;
   role?: T;
+  moduleAccess?:
+    | T
+    | {
+        clients?: T;
+        vendors?: T;
+        whatsapp?: T;
+        occasions?: T;
+        decorations?: T;
+        website?: T;
+        rewards?: T;
+      };
   active?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -3250,7 +3294,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
- * How early wishes are created, the WhatsApp message text and the daily email. Only a Manager or the Owner can change these.
+ * How early wishes are created, the WhatsApp message text and the daily email. Only someone with Full access to Birthdays & anniversaries (or the Owner) can change these.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "reminder-settings".
@@ -3309,7 +3353,7 @@ export interface ReminderSetting {
   createdAt?: string | null;
 }
 /**
- * Phone numbers, branches and homepage text shown on the website. Only a Manager or the Owner can change these.
+ * Phone numbers, branches and homepage text shown on the website. Only someone with Full access to Website (or the Owner) can change these.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings".

@@ -1,8 +1,10 @@
 import type { CollectionConfig, PayloadRequest } from 'payload'
 
-import { adminHidden, canView, canWork, hasRole, ownerOnly, type Role } from '../access/roles'
+import { accessFor, moduleHidden, type Level } from '../access/roles'
 import { sendText } from '../lib/whatsapp/cloud'
 import { toWaNumber } from '../lib/whatsapp/phone'
+
+const { canView, canWork, canDelete, can } = accessFor('whatsapp')
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -18,7 +20,7 @@ export const WhatsAppContacts: CollectionConfig = {
     read: canView,
     create: canWork,
     update: canWork,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'WhatsApp',
@@ -29,7 +31,7 @@ export const WhatsAppContacts: CollectionConfig = {
       beforeListTable: ['/components/admin/whatsapp/ImportContacts#ImportContacts'],
     },
     description: 'Everyone on our WhatsApp number. Open a person to read the chat and reply. Offers go only to “Opted in” people; anyone who replies STOP is moved to “Opted out” automatically.',
-    hidden: adminHidden('whatsapp-contacts'),
+    hidden: moduleHidden('whatsapp', 'whatsapp-contacts'),
   },
   defaultSort: '-lastInboundAt',
   hooks: {
@@ -101,7 +103,7 @@ export const WhatsAppContacts: CollectionConfig = {
 }
 
 const json = (body: unknown, status = 200) => Response.json(body, { status })
-const isStaff = (req: PayloadRequest, min: Role = 'viewer') => hasRole(req.user, min)
+const isStaff = (req: PayloadRequest, min: Exclude<Level, 'none'> = 'read') => can(req, min)
 
 async function readJson(req: PayloadRequest): Promise<Record<string, unknown>> {
   try {
@@ -117,7 +119,7 @@ async function readJson(req: PayloadRequest): Promise<Record<string, unknown>> {
  * Existing numbers are updated, never switched back from "Opted out".
  */
 async function importContacts(req: PayloadRequest) {
-  if (!isStaff(req, 'manager')) return json({ error: 'Only a Manager or the Owner can import contacts.' }, 403)
+  if (!isStaff(req, 'full')) return json({ error: 'Importing contacts needs Full access to WhatsApp.' }, 403)
   const body = await readJson(req)
   const lines = String(body.text ?? '').split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
   if (!lines.length) return json({ error: 'Paste at least one line.' }, 400)
@@ -180,7 +182,7 @@ function mergeTags(current: string | null | undefined, extra: string) {
 
 /** POST /:id/reply { text } — a free-form reply, allowed within 24 h of their last message. */
 async function reply(req: PayloadRequest) {
-  if (!isStaff(req, 'team')) return json({ error: 'Viewers can read chats but not reply.' }, 403)
+  if (!isStaff(req, 'edit')) return json({ error: 'You can read chats but not reply: ask the Owner for Add & edit access to WhatsApp.' }, 403)
   const id = req.routeParams?.id as string
   const text = String((await readJson(req)).text ?? '').trim()
   if (!text) return json({ error: 'Type a message first.' }, 400)

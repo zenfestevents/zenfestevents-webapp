@@ -1,10 +1,12 @@
 import type { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 
-import { adminHidden, canView, canWork, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { todayIst } from '../lib/occasions/dates'
 import { toWaNumber } from '../lib/occasions/message'
 import { BRANCHES, CONTACT_SOURCES, OCCASION_TYPES, RELATIONSHIPS } from '../lib/occasions/options'
 import { ensureReminders, getReminderSettings, withNextDates } from '../lib/occasions/server'
+
+const { canView, canWork, canDelete } = accessFor('occasions')
 
 const dayOnly = { date: { pickerAppearance: 'dayOnly' as const, displayFormat: 'd MMM yyyy' } }
 
@@ -60,7 +62,7 @@ export const Contacts: CollectionConfig = {
     read: canView,
     create: canWork,
     update: canWork,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Birthdays & anniversaries',
@@ -68,7 +70,7 @@ export const Contacts: CollectionConfig = {
     defaultColumns: ['name', 'phone', 'relationship', 'nextOccasionDate', 'source', 'verified'],
     listSearchableFields: ['name', 'phone', 'notes'],
     description: 'Past clients and enquiries whose birthdays and anniversaries we remember. Add the person once with their dates; wishes are created automatically before each date.',
-    hidden: adminHidden('contacts'),
+    hidden: moduleHidden('occasions', 'contacts'),
   },
   defaultSort: 'nextOccasionDate',
   hooks: {

@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminHidden, ownerOnly } from '../access/roles'
+import { ownerHidden, ownerOnly } from '../access/roles'
 
 
 /**
@@ -24,7 +24,7 @@ export const ReferralVisits: CollectionConfig = {
     useAsTitle: 'referrer',
     defaultColumns: ['referrer', 'audience', 'createdAt'],
     description: 'Someone opened an invite link. Anonymous: only who shared the link and when.',
-    hidden: adminHidden('referral-visits', 'owner'),
+    hidden: ownerHidden('referral-visits'),
   },
   defaultSort: '-createdAt',
   indexes: [{ fields: ['referrer', 'visitor'], unique: true }],

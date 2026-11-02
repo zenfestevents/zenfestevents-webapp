@@ -1,6 +1,6 @@
 import type { ArrayField, GlobalConfig } from 'payload'
 
-import { canManage, canView } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import {
   AWARD_REASONS,
   DEFAULT_COUPLE_TIERS,
@@ -10,6 +10,8 @@ import {
   reasonLabel,
   type RewardTier,
 } from '../lib/rewardTiers'
+
+const { canView, canManage } = accessFor('rewards')
 
 const tiers = (name: string, label: string, defaults: RewardTier[]): ArrayField => ({
   name,
@@ -47,6 +49,7 @@ export const RewardSettings: GlobalConfig = {
   },
   admin: {
     group: 'Rewards',
+    hidden: moduleHidden('rewards', 'reward-settings'),
     description: 'How many runs each action earns and what each tier unlocks. 0 switches an action off.',
   },
   fields: [

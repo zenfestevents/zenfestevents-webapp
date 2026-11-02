@@ -1,7 +1,7 @@
 import { APIError, type CollectionBeforeChangeHook, type CollectionConfig } from 'payload'
 
 import { anyone } from '../access'
-import { adminHidden, canManageField, canView, canWork, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { linkVendorApplication } from '../hooks/linkVendorApplication'
 import { applicationRuns, stampApplicationReferral } from '../hooks/runsClub'
 import { notifySubmission } from '../hooks/notifySubmission'
@@ -17,6 +17,8 @@ import {
   TIER_UNITS,
   toOptions,
 } from '../lib/vendorOptions'
+
+const { canView, canWork, canManageField, canDelete } = accessFor('vendors')
 
 const photoServiceOptions = PHOTO_SERVICES.map(([value, label]) => ({ value, label }))
 
@@ -49,14 +51,14 @@ export const VendorApplications: CollectionConfig = {
     read: canView,
     create: anyone,
     update: canWork,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Vendors',
     useAsTitle: 'name',
     defaultColumns: ['name', 'vendorType', 'phone', 'city', 'status', 'createdAt'],
-    description: 'Vendors who want to work with Zenfest. Open one, check the details and call them. A Manager or the Owner then sets “Status” to Approved or Rejected.',
-    hidden: adminHidden('vendor-applications'),
+    description: 'Vendors who want to work with Zenfest. Open one, check the details and call them. Someone with Full access to Vendors (or the Owner) then sets “Status” to Approved or Rejected.',
+    hidden: moduleHidden('vendors', 'vendor-applications'),
   },
   defaultSort: '-createdAt',
   hooks: {
@@ -323,11 +325,11 @@ export const VendorApplications: CollectionConfig = {
         { label: 'Approved', value: 'approved' },
         { label: 'Rejected', value: 'rejected' },
       ],
-      // Approving a vendor is a Manager's call.
+      // Approving a vendor needs Full access to Vendors.
       access: { update: canManageField },
       admin: {
         position: 'sidebar',
-        description: 'Only a Manager or the Owner can approve or reject.',
+        description: 'Only someone with Full access to Vendors (or the Owner) can approve or reject.',
         components: { Cell: '/components/admin/StatusPill#StatusPill' },
       },
     },

@@ -2,7 +2,9 @@ import crypto from 'node:crypto'
 
 import { APIError, type Access, type CollectionConfig } from 'payload'
 
-import { canWork, hasRole, ownerOnly } from '../access/roles'
+import { accessFor, hasLevel } from '../access/roles'
+
+const { canWork, canDelete } = accessFor('decorations')
 
 /** Vercel functions cap request bodies at 4.5 MB; the Quick add screen shrinks photos first. */
 export const DECOR_PHOTO_MAX_BYTES = 4 * 1024 * 1024
@@ -14,7 +16,7 @@ export const DECOR_PHOTO_MAX_BYTES = 4 * 1024 * 1024
  * `/api/decor-photos/file/<name>`.
  */
 const readPhotos: Access = ({ req, isReadingStaticFile }) =>
-  hasRole(req.user, 'viewer') || Boolean(isReadingStaticFile)
+  Boolean(isReadingStaticFile) || hasLevel(req.user, 'decorations', 'read')
 
 /**
  * Decoration catalog photos. Each upload is shrunk to at most 1600 px wide and saved as
@@ -30,7 +32,7 @@ export const DecorPhotos: CollectionConfig = {
     read: readPhotos,
     create: canWork,
     update: canWork,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Decorations',

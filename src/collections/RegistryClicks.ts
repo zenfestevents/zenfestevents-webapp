@@ -1,6 +1,8 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
+
+const { canView, canManage, canDelete } = accessFor('website', 'registry-clicks')
 
 
 /** One row per visitor sent to a partner store from a registry or the shop — affiliate click tracking. */
@@ -11,12 +13,12 @@ export const RegistryClicks: CollectionConfig = {
     read: canView,
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Gift Registry',
     defaultColumns: ['merchant', 'product', 'item', 'event', 'affiliated', 'createdAt'],
-    hidden: adminHidden('registry-clicks'),
+    hidden: moduleHidden('website', 'registry-clicks'),
   },
   defaultSort: '-createdAt',
   fields: [

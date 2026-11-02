@@ -1,7 +1,9 @@
 import type { CollectionConfig, PayloadRequest, Where } from 'payload'
 
-import { adminHidden, canManage, canView, hasRole, ownerOnly, type Role } from '../access/roles'
+import { accessFor, moduleHidden, type Level } from '../access/roles'
 import { cloudConfigured, sendTemplate } from '../lib/whatsapp/cloud'
+
+const { canView, canManage, canDelete, can } = accessFor('whatsapp')
 
 /** Messages sent per request, so one request stays well inside Vercel's time limit. */
 const BATCH_SIZE = 20
@@ -19,14 +21,14 @@ export const WhatsAppCampaigns: CollectionConfig = {
     read: canView,
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'WhatsApp',
     useAsTitle: 'name',
     defaultColumns: ['name', 'template', 'audienceTag', 'status', 'updatedAt'],
-    description: 'One approved message sent to many opted-in people at once. Meta charges about ₹1 per person. Only a Manager or the Owner can send.',
-    hidden: adminHidden('whatsapp-campaigns'),
+    description: 'One approved message sent to many opted-in people at once. Meta charges about ₹1 per person. Only someone with Full access to WhatsApp (or the Owner) can send.',
+    hidden: moduleHidden('whatsapp', 'whatsapp-campaigns'),
   },
   defaultSort: '-createdAt',
   fields: [
@@ -98,7 +100,7 @@ export const WhatsAppCampaigns: CollectionConfig = {
 }
 
 const json = (body: unknown, status = 200) => Response.json(body, { status })
-const isStaff = (req: PayloadRequest, min: Role = 'viewer') => hasRole(req.user, min)
+const isStaff = (req: PayloadRequest, min: Exclude<Level, 'none'> = 'read') => can(req, min)
 
 type Campaign = {
   id: number
@@ -194,7 +196,7 @@ function stopsWholeCampaign(error: string) {
 
 /** POST /:id/send-batch { max? } → sends to the next people; { sent, failed, left, errors }. */
 async function sendBatch(req: PayloadRequest) {
-  if (!isStaff(req, 'manager')) return json({ error: 'Only a Manager or the Owner can send a campaign.' }, 403)
+  if (!isStaff(req, 'full')) return json({ error: 'Sending a campaign needs Full access to WhatsApp.' }, 403)
   if (!cloudConfigured()) return json({ error: 'WhatsApp sending is not set up on this server yet.' }, 400)
   const c = await load(req)
   if (!c) return json({ error: 'Campaign not found.' }, 404)

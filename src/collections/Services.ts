@@ -1,10 +1,12 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access'
-import { adminHidden, canManage, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { slugField } from '../fields/slug'
 import { CONTENT_TAGS } from '../lib/contentCache'
 import { revalidateCollection } from '../hooks/revalidateContent'
+
+const { canManage, canDelete } = accessFor('website')
 
 /** Individual services: Decoration, Catering, Photography, DJ, etc. */
 export const Services: CollectionConfig = {
@@ -15,14 +17,14 @@ export const Services: CollectionConfig = {
     read: anyone,
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Website',
     useAsTitle: 'title',
     defaultColumns: ['title', 'featured', 'order'],
     description: 'The services shown on the website.',
-    hidden: adminHidden('services'),
+    hidden: moduleHidden('website', 'services'),
   },
   defaultSort: 'order',
   fields: [

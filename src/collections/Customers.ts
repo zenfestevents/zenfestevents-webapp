@@ -1,9 +1,11 @@
 import type { CollectionConfig } from 'payload'
 
 import { adminOrSelf } from '../access'
-import { adminHidden, canManage, canManageField, canViewField, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { assignReferralCode, customerRuns } from '../hooks/runsClub'
 import { accountAuth } from './accountAuth'
+
+const { canManage, canViewField, canManageField, canDelete } = accessFor('clients')
 
 /**
  * Couple / customer accounts. They shortlist marketplace vendors and send quote
@@ -15,17 +17,17 @@ export const Customers: CollectionConfig = {
   labels: { singular: 'Client account', plural: 'Client accounts' },
   auth: accountAuth({ reset: '/account/reset-password', verify: '/account/verify-email' }),
   access: {
-    read: adminOrSelf('customers'),
+    read: adminOrSelf('customers', 'clients'),
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Clients',
     useAsTitle: 'name',
     defaultColumns: ['name', 'email', 'phone', 'eventDate', 'createdAt'],
     description: 'Couples and families who made an account on the website. Usually nothing to do here.',
-    hidden: adminHidden('customers'),
+    hidden: moduleHidden('clients', 'customers'),
   },
   defaultSort: '-createdAt',
   hooks: { beforeChange: [assignReferralCode], afterChange: [customerRuns] },

@@ -7,20 +7,21 @@ import {
   type Where,
 } from 'payload'
 
-import { hasRole, hiddenBelow, ownerOnly, ownerOnlyField, ROLES } from '../access/roles'
+import { isOwner, isStaff, LEVELS, MODULES, ownerHidden, ownerOnly, ownerOnlyField, ROLES } from '../access/roles'
 
 /**
  * Zenfest's own team (admin/staff logins for /admin). NOT client logins — vendors and
- * couples have their own collections. Each member has a role (access/roles.ts); only the
- * Owner sees this list, adds people and changes roles. Everyone can open their own
- * account (top-right) to change their name or password. The first Owner is made with
+ * couples have their own collections. A login is the Owner (everything) or a Team member
+ * whose access is set per module (None / Read only / Add & edit / Full, access/roles.ts).
+ * Only the Owner sees this list, adds people and changes access. Everyone can open their
+ * own account (top-right) to change their name or password. The first Owner is made with
  * `npm run create:admin` (the create-first-user screen is broken, see CLAUDE.md).
  */
 
 /** The Owner sees everyone; anyone else only their own record. */
 const ownerOrSelf: Access = ({ req }) => {
-  if (hasRole(req.user, 'owner')) return true
-  if (hasRole(req.user, 'viewer')) return { id: { equals: req.user!.id } } as Where
+  if (isOwner(req.user)) return true
+  if (isStaff(req.user)) return { id: { equals: req.user!.id } } as Where
   return false
 }
 
@@ -64,7 +65,7 @@ export const Users: CollectionConfig = {
   auth: true,
   access: {
     // Switched-off members (and vendors / couples) can't open /admin at all.
-    admin: ({ req }) => hasRole(req.user, 'viewer'),
+    admin: ({ req }) => isStaff(req.user),
     read: ownerOrSelf,
     create: ownerOnly,
     update: ownerOrSelf,
@@ -75,8 +76,8 @@ export const Users: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'email', 'role', 'active'],
     description:
-      'Your team’s logins for this admin. Add a person, give them a role, and share their email + password with them. When someone leaves, untick “Can log in”.',
-    hidden: hiddenBelow('owner'),
+      'Your team’s logins for this admin. Add a person, choose which modules they can open and what they can do there, and share their email + password with them. When someone leaves, untick “Can log in”.',
+    hidden: ownerHidden('users'),
   },
   hooks: {
     beforeLogin: [
@@ -97,11 +98,38 @@ export const Users: CollectionConfig = {
       required: true,
       defaultValue: 'team',
       options: [...ROLES],
+      // Only Owner and Team member are offered; an old Manager / Viewer shows until it is changed.
+      filterOptions: ({ options, data }) =>
+        options.filter((o) => {
+          const value = typeof o === 'string' ? o : o.value
+          return value === 'owner' || value === 'team' || data?.role === value
+        }),
       access: { create: ownerOnlyField, update: ownerOnlyField },
       admin: {
         position: 'sidebar',
-        description: 'What this person is allowed to do. Only the Owner can change it.',
+        description:
+          'Owner can do everything, including this Team list. A Team member can do only what you set under “Access by module”. Only the Owner can change this.',
       },
+    },
+    {
+      // One level per menu group. A member with nothing set has no access to that module.
+      name: 'moduleAccess',
+      type: 'group',
+      label: 'Access by module',
+      access: { create: ownerOnlyField, update: ownerOnlyField },
+      admin: {
+        condition: (data) => data?.role !== 'owner',
+        description:
+          'Choose what this person can open. None hides the module completely. Read only can look. Add & edit can add and change records but cannot delete, approve vendors, listings or reviews, or send bulk WhatsApp messages. Full can do everything in that module.',
+      },
+      fields: MODULES.map((m) => ({
+        name: m.value,
+        type: 'select' as const,
+        label: m.label,
+        defaultValue: 'none',
+        options: LEVELS.map(({ value, label }) => ({ value, label })),
+        admin: { description: m.help },
+      })),
     },
     {
       name: 'active',

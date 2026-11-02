@@ -1,7 +1,9 @@
 import { APIError, type CollectionConfig } from 'payload'
 
 import { anyone, adminOrVendorOwner } from '../access'
-import { adminHidden, hasRole } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
+
+const vendorsAccess = accessFor('vendors')
 
 
 /** Largest listing photo. Vercel functions cap request bodies at 4.5 MB. */
@@ -20,16 +22,16 @@ export const VendorMedia: CollectionConfig = {
   labels: { singular: 'Vendor photo', plural: 'Vendor photos' },
   access: {
     read: anyone,
-    create: ({ req }) => req.user?.collection === 'vendors' || hasRole(req.user, 'manager'),
-    update: adminOrVendorOwner('vendor', 'manager'),
-    delete: adminOrVendorOwner('vendor', 'owner'),
+    create: (args) => args.req.user?.collection === 'vendors' || vendorsAccess.can(args.req, 'full'),
+    update: adminOrVendorOwner('vendor', 'vendors'),
+    delete: adminOrVendorOwner('vendor', 'vendors'),
   },
   admin: {
     group: 'Vendors',
     useAsTitle: 'filename',
     defaultColumns: ['filename', 'vendor', 'createdAt'],
     description: 'Photos vendors uploaded for their listing.',
-    hidden: adminHidden('vendor-media'),
+    hidden: moduleHidden('vendors', 'vendor-media'),
   },
   upload: {
     mimeTypes: ['image/jpeg', 'image/png', 'image/webp'],

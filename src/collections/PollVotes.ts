@@ -1,6 +1,8 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
+
+const { canView, canManage, canDelete } = accessFor('website', 'poll-votes')
 
 
 /**
@@ -16,13 +18,13 @@ export const PollVotes: CollectionConfig = {
     read: canView,
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   lockDocuments: false,
   admin: {
     group: 'Polls',
     defaultColumns: ['poll', 'optionId', 'voter', 'verified', 'createdAt'],
-    hidden: adminHidden('poll-votes'),
+    hidden: moduleHidden('website', 'poll-votes'),
   },
   defaultSort: '-createdAt',
   indexes: [{ fields: ['poll', 'voterKey'], unique: true }],

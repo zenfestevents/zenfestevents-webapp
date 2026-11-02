@@ -1,6 +1,8 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
+
+const { canView, canManage, canDelete } = accessFor('website', 'registry-claims')
 
 
 /**
@@ -19,14 +21,14 @@ export const RegistryClaims: CollectionConfig = {
     read: canView,
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Gift Registry',
     useAsTitle: 'guestName',
     defaultColumns: ['guestName', 'item', 'event', 'mode', 'createdAt'],
     description: 'Delete a claim to make the gift available again.',
-    hidden: adminHidden('registry-claims'),
+    hidden: moduleHidden('website', 'registry-claims'),
   },
   defaultSort: '-createdAt',
   fields: [

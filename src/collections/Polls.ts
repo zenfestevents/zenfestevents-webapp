@@ -1,8 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { POLL_CATEGORIES, POLL_SLUG_PATTERN, RESULTS_VISIBILITY, toOptions } from '../lib/pollOptions'
 import { slugify } from '../lib/registryOptions'
+
+const { canView, canManage, canDelete } = accessFor('website', 'polls')
 
 /**
  * Polls. Public polls (no `registryEvent`) are made by the team here and shown at
@@ -17,7 +19,7 @@ export const Polls: CollectionConfig = {
     read: canView,
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Polls',
@@ -25,7 +27,7 @@ export const Polls: CollectionConfig = {
     defaultColumns: ['question', 'category', 'status', 'closesAt', 'featured', 'registryEvent'],
     description:
       'Open a poll by setting Status to Open. It closes by itself at “Closes at”. Event polls (with a registry) are managed by the family.',
-    hidden: adminHidden('polls'),
+    hidden: moduleHidden('website', 'polls'),
   },
   defaultSort: '-createdAt',
   hooks: {

@@ -1,13 +1,15 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access'
-import { adminHidden, canView, canViewField, canWork, canWorkField, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { VENUE_DECORATORS } from '../lib/decorOptions'
 import { ALL_SERVICES, EXTRA_SHOOTS } from '../lib/eventRequirements'
 import { notifySubmission } from '../hooks/notifySubmission'
 import { syncLeadToContacts } from '../hooks/syncOccasionFromWebsite'
 import { leadRuns, stampLeadAccounts } from '../hooks/runsClub'
 import { tierSummary } from '../lib/rewards'
+
+const { canView, canWork, canViewField, canWorkField, canDelete } = accessFor('clients')
 
 /** A text hasMany limited to a known list (a list, not an enum, so adding one needs no migration). */
 const oneOf =
@@ -28,14 +30,14 @@ export const Leads: CollectionConfig = {
     read: canView,
     create: anyone,
     update: canWork,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Clients',
     useAsTitle: 'name',
     defaultColumns: ['name', 'phone', 'eventType', 'eventDate', 'status', 'createdAt'],
     description: 'People who asked for an event on the website. Call each one, then change “Status”: New → Contacted → Quoted → Booked.',
-    hidden: adminHidden('leads'),
+    hidden: moduleHidden('clients', 'leads'),
   },
   defaultSort: '-createdAt',
   hooks: {

@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminHidden, canManage, canView, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { ITEM_TYPES, toOptions } from '../lib/registryOptions'
+
+const { canView, canManage, canDelete } = accessFor('website', 'registry-items')
 
 /**
  * Gifts on a registry. Whether an item is claimed lives in `registry-claims`
@@ -15,13 +17,13 @@ export const RegistryItems: CollectionConfig = {
     read: canView,
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Gift Registry',
     useAsTitle: 'title',
     defaultColumns: ['title', 'event', 'itemType', 'price', 'merchant', 'createdAt'],
-    hidden: adminHidden('registry-items'),
+    hidden: moduleHidden('website', 'registry-items'),
   },
   defaultSort: 'sortOrder',
   fields: [

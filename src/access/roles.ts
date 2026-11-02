@@ -1,76 +1,138 @@
 import type { Access, FieldAccess, PayloadRequest } from 'payload'
 
-// Team roles for /admin (owner, 2026-10-25). Every staff login (`users`) has one role;
-// each role can do everything the roles below it can. Vendors and couples never pass
-// any of these checks — they all start with "is this a `users` login".
+// Team access for /admin (owner, 2026-11-02). Every staff login (`users`) is either the
+// **Owner** (everything, including Team and the System lists) or a **Team member**, whose
+// access is set per module on their Team page:
 //
-//   Owner        everything: Team, settings, deleting
-//   Manager      approves vendors / listings / reviews, edits the website, sends campaigns
-//   Team member  works enquiries, replies on WhatsApp, sends wishes; no approving, no deleting
-//   Viewer       looks only (trainees)
+//   None       the module is hidden and its data is closed, in the admin and over the API
+//   Read only  can look, nothing else
+//   Add & edit can add and change records; cannot delete, approve or send bulk messages
+//   Full       everything in that module: deleting, approving vendors / listings / reviews,
+//              sending WhatsApp campaigns, settings
 //
-// Never use `authenticated` on a new collection: pick one of the checks below.
+// Vendors and couples never pass any of these checks: they all start with "is this a
+// `users` login". Never use a bare "is someone logged in" check on a new collection: pick the
+// module it belongs to and use `accessFor(module)`. Lists with no module (System: Team, phone
+// checks, run history, invite visits, and the features switched off for now) use `ownerOnly`.
 
+/** The `role` select. Only Owner and Team member are offered; manager / viewer are the old roles (2026-10-25), converted by the 2026-11-02 migration and kept so the database column stays valid. */
 export const ROLES = [
-  { label: 'Owner — can do everything, including Team and deleting', value: 'owner' },
-  { label: 'Manager — can approve and edit the website, cannot delete', value: 'manager' },
-  { label: 'Team member — works enquiries and WhatsApp, cannot approve or delete', value: 'team' },
-  { label: 'Viewer — can only look', value: 'viewer' },
+  { label: 'Owner — can do everything, including Team', value: 'owner' },
+  { label: 'Manager (old role) — set “Access by module” below', value: 'manager' },
+  { label: 'Team member — only what you set in “Access by module” below', value: 'team' },
+  { label: 'Viewer (old role) — set “Access by module” below', value: 'viewer' },
 ] as const
 
 export type Role = (typeof ROLES)[number]['value']
 
-/** Role name + what it may do, in plain words (admin home "Today" board). */
-export const ROLE_HELP: Record<Role, [string, string]> = {
-  owner: ['the Owner', 'you can do everything, including adding team members and deleting.'],
-  manager: ['a Manager', 'you can approve vendors, edit the website and send bulk messages. Only the Owner can delete.'],
-  team: ['a Team member', 'you can work on enquiries, reply on WhatsApp and send wishes. Approving is for Managers.'],
-  viewer: ['a Viewer', 'you can look at everything but not change it.'],
+/** The access levels, lowest first. */
+export const LEVELS = [
+  { value: 'none', label: 'None — cannot see this module', rank: 0 },
+  { value: 'read', label: 'Read only — can look, cannot change', rank: 1 },
+  { value: 'edit', label: 'Add & edit — can add and change, cannot delete or approve', rank: 2 },
+  { value: 'full', label: 'Full — everything, including delete and approve', rank: 3 },
+] as const
+
+export type Level = (typeof LEVELS)[number]['value']
+
+const RANK: Record<Level, number> = { none: 0, read: 1, edit: 2, full: 3 }
+
+/** The menu groups a team member can be given access to (the admin menu's own groups). */
+export const MODULES = [
+  { value: 'clients', label: 'Clients', help: 'Enquiries and client accounts' },
+  { value: 'vendors', label: 'Vendors', help: 'Vendor applications, vendor listings and uploads' },
+  { value: 'whatsapp', label: 'WhatsApp', help: 'Chats, contacts and campaigns' },
+  { value: 'occasions', label: 'Birthdays & anniversaries', help: 'Contacts, wishes and wish settings' },
+  { value: 'decorations', label: 'Decorations', help: 'Decorations, suppliers, photos, prices and settings' },
+  { value: 'website', label: 'Website', help: 'Our work, services, packages, reviews, photos and website settings' },
+  { value: 'rewards', label: 'Rewards', help: 'Reward settings' },
+] as const
+
+export type Module = (typeof MODULES)[number]['value']
+
+/** Lists with no module: only the Owner opens them (Team, phone checks, run history, invite visits, features switched off). */
+export type OwnerArea = 'system'
+
+export const isLevel = (v: unknown): v is Level => typeof v === 'string' && v in RANK
+
+type MaybeUser =
+  | {
+      collection?: string
+      role?: string | null
+      active?: boolean | null
+      moduleAccess?: Partial<Record<Module, string | null>> | null
+    }
+  | null
+  | undefined
+
+/** A login in `users` whose access is switched on (not a vendor, a couple, a visitor or a member who left). */
+export function isStaff(user: MaybeUser): boolean {
+  return user?.collection === 'users' && user.active !== false
 }
 
-const RANK: Record<Role, number> = { viewer: 0, team: 1, manager: 2, owner: 3 }
-
-type MaybeUser = { collection?: string; role?: string | null; active?: boolean | null } | null | undefined
-
-/** The staff role of a login, or null for vendors, couples, switched-off members and visitors. */
-export function roleOf(user: MaybeUser): Role | null {
-  if (user?.collection !== 'users' || user.active === false) return null
-  return user.role && user.role in RANK ? (user.role as Role) : 'viewer'
+export function isOwner(user: MaybeUser): boolean {
+  return isStaff(user) && user?.role === 'owner'
 }
 
-/** Whether this login's role is `min` or higher. */
-export function hasRole(user: MaybeUser, min: Role): boolean {
-  const role = roleOf(user)
-  return role !== null && RANK[role] >= RANK[min]
+/** What this login may do in `module`. The Owner has Full everywhere; a member with nothing set has None. */
+export function levelOf(user: MaybeUser, module: Module | OwnerArea): Level {
+  if (!isStaff(user)) return 'none'
+  if (user?.role === 'owner') return 'full'
+  if (module === 'system') return 'none'
+  const set = user?.moduleAccess?.[module]
+  return isLevel(set) ? set : 'none'
 }
 
-export const isStaffReq = (req: PayloadRequest, min: Role = 'viewer') => hasRole(req.user, min)
+/** Whether this login has at least `min` in `module`. */
+export function hasLevel(user: MaybeUser, module: Module, min: Exclude<Level, 'none'>): boolean {
+  return RANK[levelOf(user, module)] >= RANK[min]
+}
 
-/** Any team member can look (Viewer and up). */
-export const canView: Access = ({ req }) => hasRole(req.user, 'viewer')
-/** Day-to-day work: Team member and up. */
-export const canWork: Access = ({ req }) => hasRole(req.user, 'team')
-/** Approving, website content, settings, campaigns: Manager and up. */
-export const canManage: Access = ({ req }) => hasRole(req.user, 'manager')
-/** Deleting and the Team list: Owner only. */
-export const ownerOnly: Access = ({ req }) => hasRole(req.user, 'owner')
+export const isStaffReq = (req: PayloadRequest) => isStaff(req.user)
 
-export const canViewField: FieldAccess = ({ req }) => hasRole(req.user, 'viewer')
-export const canWorkField: FieldAccess = ({ req }) => hasRole(req.user, 'team')
-export const canManageField: FieldAccess = ({ req }) => hasRole(req.user, 'manager')
-export const ownerOnlyField: FieldAccess = ({ req }) => hasRole(req.user, 'owner')
+/**
+ * The checks for one module. Same names as the old role checks, now scoped:
+ *   canView   Read only and up
+ *   canWork   Add & edit and up (add, change; the day-to-day work)
+ *   canManage Full (approving, settings, campaigns)
+ *   canDelete Full (deleting a record)
+ * `…Field` twins are for field-level `access`.
+ */
+export function accessFor(module: Module, slug?: string) {
+  // A list switched off for now (ADMIN_HIDDEN, below) is Owner-only over the API as well.
+  const closed = slug ? () => ADMIN_HIDDEN.has(slug) : () => false
+  const allowed = (user: MaybeUser, min: Exclude<Level, 'none'>) =>
+    closed() ? isOwner(user) : hasLevel(user, module, min)
+  const at =
+    (min: Exclude<Level, 'none'>): Access =>
+    ({ req }) =>
+      allowed(req.user, min)
+  const atField =
+    (min: Exclude<Level, 'none'>): FieldAccess =>
+    ({ req }) =>
+      allowed(req.user, min)
+  return {
+    canView: at('read'),
+    canWork: at('edit'),
+    canManage: at('full'),
+    canDelete: at('full'),
+    canViewField: atField('read'),
+    canWorkField: atField('edit'),
+    canManageField: atField('full'),
+    /** For code that holds a `req` (custom endpoints, hooks). */
+    can: (req: PayloadRequest, min: Exclude<Level, 'none'>) => allowed(req.user, min),
+  }
+}
 
-/** For `admin.hidden`: keep a list out of the menu for anyone below `min`. */
-export const hiddenBelow =
-  (min: Role) =>
-  ({ user }: { user: unknown }) =>
-    !hasRole(user as MaybeUser, min)
+/** Only the Owner: Team, System lists, and anything the Owner alone may see. */
+export const ownerOnly: Access = ({ req }) => isOwner(req.user)
+export const ownerOnlyField: FieldAccess = ({ req }) => isOwner(req.user)
 
 /**
  * Lists hidden from /admin for now (owner, 2026-10-25): features that are switched off on
  * the site. Hiding only removes them from the admin menu and pages — the data, the REST API
  * and the website keep working (the public gift registry is still live). Delete a line to
- * bring that list back.
+ * bring that list back. While hidden they are Owner-only over the API too (2026-11-02).
  */
 export const ADMIN_HIDDEN = new Set<string>([
   // Gift registry
@@ -96,6 +158,23 @@ export const ADMIN_HIDDEN = new Set<string>([
   'enquiries',
 ])
 
-/** `admin.hidden` for a list: hidden for everyone while in ADMIN_HIDDEN, else from `min` down. */
-export const adminHidden = (slug: string, min: Role = 'viewer') =>
-  ADMIN_HIDDEN.has(slug) ? true : hiddenBelow(min)
+/** `admin.hidden` for a list in `module`: hidden while in ADMIN_HIDDEN, or from anyone with no access to the module. */
+export const moduleHidden =
+  (module: Module, slug: string) =>
+  ({ user }: { user: unknown }) =>
+    ADMIN_HIDDEN.has(slug) ? true : !hasLevel(user as MaybeUser, module, 'read')
+
+/** `admin.hidden` for an Owner-only list: hidden for everyone else, and for everyone while in ADMIN_HIDDEN. */
+export const ownerHidden =
+  (slug: string) =>
+  ({ user }: { user: unknown }) =>
+    ADMIN_HIDDEN.has(slug) ? true : !isOwner(user as MaybeUser)
+
+/** Each module's access as plain words, for the admin home ("you can read X, edit Y"). */
+export function accessSummary(user: MaybeUser): { owner: boolean; lines: { label: string; level: Level }[] } {
+  const owner = isOwner(user)
+  return {
+    owner,
+    lines: MODULES.map((m) => ({ label: m.label, level: levelOf(user, m.value) })),
+  }
+}

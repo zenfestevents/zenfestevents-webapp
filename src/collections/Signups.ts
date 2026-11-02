@@ -1,9 +1,11 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access'
-import { adminHidden, canView, canWork, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
 import { notifySubmission } from '../hooks/notifySubmission'
 import { syncSignupToContacts } from '../hooks/syncOccasionFromWebsite'
+
+const { canView, canWork, canDelete } = accessFor('clients', 'signups')
 
 /**
  * Sign-ups from the ₹100-off offer. Public can create; only admin can read.
@@ -18,14 +20,14 @@ export const Signups: CollectionConfig = {
     read: canView,
     create: anyone,
     update: canWork,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'phone', 'birthday', 'planningEvent', 'status', 'createdAt'],
     description:
       'People who signed up for the ₹100-off offer. Honour the discount when quoting.',
-    hidden: adminHidden('signups'),
+    hidden: moduleHidden('clients', 'signups'),
   },
   defaultSort: '-createdAt',
   hooks: {

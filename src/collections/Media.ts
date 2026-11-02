@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access'
-import { adminHidden, canManage, ownerOnly } from '../access/roles'
+import { accessFor, moduleHidden } from '../access/roles'
+
+const { canManage, canDelete } = accessFor('website')
 
 
 export const Media: CollectionConfig = {
@@ -11,13 +13,13 @@ export const Media: CollectionConfig = {
     read: anyone,
     create: canManage,
     update: canManage,
-    delete: ownerOnly,
+    delete: canDelete,
   },
   admin: {
     group: 'Website',
     useAsTitle: 'alt',
     description: 'Photos used on the website. Upload them here, then pick them in “Our work” or “Services”.',
-    hidden: adminHidden('media'),
+    hidden: moduleHidden('website', 'media'),
   },
   upload: {
     mimeTypes: ['image/*'],
