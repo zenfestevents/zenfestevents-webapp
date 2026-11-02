@@ -5,9 +5,11 @@ import { assignItemCode, recordPriceHistory, stampPriceChange } from '../hooks/d
 import { revalidateCollection } from '../hooks/revalidateContent'
 import { CONTENT_TAGS } from '../lib/contentCache'
 import {
+  ALSO_SUITS_CHOICES,
   DECOR_CATEGORIES,
   DECOR_EVENT_TYPES,
   DECOR_KINDS,
+  DECOR_MATERIALS,
   DECOR_PRICE_MODES,
   DECOR_STATUSES,
   DECOR_THEMES,
@@ -59,7 +61,7 @@ export const DecorItems: CollectionConfig = {
   admin: {
     group: 'Decorations',
     useAsTitle: 'title',
-    defaultColumns: ['photos', 'itemCode', 'title', 'eventType', 'category', 'clientPrice', 'margin', 'status'],
+    defaultColumns: ['photos', 'itemCode', 'title', 'eventType', 'category', 'material', 'clientPrice', 'margin', 'status'],
     listSearchableFields: ['itemCode', 'title', 'size', 'includes'],
     pagination: { defaultLimit: 25 },
     description:
@@ -172,6 +174,39 @@ export const DecorItems: CollectionConfig = {
           hooks: { beforeChange: [({ value, siblingData }) => (siblingData?.category === 'other' ? value : null)] },
         },
       ],
+    },
+    {
+      // Text, not an enum, so adding an event later needs no migration (like marketplace areas).
+      name: 'alsoSuits',
+      type: 'text',
+      hasMany: true,
+      label: 'Also suits (other events)',
+      admin: {
+        components: { Field: '/components/admin/decor/AlsoSuits#DecorAlsoSuitsField' },
+      },
+      validate: (value: unknown, { siblingData }: { siblingData?: Record<string, unknown> }) => {
+        const list = Array.isArray(value) ? value : []
+        if (list.some((v) => !ALSO_SUITS_CHOICES.includes(v as never))) return 'Choose events from the list.'
+        if (list.includes(siblingData?.eventType)) return 'Leave out the main event: it is already chosen above.'
+        return true
+      },
+    },
+    {
+      name: 'material',
+      type: 'select',
+      label: 'Flowers / material',
+      options: decorOptions(DECOR_MATERIALS),
+      admin: {
+        description: 'Real flowers, artificial, mixed, or balloons. Clients can filter by it on the website.',
+      },
+      // Mandatory for every save, but kept out of the database column rules so existing
+      // decorations (saved before this existed) don't block the migration: they are asked on
+      // their next save.
+      validate: (value: unknown) => {
+        if (!value) return 'Choose Flowers / material.'
+        if (!DECOR_MATERIALS.some(([v]) => v === value)) return 'Choose Flowers / material from the list.'
+        return true
+      },
     },
     {
       name: 'themes',

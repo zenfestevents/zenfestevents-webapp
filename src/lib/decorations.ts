@@ -9,13 +9,18 @@ import type { Where } from 'payload'
 import type { Customer, DecorItem, DecorPhoto } from '../payload-types'
 import { CONTENT_TAGS, cachedContent } from './contentCache'
 import {
+  ALSO_SUITS_CHOICES,
   DECOR_CATEGORIES,
   DECOR_EVENT_TYPES,
+  DECOR_MATERIALS,
   categoryText,
+  eventTypeLabel,
   eventTypeText,
   isDecorCategory,
   isDecorEventType,
+  isDecorMaterial,
   isDecorTheme,
+  materialLabel,
   rupees,
   themeLabel,
   type DecorPriceMode,
@@ -32,8 +37,13 @@ export type PublicDecoration = {
   title: string
   eventType: string
   eventLabel: string
+  /** Other events it also suits: [value, label], never the main one. */
+  alsoSuits: [string, string][]
   category: string
   categoryLabel: string
+  /** "" for an old item saved before this was asked. */
+  material: string
+  materialLabel: string
   themes: string[]
   kind: 'item' | 'package'
   size: string
@@ -49,8 +59,10 @@ const PUBLIC_COLUMNS = {
   title: true,
   eventType: true,
   eventTypeOther: true,
+  alsoSuits: true,
   category: true,
   categoryOther: true,
+  material: true,
   themes: true,
   kind: true,
   size: true,
@@ -82,8 +94,10 @@ type PublicRow = Pick<
   | 'title'
   | 'eventType'
   | 'eventTypeOther'
+  | 'alsoSuits'
   | 'category'
   | 'categoryOther'
+  | 'material'
   | 'themes'
   | 'kind'
   | 'size'
@@ -102,8 +116,13 @@ function toPublic(d: PublicRow): PublicDecoration {
     title: d.title ?? '',
     eventType: d.eventType,
     eventLabel: eventTypeText(d.eventType, d.eventTypeOther),
+    alsoSuits: (d.alsoSuits ?? [])
+      .filter((v) => v !== d.eventType && ALSO_SUITS_CHOICES.includes(v as never))
+      .map((v): [string, string] => [v, eventTypeLabel(v)]),
     category: d.category,
     categoryLabel: categoryText(d.category, d.categoryOther),
+    material: isDecorMaterial(d.material) ? d.material : '',
+    materialLabel: materialLabel(d.material),
     themes: (d.themes ?? []).map(themeLabel).filter(Boolean),
     kind: d.kind === 'package' ? 'package' : 'item',
     size: d.size ?? '',
@@ -113,7 +132,12 @@ function toPublic(d: PublicRow): PublicDecoration {
   }
 }
 
-export type DecorFilters = { event?: string; category?: string; theme?: string; page?: number }
+export type DecorFilters = { event?: string; category?: string; material?: string; theme?: string; page?: number }
+
+/** An item belongs to an event page if that is its main event or one it also suits. */
+const forEvent = (event: string): Where => ({
+  or: [{ eventType: { equals: event } }, { alsoSuits: { equals: event } }],
+})
 
 export const DECOR_PAGE_SIZE = 24
 
@@ -122,8 +146,9 @@ export async function listDecorations(
 ): Promise<{ items: PublicDecoration[]; total: number; page: number; pages: number }> {
   const payload = await getPayloadClient()
   const and: Where[] = [ACTIVE]
-  if (isDecorEventType(filters.event)) and.push({ eventType: { equals: filters.event } })
+  if (isDecorEventType(filters.event)) and.push(forEvent(filters.event))
   if (isDecorCategory(filters.category)) and.push({ category: { equals: filters.category } })
+  if (isDecorMaterial(filters.material)) and.push({ material: { equals: filters.material } })
   if (isDecorTheme(filters.theme)) and.push({ themes: { in: [filters.theme] } })
   const res = await payload.find({
     collection: 'decor-items',
@@ -143,17 +168,21 @@ export async function listDecorations(
   }
 }
 
-/** How many active decorations each event type and category has (for the filter chips). */
+/**
+ * How many active decorations each event type, category and material has (for the filter chips).
+ * An item counts once under its main event and once under each event it also suits.
+ */
 export async function decorationCounts(): Promise<{
   byEvent: Record<string, number>
   byCategory: Record<string, number>
+  byMaterial: Record<string, number>
   total: number
 }> {
   const payload = await getPayloadClient()
   const { docs } = await payload.find({
     collection: 'decor-items',
     where: ACTIVE,
-    select: { eventType: true, category: true },
+    select: { eventType: true, alsoSuits: true, category: true, material: true },
     limit: 5000,
     depth: 0,
     overrideAccess: true,
@@ -161,11 +190,14 @@ export async function decorationCounts(): Promise<{
   })
   const byEvent: Record<string, number> = Object.fromEntries(DECOR_EVENT_TYPES.map(([v]) => [v, 0]))
   const byCategory: Record<string, number> = Object.fromEntries(DECOR_CATEGORIES.map(([v]) => [v, 0]))
+  const byMaterial: Record<string, number> = Object.fromEntries(DECOR_MATERIALS.map(([v]) => [v, 0]))
   for (const d of docs) {
-    byEvent[d.eventType] = (byEvent[d.eventType] ?? 0) + 1
+    const events = new Set([d.eventType, ...(d.alsoSuits ?? []).filter((v) => ALSO_SUITS_CHOICES.includes(v as never))])
+    for (const e of events) byEvent[e] = (byEvent[e] ?? 0) + 1
     byCategory[d.category] = (byCategory[d.category] ?? 0) + 1
+    if (d.material) byMaterial[d.material] = (byMaterial[d.material] ?? 0) + 1
   }
-  return { byEvent, byCategory, total: docs.length }
+  return { byEvent, byCategory, byMaterial, total: docs.length }
 }
 
 /** What the price block needs: kept on the server, only the text it builds is shown. */
@@ -198,7 +230,7 @@ export async function relatedDecorations(item: PublicDecoration, limit = 4): Pro
   const payload = await getPayloadClient()
   const { docs } = await payload.find({
     collection: 'decor-items',
-    where: { and: [ACTIVE, { eventType: { equals: item.eventType } }, { id: { not_equals: item.id } }] },
+    where: { and: [ACTIVE, forEvent(item.eventType), { id: { not_equals: item.id } }] },
     sort: '-createdAt',
     limit,
     depth: 1,
@@ -330,4 +362,32 @@ export async function priceFor(
     text: priceText(fields.mode, fields.clientPrice, settings.rangeSpreadPercent ?? 15),
     note: NOTE,
   }
+}
+
+/**
+ * What the stage question shows when the client says their venue has no stage. Like prices, the
+ * amount goes only to a logged-in client (and not to a blocked one); everyone else gets the
+ * log-in line. It is a single figure from Decoration settings, so it does not count towards the
+ * daily price limit.
+ */
+export type StagePrice = { state: 'shown'; text: string } | { state: 'login' }
+
+export async function stagePriceFor(customer: Customer | null): Promise<StagePrice> {
+  if (!customer) return { state: 'login' }
+  const payload = await getPayloadClient()
+  const [account, settings] = await Promise.all([
+    payload.findByID({
+      collection: 'customers',
+      id: customer.id,
+      select: { decorBlocked: true },
+      depth: 0,
+      overrideAccess: true,
+    }),
+    payload.findGlobal({ slug: 'decor-settings', depth: 0, overrideAccess: true }),
+  ])
+  const cost = settings.stageCost
+  if (account.decorBlocked || cost == null || cost <= 0) {
+    return { state: 'shown', text: 'Stage setup is charged separately. We confirm it in your quote.' }
+  }
+  return { state: 'shown', text: `Stage setup is extra: from ${rupees(cost)}. We confirm it in your quote.` }
 }

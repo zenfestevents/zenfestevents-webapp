@@ -13,6 +13,18 @@ export const DecorSettings: GlobalConfig = {
   },
   fields: [
     {
+      name: 'stageCost',
+      type: 'number',
+      min: 0,
+      max: 10_000_000,
+      label: 'Stage cost ₹ (when the venue has no stage)',
+      admin: {
+        step: 1000,
+        description:
+          'Stage decoration pages ask “Does your venue already have a stage?”. If the client says no, they see “Stage setup is extra: from ₹ this amount”. Leave empty to show “Stage is charged separately” without a number.',
+      },
+    },
+    {
       name: 'dailyPriceLimit',
       type: 'number',
       required: true,

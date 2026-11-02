@@ -67,6 +67,7 @@ async function cleanup() {
   await payload.delete({ collection: 'decor-photos', where: { alt: { equals: TITLE } }, overrideAccess: true })
   await payload.delete({ collection: 'decor-suppliers', where: { name: { like: TITLE } }, overrideAccess: true })
   await payload.delete({ collection: 'customers', where: { email: { equals: 'decor-couple@test.invalid' } }, overrideAccess: true })
+  await payload.delete({ collection: 'leads', where: { name: { like: TITLE } }, overrideAccess: true })
   // Straight to the database: `keepAnOwner` (Users.ts) rightly refuses to delete the last
   // Owner, and on a fresh local database the test Owner is the only one.
   await payload.db.deleteMany({ collection: 'users', where: { email: { like: '@test.invalid' }, name: { like: 'Decor ' } } })
@@ -124,6 +125,7 @@ const makeAs = (user: unknown, extra: Record<string, unknown> = {}) =>
       title: `${TITLE} stage`,
       eventType: 'wedding',
       category: 'stage',
+      material: 'real_flowers',
       themes: ['floral'],
       photos: [photo.id],
       supplier: supplier.id,
@@ -248,15 +250,57 @@ await check('a typed "Others" box is cleared when the event type changes', async
   })
   assert.equal(u.eventTypeOther ?? null, null)
 })
-await check('the old catch-all "Birthday" is not offered for new decorations', async () => {
-  assert.equal(await allowed(() => make({ eventType: 'birthday' })), false)
+await check('the old catch-all "Birthday" and the first-birthday / surprise types are not offered for new decorations', async () => {
+  for (const eventType of ['birthday', 'first_birthday_boy', 'first_birthday_girl', 'birthday_surprise']) {
+    assert.equal(await allowed(() => make({ eventType })), false, eventType)
+  }
 })
-await check('a decoration that already has the old "Birthday" can still be edited', async () => {
-  const old = await make({ eventType: 'birthday_boy' })
-  // As if saved before the boy/girl split (straight to the database, no validation).
-  await payload.db.updateOne({ collection: 'decor-items', id: old.id, data: { eventType: 'birthday' } })
-  const u = await payload.update({ collection: 'decor-items', id: old.id, data: { size: '10 ft' }, user: staff.team, overrideAccess: false })
-  assert.deepEqual([u.eventType, u.size], ['birthday', '10 ft'])
+await check('a decoration that already has a hidden birthday type can still be edited', async () => {
+  for (const hidden of ['birthday', 'first_birthday_girl']) {
+    const old = await make({ eventType: 'birthday_boy' })
+    // As if saved before the birthdays were cut to boy / girl (straight to the database, no validation).
+    await payload.db.updateOne({ collection: 'decor-items', id: old.id, data: { eventType: hidden } })
+    const u = await payload.update({ collection: 'decor-items', id: old.id, data: { size: '10 ft' }, user: staff.team, overrideAccess: false })
+    assert.deepEqual([u.eventType, u.size], [hidden, '10 ft'])
+  }
+})
+
+console.log('Shared events and material (2026-11-02)')
+await check('Naming ceremony and Welcome board get their own codes', async () => {
+  const n = await make({ eventType: 'naming_ceremony' })
+  assert.match(String(n.itemCode), /^NMC-STG-\d{3,}$/)
+  const w = await make({ category: 'welcome_board' })
+  assert.match(String(w.itemCode), /^WED-WLB-\d{3,}$/)
+})
+await check('Flowers / material is mandatory on every save, even a draft', async () => {
+  assert.equal(await allowed(() => make({ material: null })), false)
+  assert.equal(await allowed(() => make({ material: 'plastic' })), false)
+  assert.equal(await allowed(() => make({ material: null, status: 'draft' })), false)
+  for (const material of ['real_flowers', 'artificial_flowers', 'mixed_flowers', 'balloons']) {
+    assert.equal(await allowed(() => make({ material })), true, material)
+  }
+})
+await check('"Also suits" keeps the main event for the code and takes other real events only', async () => {
+  const r = await make({ eventType: 'reception', alsoSuits: ['engagement', 'anniversary'] })
+  assert.match(String(r.itemCode), /^REC-STG-\d{3,}$/)
+  assert.deepEqual([...(r.alsoSuits ?? [])].sort(), ['anniversary', 'engagement'])
+  assert.equal(await allowed(() => make({ eventType: 'reception', alsoSuits: ['reception'] })), false, 'the main event again')
+  assert.equal(await allowed(() => make({ alsoSuits: ['other'] })), false, 'Others')
+  assert.equal(await allowed(() => make({ alsoSuits: ['first_birthday_boy'] })), false, 'a hidden birthday')
+  assert.equal(await allowed(() => make({ alsoSuits: ['no_such_event'] })), false, 'an unknown event')
+})
+await check('the enquiry form can record whether the venue allows outside decorators', async () => {
+  const lead = (v: string) =>
+    allowed(() =>
+      payload.create({
+        collection: 'leads',
+        data: { name: TITLE, phone: '6100000299', requirements: { location: 'Test hall', venueOutsideDecorators: v } } as never,
+        overrideAccess: false,
+      }),
+    )
+  assert.equal(await lead('yes'), true)
+  assert.equal(await lead('unsure'), true)
+  assert.equal(await lead('maybe'), false)
 })
 
 // ── 4. Privacy ─────────────────────────────────────────────────────────────
@@ -382,7 +426,7 @@ await check('owner: can delete a decoration that has price history and price vie
 
 // ── 6. The public site (lib/decorations.ts) ────────────────────────────────
 console.log('Public pages')
-const { getPublicDecoration, listDecorations, priceFor } = await import('../lib/decorations')
+const { decorationCounts, getPublicDecoration, listDecorations, priceFor, stagePriceFor } = await import('../lib/decorations')
 const slugOf = (d: { slug?: string | null }) => String(d.slug)
 // Earlier sections edit and archive `a`, so the public checks use a fresh Active item.
 const live = await make({ title: `${TITLE} live` })
@@ -444,6 +488,45 @@ await check('prices: a blocked client sees no prices', async () => {
     assert.deepEqual(await priceFor(live.id, (await getPublicDecoration(slugOf(live)))!.price, couple as never), { state: 'limit' })
   } finally {
     await payload.update({ collection: 'customers', id: couple.id, data: { decorBlocked: false } as never, overrideAccess: true })
+  }
+})
+
+await check('a shared decoration shows under its main event and each event it also suits', async () => {
+  const shared = await make({ eventType: 'reception', alsoSuits: ['engagement', 'puberty'], title: `${TITLE} shared` })
+  const inEvent = async (event: string) => (await listDecorations({ event })).items.some((i) => i.id === shared.id)
+  assert.equal(await inEvent('reception'), true)
+  assert.equal(await inEvent('engagement'), true)
+  assert.equal(await inEvent('puberty'), true)
+  assert.equal(await inEvent('anniversary'), false)
+  const found = await getPublicDecoration(slugOf(shared))
+  assert.deepEqual(found!.item.alsoSuits.map(([v]) => v).sort(), ['engagement', 'puberty'])
+  assert.match(String(found!.item.code), /^REC-/)
+  const before = await decorationCounts()
+  await make({ eventType: 'reception', alsoSuits: ['engagement'], title: `${TITLE} shared 2` })
+  const after = await decorationCounts()
+  assert.equal(after.byEvent.reception, before.byEvent.reception + 1)
+  assert.equal(after.byEvent.engagement, before.byEvent.engagement + 1)
+  assert.equal(after.byEvent.puberty, before.byEvent.puberty)
+})
+await check('the site filters by flowers / material', async () => {
+  const b = await make({ material: 'balloons', title: `${TITLE} balloons only` })
+  const list = await listDecorations({ material: 'balloons' })
+  assert.ok(list.items.some((i) => i.id === b.id))
+  assert.ok(list.items.every((i) => i.material === 'balloons'))
+  const none = await listDecorations({ material: 'not_a_material' })
+  assert.ok(none.items.length > 0, 'an unknown material is ignored, not a filter')
+})
+await check('stage cost: shown to a client, never to a visitor; the amount comes from the settings', async () => {
+  await payload.updateGlobal({ slug: 'decor-settings', data: { stageCost: 25000 }, overrideAccess: true })
+  try {
+    assert.deepEqual(await stagePriceFor(null), { state: 'login' })
+    const s = await stagePriceFor(couple as never)
+    assert.equal(s.state === 'shown' && s.text.includes('₹25,000'), true)
+    await payload.updateGlobal({ slug: 'decor-settings', data: { stageCost: null }, overrideAccess: true })
+    const none = await stagePriceFor(couple as never)
+    assert.equal(none.state === 'shown' && /\d/.test(none.text), false, 'no figure without an amount')
+  } finally {
+    await payload.updateGlobal({ slug: 'decor-settings', data: { stageCost: null }, overrideAccess: true })
   }
 })
 

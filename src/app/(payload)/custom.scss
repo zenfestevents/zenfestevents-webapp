@@ -1288,6 +1288,66 @@ html[data-theme='dark'] .zf-wa--link {
   color: var(--theme-elevation-600);
 }
 
+// "Also suits" tick-list (AlsoSuits.tsx): events grouped, big tap targets on a phone.
+.zf-alsosuits {
+  display: grid;
+  gap: 10px;
+  margin-top: 6px;
+
+  fieldset {
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--theme-elevation-100);
+    border-radius: 10px;
+  }
+
+  legend {
+    padding: 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--theme-elevation-700);
+  }
+
+  fieldset > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  // `fieldset` in these selectors outranks Quick add's own label/input rules.
+  fieldset label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 4px 12px;
+    border: 1px solid var(--theme-elevation-150);
+    border-radius: 999px;
+    background: var(--theme-elevation-0);
+    cursor: pointer;
+  }
+
+  fieldset label:has(input:checked) {
+    border-color: var(--theme-elevation-800);
+    background: var(--theme-elevation-100);
+    font-weight: 600;
+  }
+
+  fieldset label input {
+    width: 18px;
+    min-height: 0;
+    height: 18px;
+    margin: 0;
+    padding: 0;
+  }
+
+  fieldset label > span {
+    font-size: 14px;
+    font-weight: inherit;
+    color: inherit;
+  }
+}
+
 .zf-photos__ok {
   margin: 6px 0 0;
   font-weight: 600;

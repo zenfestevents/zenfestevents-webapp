@@ -267,6 +267,10 @@ export interface Lead {
     weddingParts?: string | null;
     startTime?: string | null;
     location?: string | null;
+    /**
+     * Yes / Not sure / No, as answered by the client.
+     */
+    venueOutsideDecorators?: string | null;
     services?: string[] | null;
     receptionServices?: string[] | null;
     weddingServices?: string[] | null;
@@ -715,6 +719,7 @@ export interface DecorItem {
     | 'housewarming'
     | 'baby_shower'
     | 'puberty'
+    | 'naming_ceremony'
     | 'anniversary'
     | 'corporate'
     | 'shop_opening'
@@ -723,6 +728,7 @@ export interface DecorItem {
   category:
     | 'stage'
     | 'entrance'
+    | 'welcome_board'
     | 'mandap'
     | 'backdrop'
     | 'balloon'
@@ -739,6 +745,11 @@ export interface DecorItem {
    * e.g. Ceiling drapes, Table centrepiece
    */
   categoryOther?: string | null;
+  alsoSuits?: string[] | null;
+  /**
+   * Real flowers, artificial, mixed, or balloons. Clients can filter by it on the website.
+   */
+  material?: ('real_flowers' | 'artificial_flowers' | 'mixed_flowers' | 'balloons') | null;
   themes?:
     | ('traditional' | 'modern' | 'floral' | 'minimal' | 'royal' | 'pastel' | 'rustic' | 'temple' | 'kids' | 'luxury')[]
     | null;
@@ -2149,6 +2160,7 @@ export interface LeadsSelect<T extends boolean = true> {
         weddingParts?: T;
         startTime?: T;
         location?: T;
+        venueOutsideDecorators?: T;
         services?: T;
         receptionServices?: T;
         weddingServices?: T;
@@ -2418,6 +2430,8 @@ export interface DecorItemsSelect<T extends boolean = true> {
   category?: T;
   eventTypeOther?: T;
   categoryOther?: T;
+  alsoSuits?: T;
+  material?: T;
   themes?: T;
   kind?: T;
   clientPrice?: T;
@@ -3417,6 +3431,10 @@ export interface RewardSetting {
 export interface DecorSetting {
   id: number;
   /**
+   * Stage decoration pages ask “Does your venue already have a stage?”. If the client says no, they see “Stage setup is extra: from ₹ this amount”. Leave empty to show “Stage is charged separately” without a number.
+   */
+  stageCost?: number | null;
+  /**
    * Different decorations one logged-in client can see prices for each day. After that the site asks them to WhatsApp us. Seeing the same item again is free.
    */
   dailyPriceLimit: number;
@@ -3571,6 +3589,7 @@ export interface RewardSettingsSelect<T extends boolean = true> {
  * via the `definition` "decor-settings_select".
  */
 export interface DecorSettingsSelect<T extends boolean = true> {
+  stageCost?: T;
   dailyPriceLimit?: T;
   rangeSpreadPercent?: T;
   updatedAt?: T;

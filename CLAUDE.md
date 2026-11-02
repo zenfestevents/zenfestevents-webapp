@@ -956,10 +956,28 @@ src/
     (`/admin/decor/quick-add`, a custom admin view in `payload.config.ts` → `admin.components.views`)
     saves a Draft. HEIF photos (Samsung "High efficiency pictures") can't be opened by Chrome on
     Android; `uploadPhotos.ts` says how to switch it off.
-  - **Event types (owner, 2026-10-31)** are grouped (`DECOR_EVENT_GROUPS`): wedding functions,
-    birthdays (boy / girl / first boy / first girl / surprise), family functions, business &
-    others. The step-2 catch-all `birthday` stays in the enum for existing items but is hidden
-    for new choices (`filterOptions` in the form, `validate` with `previousValue` on the server).
+  - **Event types (owner, 2026-10-31; changed 2026-11-02)** are grouped (`DECOR_EVENT_GROUPS`):
+    wedding functions, birthdays (**boy / girl only** since 2026-11-02: designs hardly differ, it is
+    mostly balloons), family functions (+ **Naming ceremony**, NMC), business & others. The step-2
+    catch-all `birthday` and the first-birthday / surprise values stay in the enum for existing items
+    but are hidden for new choices (`LEGACY_EVENT_TYPES`; `filterOptions` in the form, `validate` with
+    `previousValue` on the server).
+  - **Shared decorations, material, stage, venue (owner, 2026-11-02).** One decoration often suits
+    several events (reception stage = engagement = anniversary = puberty):
+    - **`eventType` is the main event** (it gives the item code; never changes) and **`alsoSuits`**
+      (text `hasMany`, validated against `ALSO_SUITS_CHOICES`; a tick-list in `components/admin/decor/AlsoSuits.tsx`)
+      lists the others. The site shows the item under the main event and every also-suits event
+      (`forEvent()` in `lib/decorations.ts`, counts too). The admin Event filter is main **or** also-suits.
+    - **`material`** (real / artificial / mixed flowers / balloons) is mandatory for every save (a
+      `validate`, not a DB `required`, so old rows didn't block the migration) and a chip filter on
+      `/decorations`. Old items without it show no material until next saved.
+    - **Stage is not a field.** Each decoration is a standalone item (Stage, Entrance, **Welcome board**…).
+      Stage-category pages ask "Does your venue already have a stage?"; "No" shows Decoration settings →
+      `stageCost` as "from ₹X", only to a logged-in couple (`stagePriceFor`, not counted in the daily limit).
+    - **Outside decorators:** about a quarter of mandapams allow only their own decorators, so the
+      decoration pages carry a "Check with your venue first" notice (`VenueNotice`) and `/enquire` asks an
+      optional "Does your venue allow outside decorators?" (Leads `requirements.venueOutsideDecorators`,
+      text validated to yes / unsure / no). There is no per-item "needs permission" flag.
     "Shop Opening" is labelled "Opening ceremony" (value `shop_opening`, new code OPN). "Others"
     / category "Other" require `eventTypeOther` / `categoryOther`, cleared when the choice changes;
     show them with `eventTypeText()` / `categoryText()`.

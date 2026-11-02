@@ -4,11 +4,19 @@ import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
-import { DECOR_CATEGORIES, DECOR_EVENT_GROUPS, DECOR_STATUSES, DECOR_THEMES, eventTypeLabel } from '../../../lib/decorOptions'
+import {
+  DECOR_CATEGORIES,
+  DECOR_EVENT_GROUPS,
+  DECOR_MATERIALS,
+  DECOR_STATUSES,
+  DECOR_THEMES,
+  eventTypeLabel,
+} from '../../../lib/decorOptions'
 
 type Filters = {
   eventType: string
   category: string
+  material: string
   theme: string
   supplier: string
   min: string
@@ -16,14 +24,22 @@ type Filters = {
   status: string
 }
 
-const EMPTY: Filters = { eventType: '', category: '', theme: '', supplier: '', min: '', max: '', status: '' }
+const EMPTY: Filters = { eventType: '', category: '', material: '', theme: '', supplier: '', min: '', max: '', status: '' }
 
-/** Our filters → Payload list conditions (`where[and][i][field][operator]=value`). */
-function toConditions(f: Filters): [string, string][] {
-  const out: [string, string][] = []
-  const add = (field: string, op: string, value: string) => out.push([`[${field}][${op}]`, value])
-  if (f.eventType) add('eventType', 'equals', f.eventType)
+/**
+ * Our filters → Payload list conditions. Each entry is one `where[and][i]…` condition, written as
+ * [what comes after `where[and][i]`, value] pairs (the Event filter is an "or": main event or also-suits).
+ */
+function toConditions(f: Filters): [string, string][][] {
+  const out: [string, string][][] = []
+  const add = (field: string, op: string, value: string) => out.push([[`[${field}][${op}]`, value]])
+  if (f.eventType)
+    out.push([
+      ['[or][0][eventType][equals]', f.eventType],
+      ['[or][1][alsoSuits][equals]', f.eventType],
+    ])
   if (f.category) add('category', 'equals', f.category)
+  if (f.material) add('material', 'equals', f.material)
   if (f.theme) add('themes', 'in', f.theme)
   if (f.supplier) add('supplier', 'equals', f.supplier)
   if (f.min && Number(f.min) >= 0) add('clientPrice', 'greater_than_equal', String(Number(f.min)))
@@ -37,11 +53,16 @@ function toConditions(f: Filters): [string, string][] {
 function fromParams(params: URLSearchParams): Filters {
   const f = { ...EMPTY }
   for (const [key, value] of params.entries()) {
+    if (/^where\[and\]\[\d+\]\[or\]\[0\]\[eventType\]\[equals\]$/.test(key)) {
+      f.eventType = value
+      continue
+    }
     const m = key.match(/^where\[and\]\[\d+\]\[(\w+)\]\[(\w+)\]$/)
     if (!m) continue
     const [, field, op] = m
     if (field === 'eventType') f.eventType = value
     else if (field === 'category') f.category = value
+    else if (field === 'material') f.material = value
     else if (field === 'themes') f.theme = value
     else if (field === 'supplier') f.supplier = value
     else if (field === 'clientPrice' && op === 'greater_than_equal') f.min = value
@@ -91,7 +112,7 @@ export function DecorQuickFilters() {
       if (key.startsWith('where') || key === 'page') continue
       out.append(key, value)
     }
-    toConditions(next).forEach(([cond, value], i) => out.append(`where[and][${i}]${cond}`, value))
+    toConditions(next).forEach((pairs, i) => pairs.forEach(([cond, value]) => out.append(`where[and][${i}]${cond}`, value)))
     const qs = out.toString()
     router.push(qs ? `${pathname}?${qs}` : pathname)
   }
@@ -133,6 +154,17 @@ export function DecorQuickFilters() {
         <select value={f.category} onChange={set('category')}>
           <option value="">All categories</option>
           {DECOR_CATEGORIES.map(([v, l]) => (
+            <option key={v} value={v}>
+              {l}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span>Flowers / material</span>
+        <select value={f.material} onChange={set('material')}>
+          <option value="">All</option>
+          {DECOR_MATERIALS.map(([v, l]) => (
             <option key={v} value={v}>
               {l}
             </option>

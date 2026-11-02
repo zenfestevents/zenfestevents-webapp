@@ -4,8 +4,15 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { DecorCard } from '../../../../components/decor/DecorCard'
+import { StageQuestion, VenueNotice } from '../../../../components/decor/StageQuestion'
 import { ProductGallery } from '../../../../components/shop/ProductGallery'
-import { getPublicDecoration, priceFor, relatedDecorations, type PublicPrice } from '../../../../lib/decorations'
+import {
+  getPublicDecoration,
+  priceFor,
+  relatedDecorations,
+  stagePriceFor,
+  type PublicPrice,
+} from '../../../../lib/decorations'
 import { getSiteSettings } from '../../../../lib/getSettings'
 import { getCustomer } from '../../../../lib/session'
 import { whatsappLink } from '../../../../lib/site'
@@ -91,6 +98,8 @@ export default async function DecorationPage({ params }: Props) {
     relatedDecorations(item),
   ])
   const price = await priceFor(item.id, found.price, customer)
+  // Only stage decorations ask about the venue's stage.
+  const stage = item.category === 'stage' ? await stagePriceFor(customer) : null
   const wa = whatsappLink(
     settings.contact?.whatsapp,
     `Hi Zenfest, I like decoration ${item.code} (${item.title}). Please share the details and availability.`,
@@ -117,6 +126,7 @@ export default async function DecorationPage({ params }: Props) {
             <p className="dc-card__code">Code {item.code}</p>
 
             <PriceBox price={price} slug={item.slug} wa={wa} />
+            {stage ? <StageQuestion stage={stage} next={`/decorations/${item.slug}`} /> : null}
 
             <div className="sp-product__actions">
               <a className="btn btn--whatsapp" href={wa} target="_blank" rel="noopener">
@@ -131,9 +141,22 @@ export default async function DecorationPage({ params }: Props) {
               <div>
                 <dt>Good for</dt>
                 <dd>
-                  <Link href={`/decorations?event=${item.eventType}`}>{item.eventLabel}</Link>
+                  {[[item.eventType, item.eventLabel], ...item.alsoSuits].map(([value, label], i) => (
+                    <React.Fragment key={value}>
+                      {i > 0 ? ', ' : ''}
+                      <Link href={`/decorations?event=${value}`}>{label}</Link>
+                    </React.Fragment>
+                  ))}
                 </dd>
               </div>
+              {item.materialLabel && (
+                <div>
+                  <dt>Made with</dt>
+                  <dd>
+                    <Link href={`/decorations?material=${item.material}`}>{item.materialLabel}</Link>
+                  </dd>
+                </div>
+              )}
               {item.themes.length > 0 && (
                 <div>
                   <dt>Style</dt>
@@ -155,6 +178,8 @@ export default async function DecorationPage({ params }: Props) {
             </dl>
 
             {item.description && <div className="sp-product__desc">{item.description}</div>}
+
+            <VenueNotice />
           </div>
         </div>
 

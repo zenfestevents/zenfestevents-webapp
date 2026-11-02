@@ -3,17 +3,21 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { DecorCard } from '../../../components/decor/DecorCard'
+import { VenueNotice } from '../../../components/decor/StageQuestion'
 import { param, type SearchParams } from '../../../components/market/AuthShell'
 import { decorationCounts, listDecorations } from '../../../lib/decorations'
 import {
   DECOR_CATEGORIES,
   DECOR_EVENT_GROUPS,
+  DECOR_MATERIALS,
   DECOR_THEMES,
   categoryLabel,
   eventTypeLabel,
   isDecorCategory,
   isDecorEventType,
+  isDecorMaterial,
   isDecorTheme,
+  materialLabel,
 } from '../../../lib/decorOptions'
 
 // Reads the filters from the address, so this page is built per visit.
@@ -33,30 +37,34 @@ export default async function DecorationsPage({ searchParams }: Props) {
   const eventRaw = param(sp.event)
   const categoryRaw = param(sp.category)
   const themeRaw = param(sp.theme)
+  const materialRaw = param(sp.material)
   const event = isDecorEventType(eventRaw) ? eventRaw : ''
   const category = isDecorCategory(categoryRaw) ? categoryRaw : ''
   const theme = isDecorTheme(themeRaw) ? themeRaw : ''
+  const material = isDecorMaterial(materialRaw) ? materialRaw : ''
   const page = Math.max(1, Number.parseInt(param(sp.page), 10) || 1)
 
   const [counts, { items, total, pages }] = await Promise.all([
     decorationCounts(),
-    listDecorations({ event, category, theme, page }),
+    listDecorations({ event, category, material, theme, page }),
   ])
 
-  const href = (next: { event?: string; category?: string; theme?: string; page?: number }) => {
+  const href = (next: { event?: string; category?: string; material?: string; theme?: string; page?: number }) => {
     const q = new URLSearchParams()
     const e = next.event ?? event
     const c = next.category ?? category
+    const m = next.material ?? material
     const t = next.theme ?? theme
     if (e) q.set('event', e)
     if (c) q.set('category', c)
+    if (m) q.set('material', m)
     if (t) q.set('theme', t)
     if (next.page && next.page > 1) q.set('page', String(next.page))
     const qs = q.toString()
     return `/decorations${qs ? `?${qs}` : ''}`
   }
 
-  const filtered = Boolean(event || category || theme)
+  const filtered = Boolean(event || category || material || theme)
   const heading = event ? `${eventTypeLabel(event)} decorations` : 'Decorations'
 
   return (
@@ -70,6 +78,8 @@ export default async function DecorationsPage({ searchParams }: Props) {
             Log in as a client to see prices.
           </p>
         </header>
+
+        <VenueNotice />
 
         <nav className="sp-chips" aria-label="Event">
           <Link className={`sp-chip ${!event ? 'is-active' : ''}`} href={href({ event: '', page: 1 })}>
@@ -85,6 +95,20 @@ export default async function DecorationsPage({ searchParams }: Props) {
         </nav>
 
         <div className="sp-filters">
+          <nav className="sp-chips sp-chips--small" aria-label="Flowers and material">
+            <Link className={`sp-chip ${!material ? 'is-active' : ''}`} href={href({ material: '', page: 1 })}>
+              Any flowers
+            </Link>
+            {DECOR_MATERIALS.filter(([v]) => counts.byMaterial[v] > 0 || material === v).map(([v, label]) => (
+              <Link
+                key={v}
+                className={`sp-chip ${material === v ? 'is-active' : ''}`}
+                href={href({ material: v, page: 1 })}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
           <nav className="sp-chips sp-chips--small" aria-label="Category">
             <Link className={`sp-chip ${!category ? 'is-active' : ''}`} href={href({ category: '', page: 1 })}>
               Everything
@@ -116,6 +140,7 @@ export default async function DecorationsPage({ searchParams }: Props) {
             <p className="muted dc-count">
               {total} decoration{total === 1 ? '' : 's'}
               {category ? ` · ${categoryLabel(category)}` : ''}
+              {material ? ` · ${materialLabel(material)}` : ''}
             </p>
             <div className="sp-grid">
               {items.map((d) => (

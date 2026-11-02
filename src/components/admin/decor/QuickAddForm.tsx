@@ -5,10 +5,12 @@ import React, { useRef, useState } from 'react'
 import {
   DECOR_CATEGORIES,
   DECOR_EVENT_GROUPS,
+  DECOR_MATERIALS,
   LEGACY_EVENT_TYPES,
   eventTypeLabel,
   rupees,
 } from '../../../lib/decorOptions'
+import { AlsoSuitsChecklist } from './AlsoSuits'
 import { uploadDecorPhotos, type UploadedPhoto } from './uploadPhotos'
 
 type Saved = { id: number; itemCode: string }
@@ -21,6 +23,7 @@ const EMPTY = {
   eventTypeOther: '',
   category: '',
   categoryOther: '',
+  material: '',
 }
 
 /**
@@ -32,6 +35,7 @@ export function DecorQuickAddForm() {
   const input = useRef<HTMLInputElement>(null)
   const [photos, setPhotos] = useState<UploadedPhoto[]>([])
   const [f, setF] = useState(EMPTY)
+  const [alsoSuits, setAlsoSuits] = useState<string[]>([])
   const [busy, setBusy] = useState('')
   const [errors, setErrors] = useState<string[]>([])
   const [saved, setSaved] = useState<Saved | null>(null)
@@ -59,6 +63,7 @@ export function DecorQuickAddForm() {
     if (f.eventType === 'other' && !f.eventTypeOther.trim()) out.push('Type which event.')
     if (!f.category) out.push('Choose the category.')
     if (f.category === 'other' && !f.categoryOther.trim()) out.push('Type which category.')
+    if (!f.material) out.push('Choose Flowers / material.')
     return out
   }
 
@@ -83,6 +88,8 @@ export function DecorQuickAddForm() {
           eventTypeOther: f.eventType === 'other' ? f.eventTypeOther.trim() : undefined,
           category: f.category,
           categoryOther: f.category === 'other' ? f.categoryOther.trim() : undefined,
+          material: f.material,
+          alsoSuits: alsoSuits.filter((v) => v !== f.eventType),
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -103,8 +110,15 @@ export function DecorQuickAddForm() {
   }
 
   const again = () => {
-    // Keep the event type and category: the team often adds several of the same kind.
-    setF({ ...EMPTY, eventType: f.eventType, eventTypeOther: f.eventTypeOther, category: f.category, categoryOther: f.categoryOther })
+    // Keep the event type, category and material (and "also suits"): the team often adds several of the same kind.
+    setF({
+      ...EMPTY,
+      eventType: f.eventType,
+      eventTypeOther: f.eventTypeOther,
+      category: f.category,
+      categoryOther: f.categoryOther,
+      material: f.material,
+    })
     setPhotos([])
     setErrors([])
     setSaved(null)
@@ -218,6 +232,23 @@ export function DecorQuickAddForm() {
             <input type="text" maxLength={80} placeholder="e.g. Ceiling drapes" value={f.categoryOther} onChange={set('categoryOther')} />
           </label>
         ) : null}
+        <label>
+          <span>Flowers / material</span>
+          <select value={f.material} onChange={set('material')}>
+            <option value="">Choose…</option>
+            {DECOR_MATERIALS.map(([v, l]) => (
+              <option key={v} value={v}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </label>
+        <details>
+          <summary>
+            Also suits other events{alsoSuits.length ? ` (${alsoSuits.length})` : ''} — optional
+          </summary>
+          <AlsoSuitsChecklist value={alsoSuits} onChange={setAlsoSuits} main={f.eventType} />
+        </details>
         <label>
           <span>Title (optional, can add later)</span>
           <input type="text" maxLength={140} placeholder="e.g. Peacock stage with jasmine strings" value={f.title} onChange={set('title')} />

@@ -15,6 +15,7 @@ import {
   tenDigitMobile,
   type EnquiryEvent,
 } from '../lib/eventRequirements'
+import { VENUE_DECORATORS } from '../lib/decorOptions'
 import { whatsappLink } from '../lib/site'
 import { Checkboxes, Radios } from './FormChoices'
 import { BallDots } from './game'
@@ -176,6 +177,7 @@ export function EventRequirementsForm({
         weddingParts: event === 'wedding' ? part : undefined,
         startTime: get('startTime'),
         location: get('location'),
+        venueOutsideDecorators: get('venueOutsideDecorators') || undefined,
         services: event === 'wedding' ? undefined : list('services'),
         receptionServices: event === 'wedding' && hasReception(part) ? list('receptionServices') : undefined,
         weddingServices: event === 'wedding' && hasWedding(part) ? list('weddingServices') : undefined,
@@ -294,6 +296,12 @@ export function EventRequirementsForm({
           <span className="field__label">Event location *</span>
           <input name="location" required maxLength={200} placeholder="Town / venue, e.g. Tambaram, Madurai or a hall name" />
         </label>
+        <Radios
+          name="venueOutsideDecorators"
+          legend="Does your venue allow outside decorators?"
+          options={VENUE_DECORATORS}
+          hint="Some mandapams and halls allow only their own decorators. If you are not sure, choose “Not sure” and we will help you check."
+        />
         {event === 'wedding' && (
           <Radios
             name="weddingParts"

@@ -1,6 +1,7 @@
 import { StatusPill as StatusPill_ab7e90262632553960ea6c372de1f87a } from '../../../components/admin/StatusPill'
 import { DecorCoverCell as DecorCoverCell_bf96ccc7195185c8f63ad6cfb2390631 } from '../../../components/admin/decor/CoverCell'
 import { DecorPhotosField as DecorPhotosField_384c12c6f9b58bd5632b7cfd78864ac2 } from '../../../components/admin/decor/PhotosField'
+import { DecorAlsoSuitsField as DecorAlsoSuitsField_227733357f1e45e2548f6f045e25c476 } from '../../../components/admin/decor/AlsoSuits'
 import { DecorRupeesCell as DecorRupeesCell_562b43e7259bda229c700cd6e07425ce } from '../../../components/admin/decor/MarginCell'
 import { DecorMarginCell as DecorMarginCell_562b43e7259bda229c700cd6e07425ce } from '../../../components/admin/decor/MarginCell'
 import { DecorQuickFilters as DecorQuickFilters_35f8d7ee0b89322867b635687334d964 } from '../../../components/admin/decor/QuickFilters'
@@ -22,6 +23,7 @@ export const importMap = {
   "/components/admin/StatusPill#StatusPill": StatusPill_ab7e90262632553960ea6c372de1f87a,
   "/components/admin/decor/CoverCell#DecorCoverCell": DecorCoverCell_bf96ccc7195185c8f63ad6cfb2390631,
   "/components/admin/decor/PhotosField#DecorPhotosField": DecorPhotosField_384c12c6f9b58bd5632b7cfd78864ac2,
+  "/components/admin/decor/AlsoSuits#DecorAlsoSuitsField": DecorAlsoSuitsField_227733357f1e45e2548f6f045e25c476,
   "/components/admin/decor/MarginCell#DecorRupeesCell": DecorRupeesCell_562b43e7259bda229c700cd6e07425ce,
   "/components/admin/decor/MarginCell#DecorMarginCell": DecorMarginCell_562b43e7259bda229c700cd6e07425ce,
   "/components/admin/decor/QuickFilters#DecorQuickFilters": DecorQuickFilters_35f8d7ee0b89322867b635687334d964,

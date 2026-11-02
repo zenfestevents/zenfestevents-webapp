@@ -49,3 +49,41 @@
 .dc-includes {
   white-space: pre-line;
 }
+.dc-notice {
+  display: grid;
+  gap: 0.2rem;
+  margin: 1.2rem 0 0;
+  padding: 0.8rem 1rem;
+  border-left: 3px solid var(--gold, #c9a14a);
+  border-radius: 0 10px 10px 0;
+  background: var(--surface-1, rgba(0, 0, 0, 0.04));
+  font-size: 0.92rem;
+}
+.dc-notice strong {
+  font-size: 0.95rem;
+}
+.dc-notice p {
+  margin: 0;
+  color: var(--text-muted);
+}
+.dc-stage {
+  display: grid;
+  gap: 0.6rem;
+  margin: 1rem 0;
+  padding: 1rem 1.2rem;
+}
+.dc-stage__q {
+  margin: 0;
+  font-weight: 600;
+}
+.dc-stage__choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.dc-stage__answer {
+  margin: 0;
+}
+.dc-stage .btn-row {
+  margin-top: 0.2rem;
+}

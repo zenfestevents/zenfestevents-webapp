@@ -29,6 +29,7 @@ export const DECOR_EVENT_TYPES = [
   ['housewarming', 'Housewarming', 'HSW'],
   ['baby_shower', 'Baby shower', 'BBS'],
   ['puberty', 'Puberty ceremony', 'PUB'],
+  ['naming_ceremony', 'Naming ceremony', 'NMC'],
   ['anniversary', 'Anniversary', 'ANV'],
   // Business & others
   ['corporate', 'Corporate', 'CRP'],
@@ -37,8 +38,16 @@ export const DECOR_EVENT_TYPES = [
   ['other', 'Others', 'OTH'],
 ] as const
 
-/** Kept for existing items only; hidden when choosing an event type. */
-export const LEGACY_EVENT_TYPES: readonly string[] = ['birthday']
+/**
+ * Kept for existing items only; hidden when choosing an event type. Birthdays are just boy /
+ * girl since 2026-11-02 (owner: designs hardly differ, it is mostly balloons).
+ */
+export const LEGACY_EVENT_TYPES: readonly string[] = [
+  'birthday',
+  'first_birthday_boy',
+  'first_birthday_girl',
+  'birthday_surprise',
+]
 
 /** Headings for grouped dropdowns (`<optgroup>`), in DECOR_EVENT_TYPES order. */
 export const DECOR_EVENT_GROUPS: readonly { label: string; values: readonly DecorEventType[] }[] = [
@@ -47,7 +56,7 @@ export const DECOR_EVENT_GROUPS: readonly { label: string; values: readonly Deco
     label: 'Birthdays',
     values: ['birthday_boy', 'birthday_girl', 'first_birthday_boy', 'first_birthday_girl', 'birthday_surprise', 'birthday'],
   },
-  { label: 'Family functions', values: ['housewarming', 'baby_shower', 'puberty', 'anniversary'] },
+  { label: 'Family functions', values: ['housewarming', 'baby_shower', 'puberty', 'naming_ceremony', 'anniversary'] },
   { label: 'Business & others', values: ['corporate', 'shop_opening', 'sports', 'other'] },
 ]
 
@@ -55,6 +64,7 @@ export const DECOR_EVENT_GROUPS: readonly { label: string; values: readonly Deco
 export const DECOR_CATEGORIES = [
   ['stage', 'Stage', 'STG'],
   ['entrance', 'Entrance', 'ENT'],
+  ['welcome_board', 'Welcome board', 'WLB'],
   ['mandap', 'Mandap', 'MDP'],
   ['backdrop', 'Backdrop', 'BKD'],
   ['balloon', 'Balloon', 'BLN'],
@@ -76,6 +86,25 @@ export const DECOR_THEMES = [
   ['temple', 'Temple style'],
   ['kids', 'Kids'],
   ['luxury', 'Luxury'],
+] as const
+
+/**
+ * What a decoration is made of (owner, 2026-11-02): marriage / sangeet / mehendi are real
+ * flowers, receptions mostly artificial or mixed, birthdays and anniversaries mostly balloons.
+ * Mandatory for the team; a filter on the website. Stored in the database: never rename a value.
+ */
+export const DECOR_MATERIALS = [
+  ['real_flowers', 'Real flowers'],
+  ['artificial_flowers', 'Artificial flowers'],
+  ['mixed_flowers', 'Mixed flowers'],
+  ['balloons', 'Balloons'],
+] as const
+
+/** Is the venue open to outside decorators? About a quarter of mandapams only allow their own. */
+export const VENUE_DECORATORS = [
+  ['yes', 'Yes'],
+  ['unsure', 'Not sure'],
+  ['no', 'No'],
 ] as const
 
 export const DECOR_KINDS = [
@@ -106,6 +135,7 @@ export const DECOR_STATUSES = [
 export type DecorEventType = (typeof DECOR_EVENT_TYPES)[number][0]
 export type DecorCategory = (typeof DECOR_CATEGORIES)[number][0]
 export type DecorTheme = (typeof DECOR_THEMES)[number][0]
+export type DecorMaterial = (typeof DECOR_MATERIALS)[number][0]
 export type DecorKind = (typeof DECOR_KINDS)[number][0]
 export type DecorPriceMode = (typeof DECOR_PRICE_MODES)[number][0]
 export type DecorStatus = (typeof DECOR_STATUSES)[number][0]
@@ -127,10 +157,17 @@ export const eventTypeText = (v: unknown, other?: string | null) =>
 export const categoryText = (v: unknown, other?: string | null) =>
   v === 'other' && other?.trim() ? other.trim() : categoryLabel(v)
 export const themeLabel = (v: unknown) => labelIn(DECOR_THEMES, v)
+export const materialLabel = (v: unknown) => labelIn(DECOR_MATERIALS, v)
+
+/** Events an item can also suit: any real event except "Others" and the hidden old birthdays. */
+export const ALSO_SUITS_CHOICES: readonly DecorEventType[] = DECOR_EVENT_TYPES.map(([v]) => v).filter(
+  (v) => v !== 'other' && !LEGACY_EVENT_TYPES.includes(v),
+)
 
 export const isDecorEventType = (v: unknown): v is DecorEventType => DECOR_EVENT_TYPES.some(([x]) => x === v)
 export const isDecorCategory = (v: unknown): v is DecorCategory => DECOR_CATEGORIES.some(([x]) => x === v)
 export const isDecorTheme = (v: unknown): v is DecorTheme => DECOR_THEMES.some(([x]) => x === v)
+export const isDecorMaterial = (v: unknown): v is DecorMaterial => DECOR_MATERIALS.some(([x]) => x === v)
 
 /** "WED-STG-" for a wedding stage: the part of an item code before the running number. */
 export function itemCodePrefix(eventType: unknown, category: unknown): string {

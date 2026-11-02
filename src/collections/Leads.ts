@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access'
 import { adminHidden, canView, canViewField, canWork, canWorkField, ownerOnly } from '../access/roles'
+import { VENUE_DECORATORS } from '../lib/decorOptions'
 import { ALL_SERVICES, EXTRA_SHOOTS } from '../lib/eventRequirements'
 import { notifySubmission } from '../hooks/notifySubmission'
 import { syncLeadToContacts } from '../hooks/syncOccasionFromWebsite'
@@ -52,6 +53,7 @@ export const Leads: CollectionConfig = {
         'requirements.weddingParts',
         'requirements.startTime',
         'requirements.location',
+        'requirements.venueOutsideDecorators',
         'requirements.services',
         'requirements.receptionServices',
         'requirements.weddingServices',
@@ -110,6 +112,16 @@ export const Leads: CollectionConfig = {
             { name: 'startTime', type: 'text', label: 'Start time', maxLength: 20 },
             { name: 'location', type: 'text', label: 'Event location', maxLength: 200 },
           ],
+        },
+        {
+          // About a quarter of mandapams only allow their own decorators: the team needs to know early.
+          name: 'venueOutsideDecorators',
+          type: 'text',
+          label: 'Venue allows outside decorators?',
+          maxLength: 10,
+          admin: { description: 'Yes / Not sure / No, as answered by the client.' },
+          validate: (value: unknown) =>
+            !value || VENUE_DECORATORS.some(([v]) => v === value) ? true : 'Choose Yes, Not sure or No.',
         },
         {
           name: 'services',
