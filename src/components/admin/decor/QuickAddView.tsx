@@ -33,7 +33,7 @@ export function DecorQuickAddView({ initPageResult, params, searchParams }: Admi
           <p className="zf-eyebrow">Decorations</p>
           <h1>Quick add</h1>
           <p>
-            Add a decoration from your phone: photos, price, event and category. It saves as a <strong>Draft</strong>{' '}
+            Add a decoration from your phone: photos, price and event. It saves as a <strong>Draft</strong>{' '}
             (not on the website) so you can finish the details later.
           </p>
           <Link href="/admin/collections/decor-items">← All decorations</Link>

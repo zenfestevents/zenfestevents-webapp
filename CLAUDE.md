@@ -970,6 +970,25 @@ src/
     (`/admin/decor/quick-add`, a custom admin view in `payload.config.ts` → `admin.components.views`)
     saves a Draft. HEIF photos (Samsung "High efficiency pictures") can't be opened by Chrome on
     Android; `uploadPhotos.ts` says how to switch it off.
+  - **Backdrops only, generic themes, Plan this setup (owner, 2026-11-02).** Easy to get wrong:
+    - **Every decoration is a backdrop.** The `category` field stays (old items, item codes) but is
+      `admin.hidden` with `defaultValue: 'backdrop'`, so new codes read `WED-BKD-001`; Quick add, the
+      admin filters and the public chips no longer have Category. Old items keep `STG` / `ENT` codes.
+    - **Themes are generic and follow the event** (`themesForEvent()` in `lib/decorOptions.ts`: boy
+      themes for a boy's birthday, girl themes for a girl's, wedding themes for weddings…), in the
+      form (`filterOptions` + `validate`; a theme already on an item stays valid) and in the public
+      chips (`decorationCounts(event).byTheme`). **Never a character, film or brand name** (Spider-Man,
+      Cocomelon…): they are registered trademarks with copyrighted artwork and their owners send
+      takedown / legal notices. `lib/brandGuard.ts` refuses a short list of names in the title,
+      description, "what's included" and the typed event name; add names there as they come up. Photos
+      must show no character artwork or logos (the team's job).
+    - **"Plan this setup" (`components/decor/PlanSetup.tsx`) on every backdrop page needs a login.**
+      Logged out it is only a log-in prompt. Logged in: "Does your venue already have a stage?" (No shows
+      the stage cost), "Does your venue allow outside decorators?", add-ons (Name / welcome board,
+      Entrance decoration, Carpet / sofa / other + text), then **Send on WhatsApp** (a pre-filled message
+      with the code, title, the client's first name and the answers). Add-ons are priced by the team on
+      WhatsApp: nothing is saved in admin and no add-on prices are shown. Later: collections of entrances
+      and name boards to pick from (not built).
   - **Event types (owner, 2026-10-31; changed 2026-11-02)** are grouped (`DECOR_EVENT_GROUPS`):
     wedding functions, birthdays (**boy / girl only** since 2026-11-02: designs hardly differ, it is
     mostly balloons), family functions (+ **Naming ceremony**, NMC), business & others. The step-2
@@ -985,9 +1004,9 @@ src/
     - **`material`** (real / artificial / mixed flowers / balloons) is mandatory for every save (a
       `validate`, not a DB `required`, so old rows didn't block the migration) and a chip filter on
       `/decorations`. Old items without it show no material until next saved.
-    - **Stage is not a field.** Each decoration is a standalone item (Stage, Entrance, **Welcome board**…).
-      Stage-category pages ask "Does your venue already have a stage?"; "No" shows Decoration settings →
-      `stageCost` as "from ₹X", only to a logged-in couple (`stagePriceFor`, not counted in the daily limit).
+    - **Stage is not a field.** Stages, entrances and name boards are add-ons the website asks about
+      (see "Backdrops only" below); the stage cost comes from Decoration settings → `stageCost`,
+      shown as "from ₹X" only to a logged-in couple (`stagePriceFor`, not counted in the daily limit).
     - **Outside decorators:** about a quarter of mandapams allow only their own decorators, so the
       decoration pages carry a "Check with your venue first" notice (`VenueNotice`) and `/enquire` asks an
       optional "Does your venue allow outside decorators?" (Leads `requirements.venueOutsideDecorators`,

@@ -2,6 +2,7 @@ import type { CollectionConfig, FieldAccess } from 'payload'
 
 import { accessFor } from '../access/roles'
 import { assignItemCode, recordPriceHistory, stampPriceChange } from '../hooks/decorPrices'
+import { noBrandNames } from '../lib/brandGuard'
 import { revalidateCollection } from '../hooks/revalidateContent'
 import { CONTENT_TAGS } from '../lib/contentCache'
 import {
@@ -16,6 +17,7 @@ import {
   LEGACY_EVENT_TYPES,
   decorOptions,
   marginOf,
+  themesForEvent,
 } from '../lib/decorOptions'
 
 const { canView, canWork, canViewField, canDelete } = accessFor('decorations')
@@ -28,6 +30,19 @@ const neededWhenOther =
   (selectField: string, message: string) =>
   (value: unknown, { siblingData }: { siblingData?: Record<string, unknown> }) =>
     siblingData?.[selectField] === 'other' && !String(value ?? '').trim() ? message : true
+
+/** Runs each validator in turn and returns the first message. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Check = (value: any, options: any) => true | string
+const allOf =
+  (...checks: Check[]): Check =>
+  (value, options) => {
+    for (const check of checks) {
+      const result = check(value, options)
+      if (result !== true) return result
+    }
+    return true
+  }
 
 /** Hide what the server fills in until the item has been saved once. */
 const onceSaved = (data: Record<string, unknown> | undefined) => Boolean(data?.id)
@@ -63,7 +78,7 @@ export const DecorItems: CollectionConfig = {
   admin: {
     group: 'Decorations',
     useAsTitle: 'title',
-    defaultColumns: ['photos', 'itemCode', 'title', 'eventType', 'category', 'material', 'clientPrice', 'margin', 'status'],
+    defaultColumns: ['photos', 'itemCode', 'title', 'eventType', 'material', 'clientPrice', 'margin', 'status'],
     listSearchableFields: ['itemCode', 'title', 'size', 'includes'],
     pagination: { defaultLimit: 25 },
     description:
@@ -111,8 +126,11 @@ export const DecorItems: CollectionConfig = {
       name: 'title',
       type: 'text',
       maxLength: 140,
-      admin: { description: 'What a client sees, e.g. “Peacock stage with jasmine strings”.' },
-      validate: neededWhenActive('Add a title before making this Active.'),
+      admin: {
+        description:
+          'What a client sees, e.g. “Peacock backdrop with jasmine strings”. Use generic names: never a cartoon, film or brand name (say “Superhero theme”, not the character).',
+      },
+      validate: allOf(neededWhenActive('Add a title before making this Active.'), noBrandNames),
     },
     {
       type: 'row',
@@ -141,10 +159,15 @@ export const DecorItems: CollectionConfig = {
           },
         },
         {
+          // Every decoration is a backdrop now (owner, 2026-11-02): stages, entrances and name
+          // boards are add-ons the website asks about. The field stays for the old items and
+          // the item code; the team never sees it.
           name: 'category',
           type: 'select',
           required: true,
+          defaultValue: 'backdrop',
           options: decorOptions(DECOR_CATEGORIES),
+          admin: { hidden: true },
         },
       ],
     },
@@ -160,7 +183,7 @@ export const DecorItems: CollectionConfig = {
             condition: (_, siblingData) => siblingData?.eventType === 'other',
             description: 'e.g. Corporate annual day, Temple festival',
           },
-          validate: neededWhenOther('eventType', 'Type the event, since Event type is “Others”.'),
+          validate: allOf(neededWhenOther('eventType', 'Type the event, since Event type is “Others”.'), noBrandNames),
           hooks: { beforeChange: [({ value, siblingData }) => (siblingData?.eventType === 'other' ? value : null)] },
         },
         {
@@ -216,6 +239,27 @@ export const DecorItems: CollectionConfig = {
       hasMany: true,
       label: 'Theme / style',
       options: decorOptions(DECOR_THEMES),
+      admin: {
+        description:
+          'The themes offered depend on the event (boy themes for a boy’s birthday, and so on). They are generic on purpose: character and brand names are protected.',
+      },
+      // Only this event's themes are offered; one already chosen stays valid after the event changes.
+      filterOptions: ({ options, data }) => {
+        const allowed = themesForEvent(data?.eventType)
+        const chosen: unknown[] = Array.isArray(data?.themes) ? data.themes : []
+        return options.filter((o) => {
+          const value = typeof o === 'string' ? o : o.value
+          return allowed.includes(value as never) || chosen.includes(value)
+        })
+      },
+      // Same rule on the server (filterOptions only hides them in the form).
+      validate: (value: unknown, { siblingData, previousValue }: { siblingData?: Record<string, unknown>; previousValue?: unknown }) => {
+        const list = Array.isArray(value) ? value : []
+        const allowed = themesForEvent(siblingData?.eventType)
+        const before: unknown[] = Array.isArray(previousValue) ? previousValue : []
+        const wrong = list.find((v) => !DECOR_THEMES.some(([x]) => x === v) || (!allowed.includes(v as never) && !before.includes(v)))
+        return wrong ? 'Choose themes that suit this event.' : true
+      },
     },
     {
       name: 'kind',
@@ -274,13 +318,14 @@ export const DecorItems: CollectionConfig = {
       label: 'Supplier (team only)',
       access: { read: canViewField },
     },
-    { name: 'size', type: 'text', maxLength: 200, label: 'Size', admin: { description: 'e.g. 20 ft × 10 ft stage' } },
-    { name: 'includes', type: 'textarea', maxLength: 2000, label: 'What’s included' },
+    { name: 'size', type: 'text', maxLength: 200, label: 'Size', admin: { description: 'e.g. 20 ft × 10 ft backdrop' } },
+    { name: 'includes', type: 'textarea', maxLength: 2000, label: 'What’s included', validate: noBrandNames },
     {
       name: 'description',
       type: 'textarea',
       maxLength: 600,
       label: 'Short description (website and client PDFs)',
+      validate: noBrandNames,
     },
     { name: 'notes', type: 'textarea', maxLength: 4000, label: 'Notes (team only)', access: { read: canViewField } },
     // ── Sidebar ────────────────────────────────────────────────────────────────

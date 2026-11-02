@@ -13,6 +13,7 @@ import {
   DECOR_CATEGORIES,
   DECOR_EVENT_TYPES,
   DECOR_MATERIALS,
+  DECOR_THEMES,
   categoryText,
   eventTypeLabel,
   eventTypeText,
@@ -171,18 +172,20 @@ export async function listDecorations(
 /**
  * How many active decorations each event type, category and material has (for the filter chips).
  * An item counts once under its main event and once under each event it also suits.
+ * `byTheme` counts only the items shown for `event` (all of them when no event is chosen).
  */
-export async function decorationCounts(): Promise<{
+export async function decorationCounts(event = ''): Promise<{
   byEvent: Record<string, number>
   byCategory: Record<string, number>
   byMaterial: Record<string, number>
+  byTheme: Record<string, number>
   total: number
 }> {
   const payload = await getPayloadClient()
   const { docs } = await payload.find({
     collection: 'decor-items',
     where: ACTIVE,
-    select: { eventType: true, alsoSuits: true, category: true, material: true },
+    select: { eventType: true, alsoSuits: true, category: true, material: true, themes: true },
     limit: 5000,
     depth: 0,
     overrideAccess: true,
@@ -191,13 +194,15 @@ export async function decorationCounts(): Promise<{
   const byEvent: Record<string, number> = Object.fromEntries(DECOR_EVENT_TYPES.map(([v]) => [v, 0]))
   const byCategory: Record<string, number> = Object.fromEntries(DECOR_CATEGORIES.map(([v]) => [v, 0]))
   const byMaterial: Record<string, number> = Object.fromEntries(DECOR_MATERIALS.map(([v]) => [v, 0]))
+  const byTheme: Record<string, number> = Object.fromEntries(DECOR_THEMES.map(([v]) => [v, 0]))
   for (const d of docs) {
     const events = new Set([d.eventType, ...(d.alsoSuits ?? []).filter((v) => ALSO_SUITS_CHOICES.includes(v as never))])
     for (const e of events) byEvent[e] = (byEvent[e] ?? 0) + 1
     byCategory[d.category] = (byCategory[d.category] ?? 0) + 1
     if (d.material) byMaterial[d.material] = (byMaterial[d.material] ?? 0) + 1
+    if (!event || events.has(event as never)) for (const t of d.themes ?? []) byTheme[t] = (byTheme[t] ?? 0) + 1
   }
-  return { byEvent, byCategory, byMaterial, total: docs.length }
+  return { byEvent, byCategory, byMaterial, byTheme, total: docs.length }
 }
 
 /** What the price block needs: kept on the server, only the text it builds is shown. */

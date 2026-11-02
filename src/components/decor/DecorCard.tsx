@@ -20,7 +20,8 @@ export function DecorCard({ item }: { item: PublicDecoration }) {
         </div>
         <div className="sp-card__body">
           <p className="sp-card__type">
-            {item.eventLabel} · {item.categoryLabel}
+            {item.eventLabel}
+            {item.materialLabel ? ` · ${item.materialLabel}` : ''}
           </p>
           <h3 className="sp-card__title">{item.title}</h3>
           <p className="dc-card__code">{item.code}</p>

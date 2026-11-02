@@ -22,6 +22,7 @@ import * as migration_20261031_071740_decor_exact_default from './20261031_07174
 import * as migration_20261031_085337_decor_event_types_photos from './20261031_085337_decor_event_types_photos';
 import * as migration_20261102_103437_decor_shared_events_material from './20261102_103437_decor_shared_events_material';
 import * as migration_20261102_112513_module_access from './20261102_112513_module_access';
+import * as migration_20261102_125144_decor_generic_themes from './20261102_125144_decor_generic_themes';
 
 export const migrations = [
   {
@@ -142,6 +143,11 @@ export const migrations = [
   {
     up: migration_20261102_112513_module_access.up,
     down: migration_20261102_112513_module_access.down,
-    name: '20261102_112513_module_access'
+    name: '20261102_112513_module_access',
+  },
+  {
+    up: migration_20261102_125144_decor_generic_themes.up,
+    down: migration_20261102_125144_decor_generic_themes.down,
+    name: '20261102_125144_decor_generic_themes'
   },
 ];

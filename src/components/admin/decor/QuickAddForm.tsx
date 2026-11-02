@@ -3,7 +3,6 @@
 import React, { useRef, useState } from 'react'
 
 import {
-  DECOR_CATEGORIES,
   DECOR_EVENT_GROUPS,
   DECOR_MATERIALS,
   LEGACY_EVENT_TYPES,
@@ -21,13 +20,11 @@ const EMPTY = {
   vendorPrice: '',
   eventType: '',
   eventTypeOther: '',
-  category: '',
-  categoryOther: '',
   material: '',
 }
 
 /**
- * Quick add (phone): photos + prices + event type + category, saved as a Draft decoration.
+ * Quick add (phone): photos + prices + event type, saved as a Draft backdrop.
  * The team fills in the rest later from the Decorations list (or "Finish details").
  * Photos are shrunk on the phone before uploading (uploadPhotos.ts).
  */
@@ -61,8 +58,6 @@ export function DecorQuickAddForm() {
     if (!f.clientPrice || Number(f.clientPrice) <= 0) out.push('Enter the client price.')
     if (!f.eventType) out.push('Choose the event type.')
     if (f.eventType === 'other' && !f.eventTypeOther.trim()) out.push('Type which event.')
-    if (!f.category) out.push('Choose the category.')
-    if (f.category === 'other' && !f.categoryOther.trim()) out.push('Type which category.')
     if (!f.material) out.push('Choose Flowers / material.')
     return out
   }
@@ -86,8 +81,6 @@ export function DecorQuickAddForm() {
           vendorPrice: f.vendorPrice ? Number(f.vendorPrice) : undefined,
           eventType: f.eventType,
           eventTypeOther: f.eventType === 'other' ? f.eventTypeOther.trim() : undefined,
-          category: f.category,
-          categoryOther: f.category === 'other' ? f.categoryOther.trim() : undefined,
           material: f.material,
           alsoSuits: alsoSuits.filter((v) => v !== f.eventType),
         }),
@@ -110,13 +103,11 @@ export function DecorQuickAddForm() {
   }
 
   const again = () => {
-    // Keep the event type, category and material (and "also suits"): the team often adds several of the same kind.
+    // Keep the event type and material (and "also suits"): the team often adds several of the same kind.
     setF({
       ...EMPTY,
       eventType: f.eventType,
       eventTypeOther: f.eventTypeOther,
-      category: f.category,
-      categoryOther: f.categoryOther,
       material: f.material,
     })
     setPhotos([])
@@ -191,7 +182,7 @@ export function DecorQuickAddForm() {
       </section>
 
       <section className="zf-quickadd__step">
-        <h2>3. What is it?</h2>
+        <h2>3. What is it for?</h2>
         <label>
           <span>Event type</span>
           <select value={f.eventType} onChange={set('eventType')}>
@@ -216,23 +207,6 @@ export function DecorQuickAddForm() {
           </label>
         ) : null}
         <label>
-          <span>Category</span>
-          <select value={f.category} onChange={set('category')}>
-            <option value="">Choose…</option>
-            {DECOR_CATEGORIES.map(([v, l]) => (
-              <option key={v} value={v}>
-                {l}
-              </option>
-            ))}
-          </select>
-        </label>
-        {f.category === 'other' ? (
-          <label>
-            <span>Which category?</span>
-            <input type="text" maxLength={80} placeholder="e.g. Ceiling drapes" value={f.categoryOther} onChange={set('categoryOther')} />
-          </label>
-        ) : null}
-        <label>
           <span>Flowers / material</span>
           <select value={f.material} onChange={set('material')}>
             <option value="">Choose…</option>
@@ -251,7 +225,7 @@ export function DecorQuickAddForm() {
         </details>
         <label>
           <span>Title (optional, can add later)</span>
-          <input type="text" maxLength={140} placeholder="e.g. Peacock stage with jasmine strings" value={f.title} onChange={set('title')} />
+          <input type="text" maxLength={140} placeholder="e.g. Peacock backdrop with jasmine strings" value={f.title} onChange={set('title')} />
         </label>
       </section>
 

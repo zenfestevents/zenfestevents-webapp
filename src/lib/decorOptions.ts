@@ -75,6 +75,13 @@ export const DECOR_CATEGORIES = [
   ['other', 'Other', 'OTH'],
 ] as const
 
+/**
+ * Themes are generic on purpose (owner, 2026-11-02): never a character, film, brand or league
+ * name. Spider-Man, Cocomelon and the like are registered trademarks with copyrighted artwork,
+ * and their owners send takedown notices, so the website says "Superhero", not the name.
+ * Which ones the team can pick depends on the event (`themesForEvent`). Append values only:
+ * this is a Postgres enum.
+ */
 export const DECOR_THEMES = [
   ['traditional', 'Traditional'],
   ['modern', 'Modern'],
@@ -86,6 +93,25 @@ export const DECOR_THEMES = [
   ['temple', 'Temple style'],
   ['kids', 'Kids'],
   ['luxury', 'Luxury'],
+  // Boys' birthdays
+  ['superhero', 'Superhero'],
+  ['jungle', 'Jungle / safari'],
+  ['cars', 'Cars & trucks'],
+  ['dinosaur', 'Dinosaur'],
+  ['space', 'Space'],
+  ['pirate', 'Pirate'],
+  ['farm', 'Farm'],
+  ['under_the_sea', 'Under the sea'],
+  ['construction', 'Construction'],
+  // Girls' birthdays
+  ['butterfly', 'Butterfly'],
+  ['unicorn', 'Unicorn'],
+  ['princess', 'Princess / fairy tale'],
+  ['garden', 'Garden flowers'],
+  ['mermaid', 'Mermaid'],
+  ['rainbow', 'Rainbow'],
+  ['teddy', 'Teddy bear'],
+  ['candy', 'Candy land'],
 ] as const
 
 /**
@@ -157,6 +183,51 @@ export const eventTypeText = (v: unknown, other?: string | null) =>
 export const categoryText = (v: unknown, other?: string | null) =>
   v === 'other' && other?.trim() ? other.trim() : categoryLabel(v)
 export const themeLabel = (v: unknown) => labelIn(DECOR_THEMES, v)
+const BOY_THEMES: readonly DecorTheme[] = ['superhero', 'jungle', 'cars', 'dinosaur', 'space', 'pirate', 'farm', 'under_the_sea', 'construction']
+const GIRL_THEMES: readonly DecorTheme[] = ['butterfly', 'unicorn', 'princess', 'garden', 'mermaid', 'rainbow', 'teddy', 'candy', 'pastel']
+const WEDDING_THEMES: readonly DecorTheme[] = ['traditional', 'modern', 'floral', 'minimal', 'royal', 'pastel', 'rustic', 'temple', 'luxury']
+const FAMILY_THEMES: readonly DecorTheme[] = ['traditional', 'floral', 'royal', 'pastel', 'modern', 'minimal', 'luxury', 'rustic']
+const BABY_THEMES: readonly DecorTheme[] = ['pastel', 'floral', 'traditional', 'minimal', 'rustic', 'kids', 'teddy']
+const HOME_THEMES: readonly DecorTheme[] = ['traditional', 'modern', 'floral', 'minimal', 'rustic', 'temple', 'luxury', 'pastel']
+const BUSINESS_THEMES: readonly DecorTheme[] = ['modern', 'minimal', 'luxury', 'traditional', 'floral']
+
+/** The themes the team can choose (and the website offers) for an event: boy themes for a boy's birthday, and so on. */
+export function themesForEvent(event: unknown): readonly DecorTheme[] {
+  switch (event) {
+    case 'wedding':
+    case 'reception':
+    case 'engagement':
+    case 'haldi':
+    case 'mehendi':
+    case 'sangeet':
+      return WEDDING_THEMES
+    case 'birthday_boy':
+    case 'first_birthday_boy':
+      return BOY_THEMES
+    case 'birthday_girl':
+    case 'first_birthday_girl':
+      return GIRL_THEMES
+    case 'birthday':
+    case 'birthday_surprise':
+      return [...BOY_THEMES, ...GIRL_THEMES]
+    case 'housewarming':
+      return HOME_THEMES
+    case 'baby_shower':
+    case 'naming_ceremony':
+      return BABY_THEMES
+    case 'puberty':
+    case 'anniversary':
+      return FAMILY_THEMES
+    case 'corporate':
+    case 'shop_opening':
+    case 'sports':
+    case 'other':
+      return BUSINESS_THEMES
+    default:
+      return DECOR_THEMES.map(([v]) => v)
+  }
+}
+
 export const materialLabel = (v: unknown) => labelIn(DECOR_MATERIALS, v)
 
 /** Events an item can also suit: any real event except "Others" and the hidden old birthdays. */

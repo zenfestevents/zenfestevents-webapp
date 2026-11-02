@@ -700,7 +700,7 @@ export interface DecorItem {
   id: number;
   photos?: (number | DecorPhoto)[] | null;
   /**
-   * What a client sees, e.g. “Peacock stage with jasmine strings”.
+   * What a client sees, e.g. “Peacock backdrop with jasmine strings”. Use generic names: never a cartoon, film or brand name (say “Superhero theme”, not the character).
    */
   title?: string | null;
   eventType:
@@ -750,8 +750,39 @@ export interface DecorItem {
    * Real flowers, artificial, mixed, or balloons. Clients can filter by it on the website.
    */
   material?: ('real_flowers' | 'artificial_flowers' | 'mixed_flowers' | 'balloons') | null;
+  /**
+   * The themes offered depend on the event (boy themes for a boy’s birthday, and so on). They are generic on purpose: character and brand names are protected.
+   */
   themes?:
-    | ('traditional' | 'modern' | 'floral' | 'minimal' | 'royal' | 'pastel' | 'rustic' | 'temple' | 'kids' | 'luxury')[]
+    | (
+        | 'traditional'
+        | 'modern'
+        | 'floral'
+        | 'minimal'
+        | 'royal'
+        | 'pastel'
+        | 'rustic'
+        | 'temple'
+        | 'kids'
+        | 'luxury'
+        | 'superhero'
+        | 'jungle'
+        | 'cars'
+        | 'dinosaur'
+        | 'space'
+        | 'pirate'
+        | 'farm'
+        | 'under_the_sea'
+        | 'construction'
+        | 'butterfly'
+        | 'unicorn'
+        | 'princess'
+        | 'garden'
+        | 'mermaid'
+        | 'rainbow'
+        | 'teddy'
+        | 'candy'
+      )[]
     | null;
   kind: 'item' | 'package';
   /**
@@ -768,7 +799,7 @@ export interface DecorItem {
   publicDisplay: 'range' | 'from' | 'exact' | 'hidden';
   supplier?: (number | null) | DecorSupplier;
   /**
-   * e.g. 20 ft × 10 ft stage
+   * e.g. 20 ft × 10 ft backdrop
    */
   size?: string | null;
   includes?: string | null;

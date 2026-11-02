@@ -156,7 +156,7 @@ await check('codes follow event type + category with a running number', async ()
   assert.equal(Number(String(b.itemCode).slice(8)), Number(String(a.itemCode).slice(8)) + 1)
 })
 await check('a different category starts its own count', async () => {
-  const c = await make({ eventType: 'birthday_girl', category: 'balloon' })
+  const c = await make({ eventType: 'birthday_girl', category: 'balloon', themes: ['butterfly'] })
   assert.match(String(c.itemCode), /^BDG-BLN-\d{3,}$/)
 })
 await check('new event types get their own codes (Reception, Opening ceremony)', async () => {
@@ -265,7 +265,7 @@ await check('the old catch-all "Birthday" and the first-birthday / surprise type
 })
 await check('a decoration that already has a hidden birthday type can still be edited', async () => {
   for (const hidden of ['birthday', 'first_birthday_girl']) {
-    const old = await make({ eventType: 'birthday_boy' })
+    const old = await make({ eventType: 'birthday_boy', themes: ['superhero'] })
     // As if saved before the birthdays were cut to boy / girl (straight to the database, no validation).
     await payload.db.updateOne({ collection: 'decor-items', id: old.id, data: { eventType: hidden } })
     const u = await payload.update({ collection: 'decor-items', id: old.id, data: { size: '10 ft' }, user: staff.team, overrideAccess: false })
@@ -435,6 +435,7 @@ await check('owner: can delete a decoration that has price history and price vie
 // ── 6. The public site (lib/decorations.ts) ────────────────────────────────
 console.log('Public pages')
 const { decorationCounts, getPublicDecoration, listDecorations, priceFor, stagePriceFor } = await import('../lib/decorations')
+const { brandTermIn } = await import('../lib/brandGuard')
 const slugOf = (d: { slug?: string | null }) => String(d.slug)
 // Earlier sections edit and archive `a`, so the public checks use a fresh Active item.
 const live = await make({ title: `${TITLE} live` })
@@ -536,6 +537,56 @@ await check('stage cost: shown to a client, never to a visitor; the amount comes
   } finally {
     await payload.updateGlobal({ slug: 'decor-settings', data: { stageCost: null }, overrideAccess: true })
   }
+})
+
+console.log('Backdrops, generic themes, brand names (2026-11-02)')
+await check('a decoration saved without a category is a backdrop (WED-BKD-…)', async () => {
+  const d = await make({ category: undefined, title: `${TITLE} backdrop` })
+  assert.equal(d.category, 'backdrop')
+  assert.match(String(d.itemCode), /^WED-BKD-\d{3,}$/)
+})
+await check('themes follow the event: boy themes for a boy, girl themes for a girl, wedding themes for a wedding', async () => {
+  assert.equal(await allowed(() => make({ eventType: 'birthday_boy', themes: ['superhero', 'dinosaur'] })), true)
+  assert.equal(await allowed(() => make({ eventType: 'birthday_boy', themes: ['butterfly'] })), false)
+  assert.equal(await allowed(() => make({ eventType: 'birthday_girl', themes: ['butterfly', 'unicorn'] })), true)
+  assert.equal(await allowed(() => make({ eventType: 'birthday_girl', themes: ['dinosaur'] })), false)
+  assert.equal(await allowed(() => make({ eventType: 'wedding', themes: ['traditional', 'floral'] })), true)
+  assert.equal(await allowed(() => make({ eventType: 'wedding', themes: ['superhero'] })), false)
+  assert.equal(await allowed(() => make({ eventType: 'wedding', themes: ['not_a_theme'] })), false)
+})
+await check('a theme already on an item stays valid when its event changes', async () => {
+  const d = await make({ eventType: 'birthday_boy', themes: ['dinosaur'] })
+  const u = await payload.update({
+    collection: 'decor-items',
+    id: d.id,
+    data: { eventType: 'birthday_girl', size: '8 ft' },
+    user: staff.team,
+    overrideAccess: false,
+  })
+  assert.deepEqual(u.themes, ['dinosaur'])
+})
+await check('character and brand names are refused in the title, description and what is included', async () => {
+  for (const field of ['title', 'description', 'includes']) {
+    for (const bad of ['Spider-Man birthday backdrop', 'cocomelon theme', 'A FROZEN castle', 'Disney princess arch']) {
+      assert.equal(await allowed(() => make({ [field]: bad })), false, `${field}: ${bad}`)
+    }
+  }
+})
+await check('generic names are accepted, and a brand name hidden inside another word is not a false alarm', async () => {
+  assert.equal(await allowed(() => make({ title: `${TITLE} Superhero theme backdrop`, description: 'Written by an author, in a jungle of balloons' })), true)
+  assert.equal(brandTermIn('Thorough, authority, marvellous'), null)
+  assert.equal(brandTermIn('Marvel theme'), 'Marvel')
+})
+await check('theme chips only count items for the chosen event', async () => {
+  await make({ eventType: 'birthday_girl', themes: ['butterfly'], title: `${TITLE} butterfly` })
+  const all = await decorationCounts()
+  const girls = await decorationCounts('birthday_girl')
+  const boys = await decorationCounts('birthday_boy')
+  assert.ok(all.byTheme.butterfly >= 1)
+  assert.ok(girls.byTheme.butterfly >= 1)
+  assert.equal(boys.byTheme.butterfly, 0)
+  const found = await listDecorations({ event: 'birthday_girl', theme: 'butterfly' })
+  assert.ok(found.items.length >= 1 && found.items.every((i) => i.eventType === 'birthday_girl'))
 })
 
 await cleanup()

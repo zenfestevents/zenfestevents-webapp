@@ -87,3 +87,44 @@
 .dc-stage .btn-row {
   margin-top: 0.2rem;
 }
+.dc-plan__group {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.dc-plan__legend {
+  padding: 0;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+.dc-addons {
+  display: grid;
+  gap: 0.4rem;
+}
+.dc-addons__item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.5rem;
+  cursor: pointer;
+}
+.dc-addons__item input {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+.dc-addons__text {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-1, transparent);
+  color: var(--text);
+  font: inherit;
+}
+.dc-stage .btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

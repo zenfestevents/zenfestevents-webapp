@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { DecorCard } from '../../../../components/decor/DecorCard'
-import { StageQuestion, VenueNotice } from '../../../../components/decor/StageQuestion'
+import { PlanSetup, VenueNotice } from '../../../../components/decor/PlanSetup'
 import { ProductGallery } from '../../../../components/shop/ProductGallery'
 import {
   getPublicDecoration,
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${item.title} (${item.code}) — Decorations`,
     description:
-      item.description.slice(0, 160) || `${item.categoryLabel} decoration for ${item.eventLabel} by Zenfest Events.`,
+      item.description.slice(0, 160) || `Backdrop decoration for ${item.eventLabel} by Zenfest Events.`,
     alternates: { canonical: `/decorations/${item.slug}` },
     openGraph: item.photos[0] ? { images: [item.photos[0].url] } : undefined,
   }
@@ -98,8 +98,8 @@ export default async function DecorationPage({ params }: Props) {
     relatedDecorations(item),
   ])
   const price = await priceFor(item.id, found.price, customer)
-  // Only stage decorations ask about the venue's stage.
-  const stage = item.category === 'stage' ? await stagePriceFor(customer) : null
+  // The "Plan this setup" box needs a login; the stage cost goes only to a logged-in client.
+  const stage = await stagePriceFor(customer)
   const wa = whatsappLink(
     settings.contact?.whatsapp,
     `Hi Zenfest, I like decoration ${item.code} (${item.title}). Please share the details and availability.`,
@@ -119,14 +119,22 @@ export default async function DecorationPage({ params }: Props) {
 
           <div className="sp-product__info">
             <p className="sp-card__type">
-              {item.categoryLabel}
+              {item.materialLabel || 'Backdrop'}
               {item.kind === 'package' ? ' · Package' : ''}
             </p>
             <h1 className="display-m">{item.title}</h1>
             <p className="dc-card__code">Code {item.code}</p>
 
             <PriceBox price={price} slug={item.slug} wa={wa} />
-            {stage ? <StageQuestion stage={stage} next={`/decorations/${item.slug}`} /> : null}
+            <PlanSetup
+              loggedIn={stage.state === 'shown'}
+              name={customer?.name?.split(' ')[0] ?? ''}
+              code={item.code}
+              title={item.title}
+              stageText={stage.state === 'shown' ? stage.text : ''}
+              whatsapp={settings.contact?.whatsapp}
+              next={`/decorations/${item.slug}`}
+            />
 
             <div className="sp-product__actions">
               <a className="btn btn--whatsapp" href={wa} target="_blank" rel="noopener">

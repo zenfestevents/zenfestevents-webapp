@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 import {
-  DECOR_CATEGORIES,
   DECOR_EVENT_GROUPS,
   DECOR_MATERIALS,
   DECOR_STATUSES,
@@ -15,7 +14,6 @@ import {
 
 type Filters = {
   eventType: string
-  category: string
   material: string
   theme: string
   supplier: string
@@ -24,7 +22,7 @@ type Filters = {
   status: string
 }
 
-const EMPTY: Filters = { eventType: '', category: '', material: '', theme: '', supplier: '', min: '', max: '', status: '' }
+const EMPTY: Filters = { eventType: '', material: '', theme: '', supplier: '', min: '', max: '', status: '' }
 
 /**
  * Our filters → Payload list conditions. Each entry is one `where[and][i]…` condition, written as
@@ -38,7 +36,6 @@ function toConditions(f: Filters): [string, string][][] {
       ['[or][0][eventType][equals]', f.eventType],
       ['[or][1][alsoSuits][equals]', f.eventType],
     ])
-  if (f.category) add('category', 'equals', f.category)
   if (f.material) add('material', 'equals', f.material)
   if (f.theme) add('themes', 'in', f.theme)
   if (f.supplier) add('supplier', 'equals', f.supplier)
@@ -61,7 +58,6 @@ function fromParams(params: URLSearchParams): Filters {
     if (!m) continue
     const [, field, op] = m
     if (field === 'eventType') f.eventType = value
-    else if (field === 'category') f.category = value
     else if (field === 'material') f.material = value
     else if (field === 'themes') f.theme = value
     else if (field === 'supplier') f.supplier = value
@@ -74,7 +70,7 @@ function fromParams(params: URLSearchParams): Filters {
 
 /**
  * Above the Decorations list: quick filters a team member can use on a phone while a client
- * is on the line — event type, category, theme, supplier, client-price budget and status.
+ * is on the line — event type, flowers, theme, supplier, client-price budget and status.
  * They set Payload's own `where` in the address, so the list's search box, sorting and
  * paging keep working with them.
  */
@@ -146,17 +142,6 @@ export function DecorQuickFilters() {
                 </option>
               ))}
             </optgroup>
-          ))}
-        </select>
-      </label>
-      <label>
-        <span>Category</span>
-        <select value={f.category} onChange={set('category')}>
-          <option value="">All categories</option>
-          {DECOR_CATEGORIES.map(([v, l]) => (
-            <option key={v} value={v}>
-              {l}
-            </option>
           ))}
         </select>
       </label>
