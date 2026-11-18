@@ -85,7 +85,14 @@ export default buildConfig({
           path: '/decor/quick-add',
           meta: { title: 'Quick add decoration' },
         },
+        // Zenfest Intelligence Hub (event news → daily reel ideas), Owner only (2026-11-18).
+        intelligence: {
+          Component: '/components/admin/intelligence/IntelligenceView#IntelligenceView',
+          path: '/intelligence',
+          meta: { title: 'Intelligence Hub' },
+        },
       },
+      afterNavLinks: ['/components/admin/intelligence/IntelNavLink#IntelNavLink'],
     },
     meta: {
       titleSuffix: ' — Zenfest Events',

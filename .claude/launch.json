@@ -12,6 +12,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "start", "--", "-p", "3005"],
       "port": 3005
+    },
+    {
+      "name": "intelligence-hub",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd /d ..\\zenfest-intelligence-hub\\frontend && npx next dev -p 3010"],
+      "port": 3010
     }
   ]
 }
