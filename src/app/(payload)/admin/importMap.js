@@ -18,7 +18,10 @@ import { TodayBoard as TodayBoard_faa1a387f33b027f2267f4a1d75342a3 } from '../..
 import { UpcomingOccasions as UpcomingOccasions_f174883721c69835f0652f003f74ba89 } from '../../../components/admin/UpcomingOccasions'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
 import { DecorQuickAddView as DecorQuickAddView_ac8f54e320c236b6ef6bab9e0d41048c } from '../../../components/admin/decor/QuickAddView'
-import { IntelligenceView as IntelligenceView_9db4c8421e0c22f974c96140ba8cba57 } from '../../../components/admin/intelligence/IntelligenceView'
+import { TodayView as TodayView_bed86d32ca2aed587f1013c3d80554a6 } from '../../../components/admin/intelligence/views'
+import { IdeasView as IdeasView_bed86d32ca2aed587f1013c3d80554a6 } from '../../../components/admin/intelligence/views'
+import { NewsView as NewsView_bed86d32ca2aed587f1013c3d80554a6 } from '../../../components/admin/intelligence/views'
+import { SourcesView as SourcesView_bed86d32ca2aed587f1013c3d80554a6 } from '../../../components/admin/intelligence/views'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -43,6 +46,9 @@ export const importMap = {
   "/components/admin/UpcomingOccasions#UpcomingOccasions": UpcomingOccasions_f174883721c69835f0652f003f74ba89,
   "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
   "/components/admin/decor/QuickAddView#DecorQuickAddView": DecorQuickAddView_ac8f54e320c236b6ef6bab9e0d41048c,
-  "/components/admin/intelligence/IntelligenceView#IntelligenceView": IntelligenceView_9db4c8421e0c22f974c96140ba8cba57,
+  "/components/admin/intelligence/views#TodayView": TodayView_bed86d32ca2aed587f1013c3d80554a6,
+  "/components/admin/intelligence/views#IdeasView": IdeasView_bed86d32ca2aed587f1013c3d80554a6,
+  "/components/admin/intelligence/views#NewsView": NewsView_bed86d32ca2aed587f1013c3d80554a6,
+  "/components/admin/intelligence/views#SourcesView": SourcesView_bed86d32ca2aed587f1013c3d80554a6,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

@@ -2,17 +2,20 @@ import React from 'react'
 import Link from 'next/link'
 import type { ServerProps } from 'payload'
 
-import { isOwner } from '../../../access/roles'
+import { isStaff } from '../../../access/roles'
+import { SECTIONS } from './parts'
 
-/** Admin menu link to /admin/intelligence (admin.components.afterNavLinks), shown to the Owner only. */
+/** "Content" group in the admin menu (admin.components.afterNavLinks): the Intelligence Hub pages, for every team login. */
 export function IntelNavLink({ user }: ServerProps) {
-  if (!isOwner(user as never)) return null
+  if (!isStaff(user as never)) return null
   return (
     <div className="zf-intel-nav">
       <p className="zf-intel-nav__label">Content</p>
-      <Link className="nav__link" href="/admin/intelligence" prefetch={false}>
-        <span className="nav__link-label">Intelligence Hub</span>
-      </Link>
+      {SECTIONS.map((s) => (
+        <Link key={s.id} className="nav__link" href={s.href} prefetch={false}>
+          <span className="nav__link-label">{s.id === 'today' ? 'Intelligence Hub' : s.label}</span>
+        </Link>
+      ))}
     </div>
   )
 }

@@ -45,9 +45,7 @@ export const CATEGORIES = [
 ] as const
 export const IDEA_STATUSES = ['All open', "Today's Pick", 'Idea Bank', 'Scripted', 'Posted', 'Outdated'] as const
 
-// Hub constants (frontend/app/api/stats + queue routes). Update when backend/feeds.py changes.
-const SOURCES_ENABLED = 82
-const INSTAGRAM_TARGETS = 34
+// Hub constants (frontend/app/api/stats + queue routes). Source counts come from zf_sources.
 const ACTIVE_WINDOW_MS = 3 * 60 * 60 * 1000
 const MAX_ATTEMPTS = 3
 
@@ -60,7 +58,33 @@ export type IntelStats = {
   regions_7d: Record<string, number>
   sources_enabled: number
   instagram_targets: number
+  stuck: number
   polling_active: boolean
+}
+
+export type SourceKind = 'rss' | 'search' | 'rsshub' | 'instagram_account' | 'instagram_hashtag'
+
+export type IntelSource = {
+  label: string
+  region: string
+  kind: SourceKind
+  url: string
+  enabled: boolean
+  events_only: boolean
+  scan_only: boolean
+  note: string
+  verified_7d: number
+  verified_total: number
+  last_found: string | null
+  waiting: number
+}
+
+export const SOURCE_KIND_LABEL: Record<SourceKind, string> = {
+  rss: 'News feed',
+  search: 'News search',
+  rsshub: 'Chinese site (RSSHub)',
+  instagram_account: 'Instagram account',
+  instagram_hashtag: 'Instagram hashtag',
 }
 
 export type ReelIdea = {
@@ -121,7 +145,10 @@ export async function getStats(): Promise<IntelStats> {
           (SELECT MAX(created_at) FROM zf_intel_feed),
           (SELECT MAX(created_at) FROM zf_rejected_items),
           (SELECT MAX(created_at) FROM zf_pending_articles)
-        ) AS last_poll_at
+        ) AS last_poll_at,
+        (SELECT COUNT(*)::int FROM zf_sources WHERE listed AND enabled AND kind NOT LIKE 'instagram%') AS sources_enabled,
+        (SELECT COUNT(*)::int FROM zf_sources WHERE listed AND kind LIKE 'instagram%') AS instagram_targets,
+        (SELECT COUNT(*)::int FROM zf_pending_articles WHERE attempts >= ${MAX_ATTEMPTS}) AS stuck
     `),
     db().query(
       `SELECT region, COUNT(*)::int AS count FROM zf_intel_feed
@@ -137,8 +164,9 @@ export async function getStats(): Promise<IntelStats> {
     apify_month_usd: Number(s.apify_month_usd),
     last_poll_at: last,
     regions_7d: Object.fromEntries(regions.rows.map((r) => [r.region, r.count])),
-    sources_enabled: SOURCES_ENABLED,
-    instagram_targets: INSTAGRAM_TARGETS,
+    sources_enabled: s.sources_enabled,
+    instagram_targets: s.instagram_targets,
+    stuck: s.stuck,
     polling_active: Boolean(last) && Date.now() - new Date(last as string).getTime() < ACTIVE_WINDOW_MS,
   }
 }
@@ -193,6 +221,28 @@ export async function getFeed(opts: { region: string; category: string; instagra
     values,
   )
   return rows.map((r) => ({ ...r, published_at: iso(r.published_at) })) as IntelItem[]
+}
+
+/** Every source in feeds.py (zf_sources, written by the hub each run) with what it brought in. */
+export async function getSources(): Promise<IntelSource[]> {
+  const { rows } = await db().query(
+    `SELECT s.label, s.region, s.kind, s.url, s.enabled, s.events_only, s.scan_only, s.note,
+            COALESCE(f.verified_7d, 0)::int AS verified_7d,
+            COALESCE(f.verified_total, 0)::int AS verified_total,
+            GREATEST(f.last_found, p.last_found) AS last_found,
+            COALESCE(p.waiting, 0)::int AS waiting
+       FROM zf_sources s
+       LEFT JOIN (SELECT source_label,
+                         COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days') AS verified_7d,
+                         COUNT(*) AS verified_total,
+                         MAX(published_at) AS last_found
+                    FROM zf_intel_feed GROUP BY source_label) f ON f.source_label = s.label
+       LEFT JOIN (SELECT source_label, COUNT(*) AS waiting, MAX(published_at) AS last_found
+                    FROM zf_pending_articles GROUP BY source_label) p ON p.source_label = s.label
+      WHERE s.listed
+      ORDER BY s.region, s.enabled DESC, s.label`,
+  )
+  return rows.map((r) => ({ ...r, last_found: iso(r.last_found) })) as IntelSource[]
 }
 
 export async function getQueue(source: string, limit: number): Promise<QueueData> {

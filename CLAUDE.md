@@ -1045,15 +1045,20 @@ src/
     suppliers have no login. `vendorAccount` links one when they do.
   - The admin quick filters (`QuickFilters.tsx`) write Payload's own `where[and][i]…` URL, so
     the search box, sorting and paging keep working with them.
-- **Intelligence Hub in the admin (`/admin/intelligence`, owner 2026-11-18), Owner only.** The
-  Zenfest Intelligence Hub's dashboard (event news → Claude-checked → daily reel ideas; the hub
-  itself is `../zenfest-intelligence-hub`) as a custom admin view
-  (`components/admin/intelligence/IntelligenceView.tsx`, menu link `IntelNavLink` in
-  `afterNavLinks`, both shown only when `isOwner`). It reads the hub's `zf_*` tables in its own
-  Supabase database through `lib/intelligence.ts` (`pg`, env `INTEL_DATABASE_URL`, Production
-  only in Vercel), read-only. Everything renders on the server and filters are plain links, so
-  there is **no data route** — keep it that way rather than adding an `/api` endpoint. Queries
-  are copied from the hub's `frontend/app/api/*`; update both when its tables change.
+- **Intelligence Hub in the admin (`/admin/intelligence`, owner 2026-11-18), every team login.**
+  The Zenfest Intelligence Hub (event news → Claude-checked → daily reel ideas; the hub itself is
+  `../zenfest-intelligence-hub`) as four custom admin views in `components/admin/intelligence/`:
+  **Today** (`/intelligence`, `exact`), **Reel ideas**, **News** (grouped by day, News/Instagram)
+  and **Sources** (every source, last story, 7-day count, waiting list). `views.tsx` holds the
+  pages, `parts.tsx` the frame (`IntelShell`: `isStaff` check — vendors, couples and visitors get
+  "Team only") and rows (`<details>`, closed until clicked); the "Content" menu group is
+  `IntelNavLink` in `afterNavLinks`. Styles follow the admin's light/dark theme (`.zf-intel*` at
+  the end of `custom.scss`). Data: `lib/intelligence.ts` (`pg`, env `INTEL_DATABASE_URL`,
+  Production only in Vercel), read-only, from the hub's `zf_*` tables. The source list is
+  `zf_sources`, written by the hub's `sources_sync.py` at the start of every ingest run (from
+  `feeds.py`). Everything renders on the server and filters are plain links, so there is **no
+  data route** — keep it that way rather than adding an `/api` endpoint. Queries are copied from
+  the hub's `frontend/app/api/*`; update both when its tables change.
 - **Occasion reminders (`/admin` → Occasion Reminders; `collections/Contacts.ts`,
   `Reminders.ts`, `globals/ReminderSettings.ts`, `lib/occasions/*`) — internal only.**
   The owner wanted yearly birthdays/anniversaries of past clients and unconverted leads
