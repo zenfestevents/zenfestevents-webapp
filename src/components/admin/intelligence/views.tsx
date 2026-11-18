@@ -3,21 +3,22 @@ import Link from 'next/link'
 import type { AdminViewServerProps } from 'payload'
 
 import {
-  CATEGORIES,
   IDEA_STATUSES,
   REGIONS,
   SOURCE_KIND_LABEL,
-  getFeed,
+  getFeedPage,
   getIdeas,
+  getMarked,
+  getPickedIdeas,
   getQueue,
   getSources,
   getStats,
-  type IntelItem,
   type IntelSource,
   type IntelStats,
   type QueueData,
   type ReelIdea,
 } from '../../../lib/intelligence'
+import { FeedList } from './FeedList'
 import {
   BASE,
   Chips,
@@ -25,11 +26,8 @@ import {
   Footnote,
   IdeaRow,
   IntelShell,
-  NewsRow,
   Notice,
-  PickCard,
   type SP,
-  dayLabel,
   hostOf,
   one,
   safeUrl,
@@ -38,8 +36,9 @@ import {
 } from './parts'
 
 /**
- * The Intelligence Hub admin pages (registered in payload.config.ts → admin.components.views):
- * Today (/admin/intelligence), Reel ideas, News and Sources. Team-wide, read-only (2026-11-18).
+ * The Intelligence Hub admin pages (registered in payload.config.ts → admin.components.views), Owner
+ * only (2026-11-18): Feed (/admin/intelligence, Instagram-style, newest day first), Revisit, Reel
+ * ideas and Sources.
  */
 
 const QUIET_DAYS = 14
@@ -56,96 +55,59 @@ async function load<T>(fn: () => Promise<T>): Promise<{ ok: true; data: T } | { 
   }
 }
 
-function Stats({ items }: { items: [string, React.ReactNode, boolean?][] }) {
-  return (
-    <dl className="zf-intel__stats">
-      {items.map(([name, value, warn]) => (
-        <div key={name}>
-          <dt>{name}</dt>
-          <dd className={warn ? 'is-warn' : undefined}>{value}</dd>
-        </div>
-      ))}
-    </dl>
-  )
-}
+/* ---------------- Feed ---------------- */
 
-/** Warnings only when something needs attention. */
-function Health({ stats }: { stats: IntelStats }) {
-  const warnings: string[] = []
-  if (!stats.polling_active) warnings.push(`Collecting looks stopped: nothing new since ${timeAgo(stats.last_poll_at)}.`)
-  if (stats.apify_month_usd > 4.5) warnings.push(`Apify has used $${stats.apify_month_usd.toFixed(2)} of the free $5 this month.`)
-  if (stats.stuck > 0) warnings.push(`${stats.stuck} waiting item(s) failed 3 times and are skipped.`)
-  if (warnings.length === 0) return null
-  return (
-    <div className="zf-intel__warn" role="status">
-      {warnings.map((w) => (
-        <p key={w}>⚠ {w}</p>
-      ))}
-    </div>
-  )
-}
-
-/* ---------------- Today ---------------- */
-
-async function TodayBody() {
-  const res = await load(() => Promise.all([getStats(), getIdeas('All open', 'All', 6), getFeed({ region: 'All', category: 'All', instagram: false, limit: 5 })]))
+async function FeedBody({ sp }: { sp: SP }) {
+  const region = pick(one(sp.region), REGIONS, 'All')
+  const res = await load(() => getFeedPage(region))
   if (!res.ok) return <DbError />
-  const [stats, ideas, news] = res.data
-  const top = ideas[0]?.status === "Today's Pick" ? ideas[0] : null
-  const rest = (top ? ideas.slice(1) : ideas).slice(0, 5)
   return (
     <>
-      <Health stats={stats} />
-      <Stats
-        items={[
-          ['New stories (24 h)', stats.verified_last_24h],
-          ['Open ideas', stats.ideas_open],
-          ['Waiting to be read', stats.waiting_total],
-          ['Last check', timeAgo(stats.last_poll_at)],
-        ]}
+      <Chips label="Region" options={regionOptions} value={region} link={(v) => withQuery(BASE, { region: v })} />
+      <FeedList
+        key={region}
+        initial={res.data.items}
+        next={res.data.next}
+        region={region}
+        empty="No stories yet. New ones arrive every morning after Claude reads the news."
       />
-      {top ? <PickCard idea={top} /> : <Notice title="No Today’s Pick yet">The morning idea run marks one each day.</Notice>}
-      <section className="zf-intel__section">
-        <div className="zf-intel__section-head">
-          <h2>Next ideas</h2>
-          <Link href={`${BASE}/ideas`}>All reel ideas →</Link>
-        </div>
-        <div className="zf-intel__list">
-          {rest.map((idea) => (
-            <IdeaRow key={idea.id} idea={idea} />
-          ))}
-        </div>
-      </section>
-      <section className="zf-intel__section">
-        <div className="zf-intel__section-head">
-          <h2>Latest news</h2>
-          <Link href={`${BASE}/news`}>All news →</Link>
-        </div>
-        <div className="zf-intel__list">
-          {news.map((item) => (
-            <NewsRow key={item.id} item={item} />
-          ))}
-        </div>
-      </section>
-      <p className="zf-intel__muted">
-        Last 7 days by region:{' '}
-        {REGIONS.slice(1)
-          .map((r) => `${r} ${stats.regions_7d[r] ?? 0}`)
-          .join(' · ')}
-      </p>
       <Footnote />
     </>
   )
 }
 
-export function TodayView(props: AdminViewServerProps) {
+export function FeedView(props: AdminViewServerProps) {
   return (
     <IntelShell
       props={props}
-      active="today"
-      intro="Event news from Tamil Nadu, India and the world, turned into reel ideas every morning. Nothing is produced until the owner approves a script."
+      active="feed"
+      intro="What’s happening in the event world, newest first. Tap ♥ to make a story a reel idea, or the bookmark to read it again later."
     >
-      <TodayBody />
+      <FeedBody sp={(props.searchParams ?? {}) as SP} />
+    </IntelShell>
+  )
+}
+
+/* ---------------- Revisit ---------------- */
+
+async function RevisitBody() {
+  const res = await load(() => getMarked('revisit'))
+  if (!res.ok) return <DbError />
+  return (
+    <FeedList
+      initial={res.data}
+      next={null}
+      region="All"
+      dayDividers={false}
+      empty="Nothing saved yet. Tap the bookmark on any story in the Feed to keep it here."
+    />
+  )
+}
+
+export function RevisitView(props: AdminViewServerProps) {
+  return (
+    <IntelShell props={props} active="revisit" intro="Stories you saved to read again, newest saved first. Tap the bookmark again to remove one.">
+      <RevisitBody />
     </IntelShell>
   )
 }
@@ -155,27 +117,66 @@ export function TodayView(props: AdminViewServerProps) {
 async function IdeasBody({ sp }: { sp: SP }) {
   const status = pick(one(sp.status), IDEA_STATUSES, 'All open')
   const region = pick(one(sp.region), REGIONS, 'All')
-  const res = await load(() => getIdeas(status, region, 150))
+  const res = await load(() => Promise.all([getMarked('reel'), getPickedIdeas(), getIdeas(status, region, 150)]))
   if (!res.ok) return <DbError />
+  const [marked, picked, bank] = res.data
+  const done = new Set(picked.map((i) => i.intel_id).filter(Boolean))
+  const waiting = marked.filter((m) => !done.has(m.id))
+  const pickedIds = new Set(picked.map((i) => i.id))
+  const others = bank.filter((i: ReelIdea) => !pickedIds.has(i.id))
   const link = (q: Record<string, string>) => withQuery(`${BASE}/ideas`, { status, region, ...q })
+
   return (
     <>
-      <Chips
-        label="Status"
-        options={IDEA_STATUSES.map((s) => ({ value: s, label: s === 'All open' ? 'Open' : s }))}
-        value={status}
-        link={(v) => link({ status: v === 'All open' ? '' : v })}
-      />
-      <Chips label="Region" options={regionOptions} value={region} link={(v) => link({ region: v })} />
-      {res.data.length === 0 ? (
-        <Notice title="No ideas here">The daily idea run adds 7–8 every morning.</Notice>
-      ) : (
-        <div className="zf-intel__list">
-          {res.data.map((idea: ReelIdea) => (
-            <IdeaRow key={idea.id} idea={idea} />
-          ))}
+      <section className="zf-intel__section">
+        <div className="zf-intel__section-head">
+          <h2>Your picks</h2>
         </div>
-      )}
+        {picked.length === 0 && waiting.length === 0 && (
+          <Notice title="No picks yet">Tap ♥ Reel idea on any story in the Feed. Claude writes its reel outline the next morning.</Notice>
+        )}
+        {picked.length > 0 && (
+          <div className="zf-intel__list">
+            {picked.map((idea) => (
+              <IdeaRow key={idea.id} idea={idea} />
+            ))}
+          </div>
+        )}
+        {waiting.length > 0 && (
+          <>
+            <p className="zf-intel__muted zf-intel__gap">
+              Waiting for tomorrow morning’s outline ({waiting.length}):
+            </p>
+            <FeedList initial={waiting} next={null} region="All" dayDividers={false} empty="" />
+          </>
+        )}
+      </section>
+
+      <section className="zf-intel__section">
+        <div className="zf-intel__section-head">
+          <h2>Claude’s suggestions</h2>
+        </div>
+        <p className="zf-intel__muted zf-intel__gap">
+          Every morning Claude suggests 7–8 reel ideas mixing Tamil Nadu, India and the world, and marks its top one.
+          Nothing is produced until you approve a script.
+        </p>
+        <Chips
+          label="Status"
+          options={IDEA_STATUSES.map((s) => ({ value: s, label: s === 'All open' ? 'Open' : s === "Today's Pick" ? 'Top pick' : s }))}
+          value={status}
+          link={(v) => link({ status: v === 'All open' ? '' : v })}
+        />
+        <Chips label="Region" options={regionOptions} value={region} link={(v) => link({ region: v })} />
+        {others.length === 0 ? (
+          <Notice title="No ideas here" />
+        ) : (
+          <div className="zf-intel__list">
+            {others.map((idea) => (
+              <IdeaRow key={idea.id} idea={idea} />
+            ))}
+          </div>
+        )}
+      </section>
       <Footnote />
     </>
   )
@@ -183,74 +184,8 @@ async function IdeasBody({ sp }: { sp: SP }) {
 
 export function IdeasView(props: AdminViewServerProps) {
   return (
-    <IntelShell props={props} active="ideas" intro="Tap an idea to open its hook, outline and brand check. The number is its score out of 20.">
+    <IntelShell props={props} active="ideas" intro="Stories you liked become reels here. Tap an idea to open its hook, outline and brand check.">
       <IdeasBody sp={(props.searchParams ?? {}) as SP} />
-    </IntelShell>
-  )
-}
-
-/* ---------------- News ---------------- */
-
-async function NewsBody({ sp }: { sp: SP }) {
-  const type = one(sp.type) === 'instagram' ? 'instagram' : 'news'
-  const region = pick(one(sp.region), REGIONS, 'All')
-  const category = type === 'news' ? pick(one(sp.category), CATEGORIES, 'All') : 'All'
-  const res = await load(() => getFeed({ region, category, instagram: type === 'instagram', limit: 120 }))
-  if (!res.ok) return <DbError />
-  const link = (q: Record<string, string>) => withQuery(`${BASE}/news`, { type: type === 'news' ? '' : type, region, category, ...q })
-
-  const days: { label: string; items: IntelItem[] }[] = []
-  for (const item of res.data) {
-    const label = dayLabel(item.published_at)
-    const last = days[days.length - 1]
-    if (last && last.label === label) last.items.push(item)
-    else days.push({ label, items: [item] })
-  }
-
-  return (
-    <>
-      <Chips
-        label="Type"
-        options={[
-          { value: 'news', label: 'News' },
-          { value: 'instagram', label: 'Instagram' },
-        ]}
-        value={type}
-        link={(v) => withQuery(`${BASE}/news`, { type: v === 'news' ? '' : v, region })}
-      />
-      <Chips label="Region" options={regionOptions} value={region} link={(v) => link({ region: v })} />
-      {type === 'news' && (
-        <details className="zf-intel__more-filters" open={category !== 'All'}>
-          <summary>Topic{category !== 'All' ? `: ${category}` : ''}</summary>
-          <Chips label="Topic" options={CATEGORIES.map((c) => ({ value: c, label: c }))} value={category} link={(v) => link({ category: v })} />
-        </details>
-      )}
-      {days.length === 0 ? (
-        <Notice title="Nothing here yet">New stories appear after the daily Claude run.</Notice>
-      ) : (
-        days.map((d) => (
-          <section key={d.label} className="zf-intel__section">
-            <h2 className="zf-intel__day">
-              {d.label} <span>{d.items.length}</span>
-            </h2>
-            <div className="zf-intel__list">
-              {d.items.map((item) => (
-                <NewsRow key={item.id} item={item} />
-              ))}
-            </div>
-          </section>
-        ))
-      )}
-      {type === 'instagram' && <p className="zf-intel__muted">Ideas only: never repost anyone’s photos or videos.</p>}
-      <Footnote />
-    </>
-  )
-}
-
-export function NewsView(props: AdminViewServerProps) {
-  return (
-    <IntelShell props={props} active="news" intro="Stories Claude has read and checked, newest first. Tap one for the summary, reel hook and the quote found in the source.">
-      <NewsBody sp={(props.searchParams ?? {}) as SP} />
     </IntelShell>
   )
 }
@@ -269,6 +204,38 @@ function isQuiet(s: IntelSource): boolean {
   return !s.last_found || Date.now() - new Date(s.last_found).getTime() > QUIET_DAYS * 86400000
 }
 
+/** The collector's health, each number explained in plain words. */
+function CollectorStatus({ stats, waitingLink }: { stats: IntelStats; waitingLink: string }) {
+  const rows: [string, React.ReactNode, string, boolean?][] = [
+    ['Last check', timeAgo(stats.last_poll_at), 'The collector looks at every source every 30 minutes; this is when it last found something new.', !stats.polling_active],
+    [
+      'Waiting to be read',
+      <Link key="w" href={waitingLink} scroll={false}>
+        {stats.waiting_total}
+      </Link>,
+      'Stories collected but not yet read by Claude. Claude reads them every morning; then they appear in the Feed.',
+    ],
+    ['New in the Feed (24 h)', stats.verified_last_24h, 'Stories Claude read, checked and added to the Feed in the last 24 hours.'],
+    ['Open reel ideas', stats.ideas_open, 'Reel ideas not yet scripted, posted or out of date.'],
+    ['Apify this month', `$${stats.apify_month_usd.toFixed(2)} / $5`, 'Instagram reading costs. It stops itself at $4.50 so it stays free.', stats.apify_month_usd > 4.5],
+  ]
+  return (
+    <section className="zf-intel__status">
+      <h2>Collector status</h2>
+      <dl>
+        {rows.map(([name, value, help, warn]) => (
+          <div key={name}>
+            <dt>{name}</dt>
+            <dd className={warn ? 'is-warn' : undefined}>{value}</dd>
+            <p>{help}</p>
+          </div>
+        ))}
+      </dl>
+      {stats.stuck > 0 && <p className="zf-intel__muted">⚠ {stats.stuck} waiting item(s) failed 3 times and are skipped.</p>}
+    </section>
+  )
+}
+
 function WaitingPanel({ data, source, link }: { data: QueueData; source: string; link: (q: Record<string, string>) => string }) {
   return (
     <section className="zf-intel__section zf-intel__waiting">
@@ -280,7 +247,7 @@ function WaitingPanel({ data, source, link }: { data: QueueData; source: string;
           Close ×
         </Link>
       </div>
-      <p className="zf-intel__muted">Fetched but not yet read by the morning Claude run, so not checked yet.</p>
+      <p className="zf-intel__muted">Collected but not yet read by the morning Claude run, so not checked yet.</p>
       <ol className="zf-intel__queue">
         {data.items.map((item) => {
           const safe = safeUrl(item.source_url)
@@ -310,17 +277,16 @@ async function SourcesBody({ sp }: { sp: SP }) {
   const show = pick(one(sp.show), SHOW.map((s) => s.value), 'All')
   const region = pick(one(sp.region), REGIONS, 'All')
   const waiting = one(sp.waiting).slice(0, 120)
-  const res = await load(() => Promise.all([getSources(), waiting ? getQueue(waiting, 200) : Promise.resolve(null)]))
+  const res = await load(() =>
+    Promise.all([getSources(), getStats(), waiting ? getQueue(waiting, 200) : Promise.resolve(null)]),
+  )
   if (!res.ok) return <DbError />
-  const [all, queue] = res.data
+  const [all, stats, queue] = res.data
   const link = (q: Record<string, string>) => withQuery(`${BASE}/sources`, { show, region, waiting, ...q })
 
   const counts = {
-    feeds: all.filter((s) => s.enabled && !s.kind.startsWith('instagram')).length,
-    insta: all.filter((s) => s.kind.startsWith('instagram')).length,
     quiet: all.filter(isQuiet).length,
     off: all.filter((s) => !s.enabled).length,
-    waiting: all.reduce((n, s) => n + s.waiting, 0),
   }
   const shown = all.filter(
     (s) =>
@@ -336,19 +302,7 @@ async function SourcesBody({ sp }: { sp: SP }) {
 
   return (
     <>
-      <Stats
-        items={[
-          ['News sources on', counts.feeds],
-          ['Instagram pages & tags', counts.insta],
-          ['Quiet for 14 days', counts.quiet, counts.quiet > 0],
-          [
-            'Waiting to be read',
-            <Link key="w" href={link({ waiting: 'All' })} scroll={false}>
-              {counts.waiting}
-            </Link>,
-          ],
-        ]}
-      />
+      <CollectorStatus stats={stats} waitingLink={link({ waiting: 'All' })} />
       {queue && <WaitingPanel data={queue} source={waiting} link={link} />}
       <Chips
         label="Show"
@@ -369,7 +323,7 @@ async function SourcesBody({ sp }: { sp: SP }) {
                 Source
               </span>
               <span role="columnheader">Last story</span>
-              <span role="columnheader">Checked, 7 days</span>
+              <span role="columnheader">In Feed, 7 days</span>
               <span role="columnheader">Waiting</span>
             </div>
             {g.items.map((s) => {
@@ -377,7 +331,15 @@ async function SourcesBody({ sp }: { sp: SP }) {
               return (
                 <div key={s.label} role="row" className={`zf-intel__src${s.enabled ? '' : ' is-off'}${isQuiet(s) ? ' is-quiet' : ''}`}>
                   <span role="cell" className="zf-intel__src-name">
-                    <strong>{href ? <a href={href} target="_blank" rel="noopener noreferrer">{s.label} ↗</a> : s.label}</strong>
+                    <strong>
+                      {href ? (
+                        <a href={href} target="_blank" rel="noopener noreferrer">
+                          {s.label} ↗
+                        </a>
+                      ) : (
+                        s.label
+                      )}
+                    </strong>
                     <span className="zf-intel__muted">
                       {SOURCE_KIND_LABEL[s.kind] ?? s.kind}
                       {!s.enabled && ' · off'}
@@ -389,7 +351,7 @@ async function SourcesBody({ sp }: { sp: SP }) {
                   <span role="cell" data-label="Last story">
                     {s.last_found ? timeAgo(s.last_found) : '—'}
                   </span>
-                  <span role="cell" data-label="Checked, 7 days">
+                  <span role="cell" data-label="In Feed, 7 days">
                     {s.verified_7d}
                   </span>
                   <span role="cell" data-label="Waiting">

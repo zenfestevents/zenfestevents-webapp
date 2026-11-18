@@ -1045,20 +1045,28 @@ src/
     suppliers have no login. `vendorAccount` links one when they do.
   - The admin quick filters (`QuickFilters.tsx`) write Payload's own `where[and][i]…` URL, so
     the search box, sorting and paging keep working with them.
-- **Intelligence Hub in the admin (`/admin/intelligence`, owner 2026-11-18), every team login.**
-  The Zenfest Intelligence Hub (event news → Claude-checked → daily reel ideas; the hub itself is
-  `../zenfest-intelligence-hub`) as four custom admin views in `components/admin/intelligence/`:
-  **Today** (`/intelligence`, `exact`), **Reel ideas**, **News** (grouped by day, News/Instagram)
-  and **Sources** (every source, last story, 7-day count, waiting list). `views.tsx` holds the
-  pages, `parts.tsx` the frame (`IntelShell`: `isStaff` check — vendors, couples and visitors get
-  "Team only") and rows (`<details>`, closed until clicked); the "Content" menu group is
-  `IntelNavLink` in `afterNavLinks`. Styles follow the admin's light/dark theme (`.zf-intel*` at
-  the end of `custom.scss`). Data: `lib/intelligence.ts` (`pg`, env `INTEL_DATABASE_URL`,
-  Production only in Vercel), read-only, from the hub's `zf_*` tables. The source list is
-  `zf_sources`, written by the hub's `sources_sync.py` at the start of every ingest run (from
-  `feeds.py`). Everything renders on the server and filters are plain links, so there is **no
-  data route** — keep it that way rather than adding an `/api` endpoint. Queries are copied from
-  the hub's `frontend/app/api/*`; update both when its tables change.
+- **Intelligence Hub in the admin (`/admin/intelligence`, owner 2026-11-18), Owner only for now**
+  (team access later). The Zenfest Intelligence Hub (event news → Claude-checked → reel ideas; the
+  hub itself is `../zenfest-intelligence-hub`) as custom admin views in
+  `components/admin/intelligence/`. The owner wanted it to read **like Instagram, industry first,
+  reels second**:
+  - **Feed** (`/intelligence`, `exact`): one column of cards, newest first, day dividers, region
+    chips, older cards load on scroll (`FeedList`, IntersectionObserver + a scroll fallback, the
+    Owner-checked Server Action `loadMoreFeed`). A card (`FeedCard`) = picture (`image_url`, plain
+    `<img referrerPolicy="no-referrer">`, blank block on error) · **♥ Reel idea** / **Revisit**
+    buttons (`toggleFeedMark` → `zf_feed_marks`) · simple-English headline + story + "Real-life
+    example" (`plain_*` / `example`, falling back to title/summary) · More (hook, proof quote,
+    brand check).
+  - **Revisit**: cards bookmarked. **Reel ideas**: "Your picks" (`zf_reel_ideas.picked`, made by
+    the hub's morning job from ♥ marks; ones still waiting are listed) then Claude's suggestions.
+    **Sources**: every source + a "Collector status" box explaining each number.
+  - `parts.tsx` = frame (`IntelShell`, `isOwner`), `feedUtils.ts` = client-safe helpers,
+    `actions.ts` = the only writes (each re-checks `isOwner`; validates uuid + kind). Menu group
+    = `IntelNavLink` in `afterNavLinks`. Styles `.zf-intel*` / `.zf-feed*` at the end of
+    `custom.scss`, theme-aware.
+  - Data: `lib/intelligence.ts` (`pg`, env `INTEL_DATABASE_URL`, Production only in Vercel) on the
+    hub's `zf_*` tables; the hub writes the simple text, pictures and `zf_sources`. **Local dev uses
+    the live hub database**: clean up any test marks you make. No `/api` data route — keep it so.
 - **Occasion reminders (`/admin` → Occasion Reminders; `collections/Contacts.ts`,
   `Reminders.ts`, `globals/ReminderSettings.ts`, `lib/occasions/*`) — internal only.**
   The owner wanted yearly birthdays/anniversaries of past clients and unconverted leads

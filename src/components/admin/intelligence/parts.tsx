@@ -4,21 +4,25 @@ import type { AdminViewServerProps } from 'payload'
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import { Gutter } from '@payloadcms/ui'
 
-import { isStaff } from '../../../access/roles'
-import { intelConfigured, type IntelItem, type ReelIdea } from '../../../lib/intelligence'
+import { isOwner } from '../../../access/roles'
+import { intelConfigured, type ReelIdea } from '../../../lib/intelligence'
+import { safeUrl, hostOf } from './feedUtils'
+
+export { dayLabel, hostOf, safeUrl, timeAgo } from './feedUtils'
 
 /**
- * Shared pieces of the Intelligence Hub admin pages (/admin/intelligence, /ideas, /news, /sources).
- * Every Zenfest team login can open them (owner, 2026-11-18); vendors, couples and visitors can't.
- * Pages render on the server and filter with plain links, so there is no data route.
+ * Shared pieces of the Intelligence Hub admin pages (/admin/intelligence = Feed, /revisit, /ideas,
+ * /sources). **Owner only for now** (owner, 2026-11-18: team access later). Reads render on the
+ * server; the card buttons and "load older" go through the Owner-checked Server Actions in
+ * actions.ts. There is no /api data route.
  */
 
 export const BASE = '/admin/intelligence'
 
 export const SECTIONS = [
-  { id: 'today', label: 'Today', href: BASE },
+  { id: 'feed', label: 'Feed', href: BASE },
+  { id: 'revisit', label: 'Revisit', href: `${BASE}/revisit` },
   { id: 'ideas', label: 'Reel ideas', href: `${BASE}/ideas` },
-  { id: 'news', label: 'News', href: `${BASE}/news` },
   { id: 'sources', label: 'Sources', href: `${BASE}/sources` },
 ] as const
 export type Section = (typeof SECTIONS)[number]['id']
@@ -37,48 +41,6 @@ export function withQuery(path: string, query: Record<string, string>): string {
   return s ? `${path}?${s}` : path
 }
 
-export function timeAgo(value: string | null): string {
-  if (!value) return 'never'
-  const seconds = Math.max(0, (Date.now() - new Date(value).getTime()) / 1000)
-  if (seconds < 60) return 'just now'
-  if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)} h ago`
-  return `${Math.floor(seconds / 86400)} d ago`
-}
-
-const IST = 'Asia/Kolkata'
-const dayKey = (d: Date) => d.toLocaleDateString('en-CA', { timeZone: IST })
-
-/** "Today", "Yesterday" or "Mon, 16 Nov" (India dates). */
-export function dayLabel(value: string | null): string {
-  if (!value) return 'Undated'
-  const d = new Date(value)
-  const today = new Date()
-  const yesterday = new Date(today.getTime() - 86400000)
-  if (dayKey(d) === dayKey(today)) return 'Today'
-  if (dayKey(d) === dayKey(yesterday)) return 'Yesterday'
-  return d.toLocaleDateString('en-IN', { timeZone: IST, weekday: 'short', day: 'numeric', month: 'short' })
-}
-
-/** Links come from outside sources: allow only http(s). */
-export function safeUrl(url: string | null | undefined): string | null {
-  if (!url) return null
-  try {
-    const u = new URL(url)
-    return u.protocol === 'http:' || u.protocol === 'https:' ? u.toString() : null
-  } catch {
-    return null
-  }
-}
-
-export function hostOf(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, '')
-  } catch {
-    return url
-  }
-}
-
 /* ---------- page frame ---------- */
 
 export function IntelShell({
@@ -94,7 +56,7 @@ export function IntelShell({
 }) {
   const { initPageResult, params, searchParams } = props
   const { req, locale, permissions, visibleEntities } = initPageResult
-  const allowed = isStaff(req.user as never)
+  const allowed = isOwner(req.user as never)
   return (
     <DefaultTemplate
       i18n={req.i18n}
@@ -124,7 +86,7 @@ export function IntelShell({
             </nav>
           )}
           {!allowed ? (
-            <Notice title="Team only">This page is open to the Zenfest team only.</Notice>
+            <Notice title="Owner only">This page is open only to the Owner for now.</Notice>
           ) : !intelConfigured() ? (
             <Notice title="Not connected yet" alert>
               Set INTEL_DATABASE_URL (the Intelligence Hub’s database address) in the environment.
@@ -222,25 +184,11 @@ function IdeaDetails({ idea }: { idea: ReelIdea }) {
   )
 }
 
-/** Today's Pick, shown open. */
-export function PickCard({ idea }: { idea: ReelIdea }) {
-  return (
-    <article className="zf-intel__pick">
-      <p className="zf-intel__meta">
-        <span className="zf-intel__badge is-gold">Today’s pick</span> {idea.region} · {idea.category || 'Idea'} ·{' '}
-        {idea.idea_code} · <strong>{idea.total}/20</strong>
-      </p>
-      <h2>{idea.title}</h2>
-      <IdeaDetails idea={idea} />
-    </article>
-  )
-}
-
 /** One idea as a single line; click to open. */
-export function IdeaRow({ idea }: { idea: ReelIdea }) {
-  const pick = idea.status === "Today's Pick"
+export function IdeaRow({ idea, open = false }: { idea: ReelIdea; open?: boolean }) {
+  const top = idea.status === "Today's Pick"
   return (
-    <details className="zf-intel__row">
+    <details className="zf-intel__row" open={open}>
       <summary>
         <span className="zf-intel__score" title="Score out of 20">
           {idea.total}
@@ -248,8 +196,8 @@ export function IdeaRow({ idea }: { idea: ReelIdea }) {
         <span className="zf-intel__row-main">
           <span className="zf-intel__row-title">{idea.title}</span>
           <span className="zf-intel__meta">
-            {pick && <span className="zf-intel__badge is-gold">Today’s pick</span>} {idea.region} ·{' '}
-            {idea.category || 'Idea'} · {idea.idea_code}
+            {top && <span className="zf-intel__badge is-gold">Claude’s top pick today</span>} {idea.region} ·{' '}
+            {idea.category || 'Idea'} · {idea.status} · {idea.idea_code}
           </span>
         </span>
       </summary>
@@ -258,49 +206,11 @@ export function IdeaRow({ idea }: { idea: ReelIdea }) {
   )
 }
 
-/* ---------- news ---------- */
-
-export function NewsRow({ item }: { item: IntelItem }) {
-  const insta = (item.source_label || '').startsWith('Instagram')
-  return (
-    <details className="zf-intel__row">
-      <summary>
-        <span className={`zf-intel__dot${insta ? ' is-insta' : ''}`} aria-hidden="true" />
-        <span className="zf-intel__row-main">
-          <span className="zf-intel__row-title">{item.title}</span>
-          <span className="zf-intel__meta">
-            {item.region} · {item.primary_category} · {item.source_label} · {timeAgo(item.published_at)}
-          </span>
-        </span>
-      </summary>
-      <div className="zf-intel__detail">
-        {item.summary && <p>{item.summary}</p>}
-        {item.hook_idea && (
-          <p className="zf-intel__hook">
-            <strong>Reel hook</strong> {item.hook_idea}
-          </p>
-        )}
-        {item.exact_source_quote && (
-          <figure className="zf-intel__quote">
-            <figcaption>✓ Quote found in the source</figcaption>
-            <blockquote>“{item.exact_source_quote}”</blockquote>
-          </figure>
-        )}
-        <BrandNote text={item.brand_note} />
-        <p className="zf-intel__meta">
-          Hook {item.hook_score}/5 · Fit {item.relevance_score}/5 · Visual {item.visual_score}/5 ·{' '}
-          <SourceLink url={item.source_url} label={item.source_label} />
-        </p>
-      </div>
-    </details>
-  )
-}
-
 export function Footnote() {
   return (
     <p className="zf-intel__foot">
-      Titles, summaries and hooks are written by Claude. The quote check only proves the quote is in the source: open
-      the source before using a fact in a reel. Reload the page for the latest.
+      Simple text, examples and hooks are written by Claude. The proof check only shows one sentence is really in the
+      source: open the source before using a fact in a reel.
     </p>
   )
 }

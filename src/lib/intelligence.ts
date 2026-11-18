@@ -88,7 +88,8 @@ export const SOURCE_KIND_LABEL: Record<SourceKind, string> = {
 }
 
 export type ReelIdea = {
-  id: number
+  id: string
+  intel_id?: string | null
   idea_code: string | null
   title: string
   hook_idea: string | null
@@ -221,6 +222,108 @@ export async function getFeed(opts: { region: string; category: string; instagra
     values,
   )
   return rows.map((r) => ({ ...r, published_at: iso(r.published_at) })) as IntelItem[]
+}
+
+/* ---------- the owner's feed (2026-11-18) ---------- */
+
+export type FeedItem = {
+  id: string
+  region: string | null
+  category: string | null
+  source_label: string | null
+  source_url: string
+  published_at: string | null
+  headline: string
+  story: string
+  example: string
+  image_url: string
+  hook_idea: string | null
+  exact_source_quote: string | null
+  brand_note: string | null
+  scores: string
+  reel: boolean
+  revisit: boolean
+}
+
+export type FeedCursor = { at: string; id: string }
+export type MarkKind = 'reel' | 'revisit'
+
+export const FEED_PAGE = 20
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+export const isUuid = (v: unknown): v is string => typeof v === 'string' && UUID_RE.test(v)
+
+const FEED_COLUMNS = `
+  f.id::text AS id, f.region, f.primary_category AS category, f.source_label, f.source_url, f.published_at,
+  COALESCE(NULLIF(f.plain_headline, ''), f.title) AS headline,
+  COALESCE(NULLIF(f.plain_story, ''), f.summary) AS story,
+  f.example, f.image_url, f.hook_idea, f.exact_source_quote, f.brand_note,
+  ('Hook ' || f.hook_score || '/5 · Fit ' || f.relevance_score || '/5 · Visual ' || f.visual_score || '/5') AS scores,
+  EXISTS (SELECT 1 FROM zf_feed_marks m WHERE m.intel_id = f.id AND m.kind = 'reel') AS reel,
+  EXISTS (SELECT 1 FROM zf_feed_marks m WHERE m.intel_id = f.id AND m.kind = 'revisit') AS revisit`
+
+const feedRow = (r: Record<string, unknown>) => ({ ...r, published_at: iso(r.published_at) }) as FeedItem
+
+/** Newest first, FEED_PAGE at a time. `cursor` = the last card shown (published_at + id). */
+export async function getFeedPage(region: string, cursor?: FeedCursor | null): Promise<{ items: FeedItem[]; next: FeedCursor | null }> {
+  const where: string[] = []
+  const values: unknown[] = []
+  if ((REGIONS as readonly string[]).includes(region) && region !== 'All') {
+    values.push(region)
+    where.push(`f.region = $${values.length}`)
+  }
+  if (cursor && isUuid(cursor.id) && !Number.isNaN(Date.parse(cursor.at))) {
+    values.push(cursor.at, cursor.id)
+    where.push(`(f.published_at, f.id) < ($${values.length - 1}::timestamptz, $${values.length}::uuid)`)
+  }
+  values.push(FEED_PAGE)
+  const { rows } = await db().query(
+    `SELECT ${FEED_COLUMNS} FROM zf_intel_feed f
+      ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
+      ORDER BY f.published_at DESC, f.id DESC
+      LIMIT $${values.length}`,
+    values,
+  )
+  const items = rows.map(feedRow)
+  const last = items[items.length - 1]
+  return { items, next: items.length === FEED_PAGE && last?.published_at ? { at: last.published_at, id: last.id } : null }
+}
+
+/** Cards the owner marked with `kind`, newest mark first. */
+export async function getMarked(kind: MarkKind): Promise<FeedItem[]> {
+  const { rows } = await db().query(
+    `SELECT ${FEED_COLUMNS} FROM zf_intel_feed f
+       JOIN zf_feed_marks k ON k.intel_id = f.id AND k.kind = $1
+      ORDER BY k.created_at DESC
+      LIMIT 300`,
+    [kind],
+  )
+  return rows.map(feedRow)
+}
+
+/** Turn a card button on or off. Returns the new state. */
+export async function setMark(intelId: string, kind: MarkKind, on: boolean): Promise<boolean> {
+  if (!isUuid(intelId) || (kind !== 'reel' && kind !== 'revisit')) throw new Error('Bad mark')
+  if (on) {
+    await db().query(
+      `INSERT INTO zf_feed_marks (intel_id, kind) SELECT id, $2 FROM zf_intel_feed WHERE id = $1::uuid
+       ON CONFLICT DO NOTHING`,
+      [intelId, kind],
+    )
+  } else {
+    await db().query(`DELETE FROM zf_feed_marks WHERE intel_id = $1::uuid AND kind = $2`, [intelId, kind])
+  }
+  return on
+}
+
+/** Reel ideas the morning job made from the owner's picks (zf_reel_ideas.picked). */
+export async function getPickedIdeas(): Promise<ReelIdea[]> {
+  const { rows } = await db().query(
+    `SELECT id, idea_code, title, hook_idea, outline, source_name, source_url, date_found::text AS date_found,
+            category, region, evergreen, status, brand_note, intel_id::text AS intel_id,
+            (hook_score + relevance_score + visual_score + freshness_score) AS total
+       FROM zf_reel_ideas WHERE picked ORDER BY date_found DESC, idea_code DESC LIMIT 200`,
+  )
+  return rows as ReelIdea[]
 }
 
 /** Every source in feeds.py (zf_sources, written by the hub each run) with what it brought in. */

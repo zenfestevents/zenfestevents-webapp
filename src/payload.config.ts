@@ -85,22 +85,22 @@ export default buildConfig({
           path: '/decor/quick-add',
           meta: { title: 'Quick add decoration' },
         },
-        // Zenfest Intelligence Hub (event news → daily reel ideas), every team login (2026-11-18).
+        // Zenfest Intelligence Hub: Instagram-style industry feed + reel ideas, Owner only (2026-11-18).
         intelligence: {
-          Component: '/components/admin/intelligence/views#TodayView',
+          Component: '/components/admin/intelligence/views#FeedView',
           path: '/intelligence',
           exact: true,
-          meta: { title: 'Intelligence Hub' },
+          meta: { title: 'Industry feed · Intelligence Hub' },
+        },
+        intelligenceRevisit: {
+          Component: '/components/admin/intelligence/views#RevisitView',
+          path: '/intelligence/revisit',
+          meta: { title: 'Revisit · Intelligence Hub' },
         },
         intelligenceIdeas: {
           Component: '/components/admin/intelligence/views#IdeasView',
           path: '/intelligence/ideas',
           meta: { title: 'Reel ideas · Intelligence Hub' },
-        },
-        intelligenceNews: {
-          Component: '/components/admin/intelligence/views#NewsView',
-          path: '/intelligence/news',
-          meta: { title: 'News · Intelligence Hub' },
         },
         intelligenceSources: {
           Component: '/components/admin/intelligence/views#SourcesView',
